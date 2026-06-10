@@ -209,489 +209,625 @@ The portfolio has the following features visitors can interact with:
 
 
 // ── State ──
-let chatHistory = [];
-let isListening = false;
+ /* ─── SUGGESTION CHIPS ─── */
+const SUGGESTIONS = [
+  'What projects has Pavan built?',
+  "What's Pavan's tech stack?",
+  'Is Pavan open to work?',
+  'Tell me about SPARMS',
+  'How do I contact Pavan?',
+  'What did Pavan do in his internship?',
+];
+ 
+const WELCOME_CHIPS = [
+  'Projects 🚀',
+  'Skills 🧠',
+  'Experience 💼',
+  'Contact 📬',
+];
+ 
+/* ─── STATE ─── */
+let conversationHistory = [];
 let voiceEnabled = true;
-let recognition  = null;
-let currentUtter = null;
-let pendingSpeak = null;
-
-// ── DOM Ready ──
-document.addEventListener('DOMContentLoaded', init);
-
-function init() {
-  initQR();
-  initStars();
-  initSidebar();
-  initInput();
-  initVoice();
-  setupRecognition();
-  appendWelcome();
-  initSuggestionStrip();
-}
-
-/* ═══════════════════════
-   QR CODE
-═══════════════════════ */
-function initQR() {
-  const el = document.getElementById('qrCode');
-  if (!el) return;
-  if (typeof QRCode === 'undefined') {
-    // Retry after delay
-    setTimeout(initQR, 500);
-    return;
-  }
-  el.innerHTML = '';
-  new QRCode(el, {
-    text:         'https://kalyanfinity-portfolio.netlify.app',
-    width:        108,
-    height:       108,
-    colorDark:    '#000000',
-    colorLight:   '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-}
-
-/* ═══════════════════════
-   STAR FIELD
-═══════════════════════ */
+let isGenerating = false;
+let recognition = null;
+let synth = window.speechSynthesis;
+let currentUtterance = null;
+ 
+/* ─── DOM REFS ─── */
+const $ = id => document.getElementById(id);
+const messagesEl   = $('messages');
+const inputField   = $('inputField');
+const sendBtn      = $('sendBtn');
+const micBtn       = $('micBtn');
+const clearBtn     = $('clearBtn');
+const voiceToggle  = $('voiceToggle');
+const voiceStatus  = $('voiceStatus');
+const charCount    = $('charCount');
+const suggestStrip = $('suggestStrip');
+const sidebar      = $('sidebar');
+const backdrop     = $('backdrop');
+const menuBtn      = $('menuBtn');
+const sidebarClose = $('sidebarClose');
+const toastWrap    = $('toastWrap');
+const quickAskList = $('quickAskList');
+ 
+/* ══════════════════════════════════════════════════
+   STARS
+   ══════════════════════════════════════════════════ */
 function initStars() {
-  const canvas = document.getElementById('stars');
-  if (!canvas) return;
-  const ctx  = canvas.getContext('2d');
+  const canvas = $('stars');
+  const ctx    = canvas.getContext('2d');
   let W, H, stars = [];
-
+ 
   function resize() {
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
-    buildStars();
   }
-
-  function buildStars() {
-    stars = Array.from({ length: 160 }, () => ({
-      x:  Math.random() * W,
-      y:  Math.random() * H,
-      r:  Math.random() * 1.3 + 0.2,
-      a:  Math.random(),
-      da: (Math.random() - 0.5) * 0.004,
-      hue: Math.random() < 0.15 ? 190 : 210
-    }));
+ 
+  function createStars(n) {
+    stars = [];
+    for (let i = 0; i < n; i++) {
+      stars.push({
+        x:    Math.random() * W,
+        y:    Math.random() * H,
+        r:    Math.random() * 1.4 + 0.2,
+        a:    Math.random(),
+        speed: Math.random() * 0.004 + 0.001,
+        twinkleOffset: Math.random() * Math.PI * 2,
+      });
+    }
   }
-
+ 
+  let frame = 0;
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    frame++;
     for (const s of stars) {
-      s.a += s.da;
-      if (s.a <= 0 || s.a >= 1) s.da *= -1;
+      const opacity = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(frame * s.speed + s.twinkleOffset));
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${s.hue},80%,75%,${s.a * 0.5})`;
+      ctx.fillStyle = `rgba(200,220,255,${opacity})`;
       ctx.fill();
     }
     requestAnimationFrame(draw);
   }
-
-  window.addEventListener('resize', resize);
+ 
   resize();
+  createStars(200);
   draw();
+  window.addEventListener('resize', () => { resize(); createStars(200); });
 }
-
-/* ═══════════════════════
-   SIDEBAR
-═══════════════════════ */
-function initSidebar() {
-  const sidebar  = document.getElementById('sidebar');
-  const backdrop = document.getElementById('backdrop');
-  const menuBtn  = document.getElementById('menuBtn');
-  const closeBtn = document.getElementById('sidebarClose');
-
-  const open  = () => { sidebar.classList.add('open'); backdrop.classList.add('active'); document.body.style.overflow = 'hidden'; };
-  const close = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); document.body.style.overflow = ''; };
-
-  menuBtn?.addEventListener('click', open);
-  closeBtn?.addEventListener('click', close);
-  backdrop?.addEventListener('click', close);
-
-  // Quick asks
-  document.getElementById('quickAskList')?.addEventListener('click', e => {
-    const btn = e.target.closest('.quick-ask');
-    if (!btn) return;
-    const q = btn.dataset.q;
-    if (q) { handleSend(q); if (window.innerWidth <= 768) close(); }
-  });
-
-  // Clear btn
-  document.getElementById('clearBtn')?.addEventListener('click', () => {
-    chatHistory = [];
-    document.getElementById('messages').innerHTML = '';
-    appendWelcome();
-    showToast('Chat cleared');
-  });
-}
-
-/* ═══════════════════════
-   INPUT
-═══════════════════════ */
-function initInput() {
-  const field   = document.getElementById('inputField');
-  const sendBtn = document.getElementById('sendBtn');
-  const cc      = document.getElementById('charCount');
-
-  sendBtn?.addEventListener('click', sendMessage);
-
-  field?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  });
-
-  field?.addEventListener('input', () => {
-    // Auto-resize
-    field.style.height = 'auto';
-    field.style.height = Math.min(field.scrollHeight, 120) + 'px';
-    // Char count
-    const left = 500 - field.value.length;
-    if (cc) { cc.textContent = left; cc.classList.toggle('warn', left < 50); }
-  });
-
-  // Suggestion strip chip clicks
-  document.getElementById('suggestStrip')?.addEventListener('click', e => {
-    const chip = e.target.closest('.strip-chip');
-    if (chip) { handleSend(chip.textContent.trim()); clearSuggestions(); }
-  });
-
-  // Message area chip clicks
-  document.getElementById('messages')?.addEventListener('click', e => {
-    const chip = e.target.closest('.chip, .sugg-chip');
-    if (chip) {
-      const q = chip.dataset.q || chip.textContent.trim();
-      handleSend(q);
-    }
-  });
-}
-
-function sendMessage() {
-  const field = document.getElementById('inputField');
-  const text  = field?.value.trim();
-  if (!text) return;
-  field.value = '';
-  field.style.height = 'auto';
-  const cc = document.getElementById('charCount');
-  if (cc) cc.textContent = '500';
-  handleSend(text);
-}
-
-/* ═══════════════════════
-   VOICE
-═══════════════════════ */
-function initVoice() {
-  // Voice toggle in header
-  const btn = document.getElementById('voiceToggle');
-  const status = document.getElementById('voiceStatus');
-  btn?.addEventListener('click', () => {
-    voiceEnabled = !voiceEnabled;
-    if (!voiceEnabled) stopSpeaking();
-    if (btn) btn.classList.toggle('active', voiceEnabled);
-    if (status) status.textContent = voiceEnabled ? '🔊 Voice on' : '🔇 Voice off';
-    showToast(voiceEnabled ? 'Voice on' : 'Voice off');
-  });
-  if (btn) btn.classList.add('active');
-
-  // Voice status text click
-  status?.addEventListener('click', () => btn?.click());
-
-  // Mic btn
-  document.getElementById('micBtn')?.addEventListener('click', () => {
-    if (isListening) stopListening();
-    else startListening();
-  });
-
-  // Preload voices
-  if (window.speechSynthesis) {
-    window.speechSynthesis.getVoices();
-    window.speechSynthesis.addEventListener('voiceschanged', () => {
-      if (pendingSpeak) { speak(pendingSpeak); pendingSpeak = null; }
-    });
+ 
+/* ══════════════════════════════════════════════════
+   PARTICLES
+   ══════════════════════════════════════════════════ */
+function initParticles() {
+  const container = $('particles');
+  const COUNT = 18;
+  for (let i = 0; i < COUNT; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const hue = Math.random() > 0.5 ? '195' : '260';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      width: ${Math.random() * 3 + 1.5}px;
+      height: ${Math.random() * 3 + 1.5}px;
+      background: hsl(${hue}, 100%, 70%);
+      animation-duration: ${Math.random() * 20 + 15}s;
+      animation-delay: ${Math.random() * 20}s;
+      opacity: 0;
+    `;
+    container.appendChild(p);
   }
 }
-
-function setupRecognition() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-  recognition = new SR();
-  recognition.continuous      = false;
-  recognition.interimResults  = true;
-  recognition.lang            = 'en-IN';
-
-  recognition.onstart  = () => { isListening = true;  updateMicUI(true); };
-  recognition.onend    = () => { isListening = false; updateMicUI(false); };
-  recognition.onerror  = e  => { stopListening(); if (e.error === 'not-allowed') showToast('Mic access denied'); };
-  recognition.onresult = e  => {
-    const t = Array.from(e.results).map(r => r[0].transcript).join('');
-    const f = document.getElementById('inputField');
-    if (f) { f.value = t; f.dispatchEvent(new Event('input')); }
-    if (e.results[e.results.length - 1].isFinal) setTimeout(sendMessage, 400);
-  };
-}
-
-function startListening() {
-  if (!recognition) { showToast('Voice not supported in this browser'); return; }
-  stopSpeaking();
-  try { recognition.start(); } catch(e) { console.warn(e); }
-}
-function stopListening() {
-  if (recognition && isListening) recognition.stop();
-  isListening = false; updateMicUI(false);
-}
-function updateMicUI(on) {
-  const btn = document.getElementById('micBtn');
-  btn?.classList.toggle('listening', on);
-}
-
-function speak(text) {
-  if (!voiceEnabled || !window.speechSynthesis) return;
-  const clean = text.replace(/<[^>]+>/g, '').replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ').trim();
-  if (!clean) return;
-  const voices = window.speechSynthesis.getVoices();
-  if (!voices.length) { pendingSpeak = text; return; }
-  stopSpeaking();
-  currentUtter = new SpeechSynthesisUtterance(clean);
-  currentUtter.lang = 'en-US'; currentUtter.rate = 1.0; currentUtter.pitch = 1.0;
-  const pref = voices.find(v => v.name.includes('Google US English')) ||
-               voices.find(v => v.lang === 'en-US' && !v.localService) ||
-               voices.find(v => v.lang.startsWith('en-'));
-  if (pref) currentUtter.voice = pref;
-  setTimeout(() => window.speechSynthesis.speak(currentUtter), 80);
-}
-function stopSpeaking() {
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
-}
-
-/* ═══════════════════════
-   WELCOME
-═══════════════════════ */
-function appendWelcome() {
-  const h = new Date().getHours();
-  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Working late?';
-
-  const chips = [
-    { label: 'Projects',   q: "What projects has Pavan built?" },
-    { label: 'Skills',     q: "What are Pavan's strongest skills?" },
-    { label: 'Experience', q: "Tell me about Pavan's internship" },
-    { label: 'Hire',       q: "Is Pavan available for hire?" },
-  ];
-
-  const chipsHtml = `<div class="chips-row">${chips.map(c =>
-    `<button class="chip" data-q="${c.q}">${c.label}</button>`).join('')}</div>`;
-
-  const welcomeHtml = `
-    <div class="welcome-card">
-      <div class="welcome-card__title">${greet}! I'm <strong>Candy</strong></div>
-      <div class="welcome-card__sub">Pavan's personal AI — here to tell you anything about his work, skills, and story. What would you like to know?</div>
-      ${chipsHtml}
-    </div>`;
-
-  const body = document.getElementById('messages');
-  const wrap = document.createElement('div');
-  wrap.className = 'msg msg--assistant';
-  wrap.innerHTML = `
-    <div class="msg-avatar"><span>C</span></div>
-    <div class="msg-content">${welcomeHtml}</div>`;
-  body.appendChild(wrap);
-}
-
-/* ═══════════════════════
-   MAIN SEND
-═══════════════════════ */
-async function handleSend(text) {
-  stopListening();
-  clearSuggestions();
-  appendMsg('user', escapeHTML(text));
-  chatHistory.push({ role: 'user', content: text });
-
-  const tid = appendTyping();
-
+ 
+/* ══════════════════════════════════════════════════
+   QR CODE
+   ══════════════════════════════════════════════════ */
+function initQR() {
   try {
-    const res = await fetch(GROQ_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model:       GROQ_MODEL,
-        messages:    [{ role: 'system', content: SYSTEM_PROMPT }, ...chatHistory],
-        max_tokens:  600,
-        temperature: 0.85,
-        top_p:       0.9,
-        stream:      false,
-      }),
+    new QRCode($('qrCode'), {
+      text: CONFIG.PORTFOLIO_URL,
+      width: 110,
+      height: 110,
+      colorDark: '#03040f',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M,
     });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `HTTP ${res.status}`);
-    }
-
-    const data  = await res.json();
-    const reply = data.choices?.[0]?.message?.content?.trim() || 'Got an empty response — please try again.';
-
-    removeTyping(tid);
-    await typeMessage(formatReply(reply));
-    addSmartSuggestions(reply);
-    speak(reply);
-    chatHistory.push({ role: 'assistant', content: reply });
-    if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
-
-  } catch (err) {
-    removeTyping(tid);
-    appendMsg('error', `Something went wrong: ${escapeHTML(err.message)}`);
-    console.error('[Candy]', err);
+  } catch (e) {
+    $('qrCode').style.display = 'none';
   }
 }
-
-/* ═══════════════════════
-   SMART SUGGESTIONS
-═══════════════════════ */
-const SUGGESTIONS = {
-  project:    ['Which project is most impressive?', 'Does Pavan have live demos?', 'What tech stack does Pavan use?'],
-  skill:      ["What's Pavan's strongest skill?", 'Does Pavan know machine learning?', 'Can Pavan work with Power BI?'],
-  intern:     ['What did Pavan do in his internship?', 'Is Pavan open to new opportunities?', 'How do I contact Pavan?'],
-  contact:    ['What roles is Pavan looking for?', "What's Pavan's LinkedIn?", "Can I see Pavan's resume?"],
-  education:  ['What is Pavan studying?', 'When does Pavan graduate?', 'What projects has Pavan built?'],
-  default:    ["Tell me about Pavan's projects", "What are Pavan's skills?", 'How do I contact Pavan?'],
-};
-
-function addSmartSuggestions(reply) {
-  const l = reply.toLowerCase();
-  let set = SUGGESTIONS.default;
-  if (l.includes('project') || l.includes('sparms') || l.includes('inventoryiq') || l.includes('digit')) set = SUGGESTIONS.project;
-  else if (l.includes('skill') || l.includes('python') || l.includes('sql') || l.includes('power bi')) set = SUGGESTIONS.skill;
-  else if (l.includes('intern') || l.includes('interncall') || l.includes('experience')) set = SUGGESTIONS.intern;
-  else if (l.includes('contact') || l.includes('email') || l.includes('hire') || l.includes('linkedin')) set = SUGGESTIONS.contact;
-  else if (l.includes('education') || l.includes('mca') || l.includes('degree')) set = SUGGESTIONS.education;
-
-  const strip = document.getElementById('suggestStrip');
-  if (!strip) return;
-  strip.innerHTML = set.map(s => `<button class="strip-chip">${s}</button>`).join('');
-  // Auto-clear after next send
-  document.getElementById('inputField')?.addEventListener('keydown', clearSuggestions, { once: true });
-}
-
-function clearSuggestions() {
-  const strip = document.getElementById('suggestStrip');
-  if (strip) strip.innerHTML = '';
-}
-
-function initSuggestionStrip() {
-  // Pre-populate with starter chips
-  const strip = document.getElementById('suggestStrip');
-  if (!strip) return;
-  const starters = ['What projects has Pavan built?', "What are Pavan's skills?", 'Is Pavan available for hire?'];
-  strip.innerHTML = starters.map(s => `<button class="strip-chip">${s}</button>`).join('');
-}
-
-/* ═══════════════════════
-   DOM HELPERS
-═══════════════════════ */
-function appendMsg(role, html) {
-  const body = document.getElementById('messages');
-  const wrap = document.createElement('div');
-  wrap.className = `msg msg--${role}`;
-  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
-
-  if (role === 'user') {
-    wrap.innerHTML = `
-      <div class="msg-content">
-        <div class="bubble bubble--user">${html}</div>
-        <div class="msg-time">${time}</div>
-      </div>`;
-  } else if (role === 'error') {
-    wrap.innerHTML = `<div class="bubble bubble--error">${html}</div>`;
-  } else {
-    wrap.innerHTML = `
-      <div class="msg-avatar"><span>C</span></div>
-      <div class="msg-content">
-        <div class="bubble bubble--assistant">${html}</div>
-        <div class="msg-time">${time}</div>
-      </div>`;
-  }
-
-  body.appendChild(wrap);
-  body.scrollTop = body.scrollHeight;
-  return wrap;
-}
-
-function appendTyping() {
-  const id   = 'ty-' + Date.now();
-  const body = document.getElementById('messages');
-  const wrap = document.createElement('div');
-  wrap.className = 'msg msg--assistant'; wrap.id = id;
-  wrap.innerHTML = `
-    <div class="msg-avatar"><span>C</span></div>
-    <div class="bubble bubble--assistant"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  body.appendChild(wrap);
-  body.scrollTop = body.scrollHeight;
-  return id;
-}
-function removeTyping(id) { document.getElementById(id)?.remove(); }
-
-/* Word-by-word typing effect */
-async function typeMessage(html) {
-  const body = document.getElementById('messages');
-  const wrap = document.createElement('div');
-  wrap.className = 'msg msg--assistant';
-  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
-  wrap.innerHTML = `
-    <div class="msg-avatar"><span>C</span></div>
-    <div class="msg-content">
-      <div class="bubble bubble--assistant" id="_tb"></div>
-      <div class="msg-time">${time}</div>
-    </div>`;
-  body.appendChild(wrap);
-  body.scrollTop = body.scrollHeight;
-
-  const bubble = document.getElementById('_tb');
-  bubble?.removeAttribute('id');
-  if (!bubble) return;
-
-  // Strip tags for typing animation
-  const plain = html.replace(/<[^>]+>/g, '');
-  const words = plain.split(' ');
-  let built = '';
-  for (let i = 0; i < words.length; i++) {
-    built += (i === 0 ? '' : ' ') + words[i];
-    bubble.textContent = built;
-    body.scrollTop = body.scrollHeight;
-    await sleep(55);
-  }
-  bubble.innerHTML = html;
-  body.scrollTop = body.scrollHeight;
-}
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-function escapeHTML(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function formatReply(text) {
-  text = text.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/`([^`]+)`/g,'<code>$1</code>')
-    .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
-    .replace(/\n\n/g,'</p><p>')
-    .replace(/\n/g,'<br>');
-}
-
-function showToast(msg) {
-  const wrap = document.getElementById('toastWrap');
-  if (!wrap) return;
+ 
+/* ══════════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════════ */
+function showToast(msg, duration = 2600) {
   const t = document.createElement('div');
   t.className = 'toast';
   t.textContent = msg;
-  wrap.appendChild(t);
-  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+  toastWrap.appendChild(t);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => t.classList.add('show'));
+  });
   setTimeout(() => {
     t.classList.remove('show');
     setTimeout(() => t.remove(), 400);
-  }, 2400);
+  }, duration);
 }
+ 
+/* ══════════════════════════════════════════════════
+   SIDEBAR
+   ══════════════════════════════════════════════════ */
+function openSidebar() {
+  sidebar.classList.add('open');
+  backdrop.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+}
+menuBtn.addEventListener('click', openSidebar);
+sidebarClose.addEventListener('click', closeSidebar);
+backdrop.addEventListener('click', closeSidebar);
+ 
+/* ─── Quick asks ─── */
+quickAskList.addEventListener('click', e => {
+  const btn = e.target.closest('.quick-ask');
+  if (!btn) return;
+  const q = btn.dataset.q;
+  closeSidebar();
+  setTimeout(() => sendMessage(q), 220);
+});
+ 
+/* ══════════════════════════════════════════════════
+   VOICE SYNTHESIS
+   ══════════════════════════════════════════════════ */
+function speak(text) {
+  if (!voiceEnabled || !synth) return;
+  synth.cancel();
+  const clean = text.replace(/[*_`#>\[\]()!]/g, '').replace(/\n+/g, ' ').trim();
+  if (!clean) return;
+  const utt = new SpeechSynthesisUtterance(clean);
+  utt.rate  = 1.05;
+  utt.pitch = 1.0;
+  utt.volume = 0.9;
+  const voices = synth.getVoices();
+  const preferred = voices.find(v =>
+    /Google|Natural|Enhanced/i.test(v.name) && /en/i.test(v.lang)
+  ) || voices.find(v => /en/i.test(v.lang));
+  if (preferred) utt.voice = preferred;
+  currentUtterance = utt;
+  synth.speak(utt);
+}
+ 
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  voiceToggle.classList.toggle('active', voiceEnabled);
+  voiceStatus.textContent = voiceEnabled ? '🔊 Voice on' : '🔇 Voice off';
+  if (!voiceEnabled && synth) synth.cancel();
+  showToast(voiceEnabled ? '🔊 Voice enabled' : '🔇 Voice disabled');
+}
+ 
+voiceToggle.addEventListener('click', toggleVoice);
+voiceStatus.addEventListener('click', toggleVoice);
+ 
+/* ══════════════════════════════════════════════════
+   VOICE INPUT (Web Speech API)
+   ══════════════════════════════════════════════════ */
+function initSpeechRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    micBtn.style.display = 'none';
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+ 
+  recognition.onstart = () => {
+    micBtn.classList.add('listening');
+    micBtn.innerHTML = '<i class="fas fa-stop"></i>';
+    showToast('🎙 Listening…');
+  };
+  recognition.onresult = e => {
+    let interim = '', final = '';
+    for (const r of e.results) {
+      if (r.isFinal) final += r[0].transcript;
+      else interim += r[0].transcript;
+    }
+    inputField.value = final || interim;
+    autoResize();
+    updateCharCount();
+  };
+  recognition.onend = () => {
+    micBtn.classList.remove('listening');
+    micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    if (inputField.value.trim()) sendMessage();
+  };
+  recognition.onerror = e => {
+    micBtn.classList.remove('listening');
+    micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+    if (e.error !== 'no-speech') showToast('⚠ Mic error: ' + e.error);
+  };
+}
+ 
+micBtn.addEventListener('click', () => {
+  if (!recognition) { showToast('⚠ Voice not supported in this browser'); return; }
+  if (micBtn.classList.contains('listening')) {
+    recognition.stop();
+  } else {
+    if (synth) synth.cancel();
+    recognition.start();
+  }
+});
+ 
+/* ══════════════════════════════════════════════════
+   INPUT HANDLING
+   ══════════════════════════════════════════════════ */
+function autoResize() {
+  inputField.style.height = 'auto';
+  inputField.style.height = Math.min(inputField.scrollHeight, 120) + 'px';
+}
+function updateCharCount() {
+  const rem = 500 - inputField.value.length;
+  charCount.textContent = rem;
+  charCount.classList.toggle('warn', rem < 60);
+}
+ 
+inputField.addEventListener('input', () => { autoResize(); updateCharCount(); });
+inputField.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+sendBtn.addEventListener('click', () => sendMessage());
+clearBtn.addEventListener('click', () => {
+  if (isGenerating) return;
+  clearChat();
+  showToast('✨ New chat started');
+});
+ 
+/* ══════════════════════════════════════════════════
+   SUGGESTIONS STRIP
+   ══════════════════════════════════════════════════ */
+function renderSuggestions(items) {
+  suggestStrip.innerHTML = '';
+  items.forEach((s, i) => {
+    const c = document.createElement('button');
+    c.className = 'strip-chip';
+    c.textContent = s;
+    c.style.animationDelay = `${i * 0.05}s`;
+    c.addEventListener('click', () => {
+      sendMessage(s);
+      suggestStrip.innerHTML = '';
+    });
+    suggestStrip.appendChild(c);
+  });
+}
+ 
+/* ══════════════════════════════════════════════════
+   MESSAGE RENDERING
+   ══════════════════════════════════════════════════ */
+function getTime() {
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+ 
+function formatMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/\[(.+?)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+}
+ 
+function createMsgEl(role, content, chips = []) {
+  const isUser = role === 'user';
+  const isError = role === 'error';
+ 
+  const wrap = document.createElement('div');
+  wrap.className = `msg msg--${isUser ? 'user' : 'assistant'}`;
+ 
+  if (!isUser) {
+    const av = document.createElement('div');
+    av.className = 'msg-avatar';
+    av.innerHTML = '<i class="fas fa-robot"></i>';
+    wrap.appendChild(av);
+  }
+ 
+  const contentWrap = document.createElement('div');
+  contentWrap.className = 'msg-content';
+ 
+  const bubble = document.createElement('div');
+  bubble.className = `bubble bubble--${isError ? 'error' : isUser ? 'user' : 'assistant'}`;
+ 
+  if (isUser) {
+    bubble.textContent = content;
+  } else {
+    bubble.innerHTML = `<p>${formatMarkdown(content)}</p>`;
+  }
+  contentWrap.appendChild(bubble);
+ 
+  if (chips.length) {
+    const row = document.createElement('div');
+    row.className = 'chips-row';
+    chips.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.textContent = c;
+      btn.addEventListener('click', () => {
+        sendMessage(c);
+        row.remove();
+      });
+      row.appendChild(btn);
+    });
+    contentWrap.appendChild(row);
+  }
+ 
+  const time = document.createElement('div');
+  time.className = 'msg-time';
+  time.textContent = getTime();
+  contentWrap.appendChild(time);
+ 
+  wrap.appendChild(contentWrap);
+  return wrap;
+}
+ 
+function addMessage(role, content, chips = []) {
+  const el = createMsgEl(role, content, chips);
+  messagesEl.appendChild(el);
+  scrollToBottom();
+  return el;
+}
+ 
+function showTyping() {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg--assistant';
+  wrap.id = 'typingIndicator';
+ 
+  const av = document.createElement('div');
+  av.className = 'msg-avatar';
+  av.innerHTML = '<i class="fas fa-robot"></i>';
+  wrap.appendChild(av);
+ 
+  const contentWrap = document.createElement('div');
+  contentWrap.className = 'msg-content';
+ 
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble bubble--assistant';
+  bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  contentWrap.appendChild(bubble);
+  wrap.appendChild(contentWrap);
+ 
+  messagesEl.appendChild(wrap);
+  scrollToBottom();
+  return wrap;
+}
+ 
+function removeTyping() {
+  const el = $('typingIndicator');
+  if (el) el.remove();
+}
+ 
+function scrollToBottom(smooth = true) {
+  messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
+}
+ 
+/* ══════════════════════════════════════════════════
+   WELCOME SCREEN
+   ══════════════════════════════════════════════════ */
+function showWelcome() {
+  const card = document.createElement('div');
+  card.className = 'welcome-card';
+  card.id = 'welcomeCard';
+  card.innerHTML = `
+    <div class="welcome-card__title">
+      Hey there! 👋 I'm <strong>Candy</strong>
+    </div>
+    <div class="welcome-card__sub">
+      Pavan Kalyan's personal AI assistant. Ask me anything about his projects, skills, experience, or how to get in touch!
+    </div>
+    <div class="chips-row" id="welcomeChips"></div>
+  `;
+ 
+  const chipsContainer = card.querySelector('#welcomeChips');
+  WELCOME_CHIPS.forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = label;
+    const queryMap = {
+      'Projects 🚀': 'What projects has Pavan built?',
+      'Skills 🧠':   "What are Pavan's strongest skills?",
+      'Experience 💼': 'Tell me about his internship experience',
+      'Contact 📬':  'How do I contact Pavan?',
+    };
+    btn.addEventListener('click', () => {
+      card.remove();
+      sendMessage(queryMap[label] || label);
+    });
+    chipsContainer.appendChild(btn);
+  });
+ 
+  const msgWrap = document.createElement('div');
+  msgWrap.className = 'msg msg--assistant';
+  msgWrap.id = 'welcomeMsg';
+ 
+  const av = document.createElement('div');
+  av.className = 'msg-avatar';
+  av.innerHTML = '<i class="fas fa-robot"></i>';
+  msgWrap.appendChild(av);
+ 
+  const content = document.createElement('div');
+  content.className = 'msg-content';
+  content.appendChild(card);
+  msgWrap.appendChild(content);
+ 
+  messagesEl.appendChild(msgWrap);
+}
+ 
+function clearChat() {
+  conversationHistory = [];
+  if (synth) synth.cancel();
+  messagesEl.innerHTML = '';
+  suggestStrip.innerHTML = '';
+  showWelcome();
+}
+ 
+/* ══════════════════════════════════════════════════
+   GROQ API
+   ══════════════════════════════════════════════════ */
+async function callGroq(messages) {
+  const response = await fetch(CONFIG.GROQ_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${CONFIG.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: CONFIG.MODEL,
+      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
+      max_tokens: CONFIG.MAX_TOKENS,
+      temperature: CONFIG.TEMPERATURE,
+      stream: false,
+    }),
+  });
+ 
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `API error ${response.status}`);
+  }
+ 
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content?.trim() || 'I had trouble responding. Please try again.';
+}
+ 
+/* ══════════════════════════════════════════════════
+   SEND MESSAGE
+   ══════════════════════════════════════════════════ */
+async function sendMessage(text) {
+  const msg = (text || inputField.value).trim();
+  if (!msg || isGenerating) return;
+ 
+  // Remove welcome card if present
+  const welcomeMsg = $('welcomeMsg');
+  if (welcomeMsg) welcomeMsg.remove();
+ 
+  // Clear input
+  inputField.value = '';
+  autoResize();
+  updateCharCount();
+  suggestStrip.innerHTML = '';
+ 
+  // Add user message
+  addMessage('user', msg);
+ 
+  // Add to history
+  conversationHistory.push({ role: 'user', content: msg });
+ 
+  // Show typing
+  isGenerating = true;
+  sendBtn.disabled = true;
+  const typingEl = showTyping();
+ 
+  try {
+    const reply = await callGroq(conversationHistory);
+ 
+    removeTyping();
+    addMessage('assistant', reply);
+ 
+    // Add to history (keep last 14 turns to stay within token limits)
+    conversationHistory.push({ role: 'assistant', content: reply });
+    if (conversationHistory.length > 14) conversationHistory.splice(0, 2);
+ 
+    // Voice
+    speak(reply);
+ 
+    // Show follow-up suggestions
+    const followUps = getFollowUps(msg);
+    if (followUps.length) renderSuggestions(followUps);
+ 
+  } catch (err) {
+    removeTyping();
+    console.error('Groq error:', err);
+    addMessage('error', `⚠ ${err.message || 'Something went wrong. Check your API key or try again.'}`);
+  } finally {
+    isGenerating = false;
+    sendBtn.disabled = false;
+    inputField.focus();
+  }
+}
+ 
+/* ══════════════════════════════════════════════════
+   CONTEXTUAL FOLLOW-UP SUGGESTIONS
+   ══════════════════════════════════════════════════ */
+function getFollowUps(lastMsg) {
+  const msg = lastMsg.toLowerCase();
+  if (msg.includes('project') || msg.includes('build') || msg.includes('sparms'))
+    return ['What tech did Pavan use?', "Tell me about LYRA AI", 'Is code available on GitHub?'];
+  if (msg.includes('skill') || msg.includes('tech') || msg.includes('stack'))
+    return ['Which ML tools does Pavan know?', 'Tell me about his Java projects', 'What is he learning now?'];
+  if (msg.includes('intern') || msg.includes('experience') || msg.includes('work'))
+    return ['What projects did Pavan build?', 'Is he available for hire?', 'How do I contact Pavan?'];
+  if (msg.includes('contact') || msg.includes('hire') || msg.includes('email'))
+    return ['View portfolio', 'What projects has Pavan built?', "What's his LinkedIn?"];
+  if (msg.includes('educat') || msg.includes('study') || msg.includes('mca'))
+    return ['What are his strongest skills?', 'What projects has he built?'];
+  // default rotation
+  const pool = [...SUGGESTIONS];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, 3);
+}
+ 
+/* ══════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  initStars();
+  initParticles();
+  initQR();
+  initSpeechRecognition();
+ 
+  // Load voices async (Chrome loads them asynchronously)
+  if (synth && synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = () => synth.getVoices();
+  }
+ 
+  // Show welcome
+  showWelcome();
+ 
+  // Initial suggestions strip
+  renderSuggestions(SUGGESTIONS.slice(0, 4));
+ 
+  // Focus input on desktop
+  if (window.innerWidth > 768) {
+    setTimeout(() => inputField.focus(), 400);
+  }
+ 
+  // Close sidebar on swipe left (mobile)
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = touchStartX - e.changedTouches[0].clientX;
+    if (dx > 60 && sidebar.classList.contains('open')) closeSidebar();
+  }, { passive: true });
+ 
+  // Swipe right from left edge to open sidebar
+  document.addEventListener('touchstart', e => {
+    if (e.touches[0].clientX < 24) touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx > 70 && touchStartX < 24 && !sidebar.classList.contains('open')) openSidebar();
+  }, { passive: true });
+});
+ 
