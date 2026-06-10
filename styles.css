@@ -84,11 +84,14 @@ body {
   display: flex;
   flex-direction: column;
   padding: 28px 20px;
-  border-right: 1px solid var(--border);
-  background: rgba(4,6,17,0.7);
-  backdrop-filter: blur(20px);
+  /* No hard border — right edge fades into chat via gradient mask */
+  border-right: none;
+  background: transparent;
   gap: 22px;
-  overflow: hidden; /* no scrollbar */
+  overflow: hidden;
+  /* Fade right edge so sidebar content bleeds into chat with no line */
+  -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
+  mask-image: linear-gradient(to right, black 80%, transparent 100%);
 }
 
 .sidebar-close {
@@ -352,8 +355,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 14px 22px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(4,6,17,0.6);
+  border-bottom: 1px solid rgba(139,92,246,0.07);
+  background: rgba(4,6,17,0.35);
   backdrop-filter: blur(20px);
   flex-shrink: 0;
 }
@@ -544,8 +547,8 @@ body {
 /* ── Input Area ── */
 .input-area {
   padding: 14px 18px 16px;
-  border-top: 1px solid rgba(139,92,246,0.12);
-  background: rgba(0,0,0,0.2);
+  border-top: 1px solid rgba(139,92,246,0.07);
+  background: rgba(0,0,0,0.12);
   flex-shrink: 0;
 }
 .input-row {
