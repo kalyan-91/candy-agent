@@ -813,7 +813,7 @@ a.hdr-btn {
     top: 0; left: 0; bottom: 0;
     width: min(300px, 88vw);
     height: 100%;
-    z-index: 100;
+    z-index: 1000;
 
     /* Fully opaque — no transparency, no backdrop-filter */
     background: #060a1e !important;
@@ -921,18 +921,20 @@ a.hdr-btn {
 
   /* ── 6. Sidebar close button always visible ── */
   .sidebar-close {
-    display: flex;
-    position: fixed;
-    top: 14px;
-    left: calc(min(300px, 88vw) - 50px);
-    z-index: 101;
-    background: rgba(0,212,255,0.12) !important;
-    border-color: rgba(0,212,255,0.3) !important;
-    color: var(--cyan) !important;
-    transition: transform 0.3s var(--ease), background 0.2s, opacity 0.36s;
-    opacity: 0;
-    pointer-events: none;
-  }
+  display: flex;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  left: auto;
+  z-index: 1001;
+
+  background: rgba(0,212,255,0.12);
+  border: 1px solid rgba(0,212,255,0.3);
+  color: var(--cyan);
+
+  opacity: 1;
+  pointer-events: auto;
+}
   .sidebar.open .sidebar-close {
     opacity: 1;
     pointer-events: all;
@@ -958,12 +960,23 @@ a.hdr-btn {
     -webkit-backdrop-filter: none !important;
   }
 
-  .backdrop {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(0,0,0,0.78) !important;
-  }
+ .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
 
+    background: rgba(0,0,0,0.78);
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 0.3s ease;
+}
+
+.backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
   /* ── 9. Header tweaks ── */
   .chat-header { padding: 0 12px; }
   .chat-header__status { display: none; }
