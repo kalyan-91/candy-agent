@@ -12,14 +12,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@1,9..144,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <canvas id="bgCanvas"></canvas>
-
-<!-- Floating particles overlay -->
 <div id="floatParticles"></div>
 
 <div class="app">
@@ -27,7 +24,6 @@
   <!-- ── SIDEBAR ── -->
   <aside class="sidebar" id="sidebar">
 
-    <!-- Mobile close -->
     <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
       <i class="fas fa-times"></i>
     </button>
@@ -74,10 +70,11 @@
 
     <div class="sidebar-divider"></div>
 
-    <!-- QR Code -->
+    <!-- QR Code Section -->
     <div class="qr-section">
       <div class="qr-label">Visit Portfolio</div>
       <div class="qr-box">
+        <!-- QR renders here via JS -->
         <div id="qrCode"></div>
         <div class="qr-desc">Scan to visit Pavan's full portfolio with projects and resume</div>
         <div class="qr-btns">
@@ -121,7 +118,6 @@
   <main class="chat-area">
 
     <header class="chat-header">
-      <!-- Mobile menu toggle -->
       <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
         <i class="fas fa-bars"></i>
       </button>
@@ -182,6 +178,145 @@
 <!-- Mobile sidebar backdrop -->
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
+<!-- QRCode.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════
+// QR CODE INIT — runs after qrcode.min.js is loaded
+// ═══════════════════════════════════════════════════
+(function initQR() {
+  const el = document.getElementById('qrCode');
+  if (!el || typeof QRCode === 'undefined') return;
+  // Clear any placeholder content
+  el.innerHTML = '';
+  new QRCode(el, {
+    text:         'https://kalyanfinity-portfolio.netlify.app',
+    width:        110,
+    height:       110,
+    colorDark:    '#000000',
+    colorLight:   '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+})();
+</script>
+
 <script src="script.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════
+// MAIN CHAT — sidebar + mobile menu + suggestions
+// ═══════════════════════════════════════════════════
+(function initUI() {
+
+  // ── Mobile sidebar toggle ──
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const menuBtn  = document.getElementById('mobileMenuBtn');
+  const closeBtn = document.getElementById('sidebarClose');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    backdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  if (menuBtn)  menuBtn.addEventListener('click', openSidebar);
+  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+  if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+  // ── Clear button ──
+  const clearBtn = document.getElementById('clearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      chatHistory = [];
+      document.getElementById('messages').innerHTML = '';
+      appendWelcome();
+    });
+  }
+
+  // ── Sidebar suggestion buttons ──
+  document.getElementById('suggestionsList')?.addEventListener('click', e => {
+    const btn = e.target.closest('.suggestion-btn');
+    if (!btn) return;
+    const q = btn.dataset.q;
+    if (!q) return;
+    const inputField = document.getElementById('inputField');
+    if (inputField) {
+      inputField.value = q;
+      inputField.dispatchEvent(new Event('input'));
+    }
+    // Trigger send
+    handleSend(q).then(() => {
+      if (inputField) inputField.value = '';
+    });
+    // Close sidebar on mobile after selecting
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+
+  // ── Background canvas animation ──
+  const canvas = document.getElementById('bgCanvas');
+  if (canvas) {
+    const ctx  = canvas.getContext('2d');
+    let W, H, stars = [];
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < 120; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.2 + 0.3,
+          a: Math.random(),
+          s: (Math.random() - 0.5) * 0.003
+        });
+      }
+    }
+    function drawFrame() {
+      ctx.clearRect(0, 0, W, H);
+      for (const s of stars) {
+        s.a += s.s;
+        if (s.a <= 0 || s.a >= 1) s.s *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(125,211,252,${s.a * 0.6})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(drawFrame);
+    }
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize(); initStars(); drawFrame();
+  }
+
+  // ── Float orbs ──
+  const fp = document.getElementById('floatParticles');
+  if (fp) {
+    const colors = ['rgba(0,212,255,0.35)', 'rgba(139,92,246,0.3)', 'rgba(125,211,252,0.25)'];
+    for (let i = 0; i < 6; i++) {
+      const orb = document.createElement('div');
+      orb.className = 'float-orb';
+      const size = 80 + Math.random() * 120;
+      orb.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random()*100}%;
+        background:${colors[i % colors.length]};
+        animation-duration:${14 + Math.random()*14}s;
+        animation-delay:${-Math.random()*20}s;
+      `;
+      fp.appendChild(orb);
+    }
+  }
+
+})();
+</script>
+
 </body>
 </html>
