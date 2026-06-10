@@ -73,8 +73,7 @@ body {
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
   height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 /* ══════════════════════════════════════════
@@ -84,14 +83,10 @@ body {
   display: flex;
   flex-direction: column;
   padding: 28px 20px;
-  /* No hard border — right edge fades into chat via gradient mask */
   border-right: none;
   background: transparent;
   gap: 22px;
   overflow: hidden;
-  /* Fade right edge so sidebar content bleeds into chat with no line */
-  -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
-  mask-image: linear-gradient(to right, black 80%, transparent 100%);
 }
 
 .sidebar-close {
@@ -355,23 +350,12 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 14px 22px;
-  border-bottom: 1px solid rgba(139,92,246,0.07);
-  background: rgba(4,6,17,0.35);
-  backdrop-filter: blur(20px);
+  border-bottom: none;
+  background: transparent;
+  backdrop-filter: none;
   flex-shrink: 0;
 }
-.chat-header::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, #00d4ff, #7dd3fc, #fbbf24, #a78bfa, #00d4ff);
-  background-size: 300% 100%;
-  animation: borderFlow 4s linear infinite;
-}
-@keyframes borderFlow {
-  0%   { background-position: 0% 0%; }
-  100% { background-position: 300% 0%; }
-}
+/* top glow bar removed */
 
 .chat-header-left {
   display: flex; align-items: center; gap: 12px;
@@ -643,6 +627,10 @@ body {
     top: 0; left: 0; bottom: 0;
     width: min(var(--sidebar-w), 88vw);
     z-index: 100;
+    background: rgba(4,6,17,0.97);
+    backdrop-filter: blur(24px);
+    -webkit-mask-image: none;
+    mask-image: none;
     transform: translateX(-110%);
     transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
     overflow-y: auto;
