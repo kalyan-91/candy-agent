@@ -1,8 +1,9 @@
 'use strict';
 
-// ═══════════════════════════════════════════════════
-// CANDY — Main chat page script.js
-// ═══════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
+   CANDY v2 — script.js
+   Chat + Voice + QR + Stars + Sidebar + Suggestions
+═══════════════════════════════════════════════════ */
 
 const GROQ_MODEL    = 'llama-3.3-70b-versatile';
 const GROQ_ENDPOINT = 'https://pk-groq-proxy.daroorpavankalyan.workers.dev';
@@ -11,9 +12,7 @@ const SYSTEM_PROMPT = `You are Candy — a sharp, warm, and genuinely helpful AI
 
 Your job is to help visitors learn about Pavan — but do it like a real conversation, not a bullet-point dump. Be natural. Ask follow-up questions when relevant. Show genuine enthusiasm about his work. Vary your response style — sometimes short and direct, sometimes more detailed when the topic deserves it.
 
-You can make your own decisions about how to respond. If someone says hi, just say hi back warmly — do not dump his entire resume at them. If someone asks something vague, ask what they mean. If someone seems like a recruiter, be a little more professional. If they seem like a fellow student, be casual and relatable.
-
-Never use emojis in your responses. Keep the tone clean, professional, and conversational.
+Never use emojis. Keep the tone clean, professional, and conversational.
 
 == FACTS ABOUT PAVAN ==
 
@@ -29,148 +28,341 @@ Personal:
 - Open to: internships and entry-level roles in Data Analytics and Data Science
 
 Education:
-- MCA — JNTUA, Anantapur (2025 to 2027, currently pursuing). Focus: Data Analytics, Database Management, Business Intelligence
-- BSc MSCS (Maths, Stats, Computer Science) — St. Joseph's Degree College, Rayalaseema University, Kurnool (2021 to 2024, completed)
+- MCA — JNTUA, Anantapur (2025–2027, currently pursuing). Focus: Data Analytics, Database Management, Business Intelligence
+- BSc MSCS — St. Joseph's Degree College, Rayalaseema University, Kurnool (2021–2024, completed)
 
 Internship:
-- Data Science Intern at Interncall, Kurnool (Jan to Apr 2024)
-- Applied Python for data science tasks including data cleaning, EDA, and building ML models
-- Worked with Matplotlib and Seaborn to present insights to stakeholders
-- Gained end-to-end experience across the full data science project lifecycle
+- Data Science Intern at Interncall, Kurnool (Jan–Apr 2024)
+- Python for data cleaning, EDA, ML models
+- Matplotlib/Seaborn for stakeholder presentations
 - Stack: Python, Pandas, Scikit-learn, Matplotlib, Seaborn
 
-Skills:
-- SQL 90%, Excel 88%, Python 85%, Java 70%
-- Power BI 85%, Matplotlib 80%, Seaborn 80%, Plotly 75%
-- Pandas 85%, NumPy 80%, Scikit-learn 75%, TensorFlow 70%
-- HTML 85%, CSS 80%, JavaScript 70%
-- Tools: Streamlit, OpenCV, JDBC, Maven, iText PDF, ZXing, GitHub
+Skills: SQL 90%, Excel 88%, Python 85%, Power BI 85%, Pandas 85%, Java 70%, TensorFlow 70%, HTML/CSS/JS
+Tools: Streamlit, OpenCV, JDBC, Maven, iText PDF, GitHub
 
 Projects:
-1. SPARMS — Java Swing desktop app for academic result management. Role-based dashboards for Admin, Faculty, and Students. Features OMR scanning, automated grade computation, MySQL with JDBC, and PDF export. Stack: Java Swing, MySQL, JDBC, Maven, iText, ZXing.
-2. InventoryIQ — Streamlit inventory and analytics dashboard. Live: inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app. Stack: Python, Streamlit, Pandas, Plotly
-3. Digit Recognizer — CNN app that recognizes handwritten digits 0 through 9 on an interactive canvas. Live: hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app. Stack: Python, TensorFlow, Streamlit, OpenCV
-4. Netflix Dashboard — Power BI dashboard exploring over 5000 titles, genres, durations, and countries. Stack: Power BI, DAX, Power Query
-5. Employee Attrition Analysis — ML classification models plus a Power BI dashboard for HR analytics. Stack: Python, Scikit-learn, Power BI, Pandas
-6. Zomato Analysis — Restaurant rating pattern analysis and predictive classification models. Stack: Python, Pandas, Scikit-learn, Excel
+1. SPARMS — Java Swing academic result management app, OMR scanning, MySQL, PDF export
+2. InventoryIQ — Streamlit analytics dashboard. Live: inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app
+3. Digit Recognizer — CNN handwriting recognition. Live: hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app
+4. Netflix Dashboard — Power BI, 5000+ titles
+5. Employee Attrition Analysis — ML + Power BI HR analytics
+6. Zomato Analysis — restaurant rating patterns, predictive models
+
+Background: First in family to pursue higher education in tech. Self-taught, project-driven learner. Motto: learn by building.
 
 == RESPONSE RULES ==
-- Never use emojis anywhere in your replies.
-- Never start every message the same way. Vary your openers.
-- Do not always list everything. Pick what is most relevant to the question.
+- Never use emojis.
+- Vary your openers — never start the same way twice.
+- Keep responses under 5 sentences unless detail is needed.
 - If asked about a project with a live link, always share it.
-- For contact questions, share email and LinkedIn.
-- Keep responses under 5 sentences unless the person clearly wants detail.
+- After 2-3 messages, naturally ask for the visitor's name and email for Pavan to follow up.
+- If visitor seems like a recruiter, mention Pavan is actively seeking internships and entry-level Data Analyst roles.
 - Never say "As an AI language model". Just answer naturally.
-- After 2 to 3 messages from the visitor, naturally ask for their name and email so Pavan can follow up. Do it conversationally, not like a form.
-- If a visitor seems like a recruiter, mention that Pavan is actively looking for internships and entry-level Data Analyst roles.
-- If you do not know something about Pavan that is not covered above, say so honestly and suggest reaching out directly.`;
+- Format links as plain URLs, not markdown.`;
 
 // ── State ──
-let chatHistory  = [];
-let isListening  = false;
+let chatHistory = [];
+let isListening = false;
+let voiceEnabled = true;
 let recognition  = null;
+let currentUtter = null;
+let pendingSpeak = null;
 
 // ── DOM Ready ──
-document.addEventListener('DOMContentLoaded', () => {
-  setupEventListeners();
+document.addEventListener('DOMContentLoaded', init);
+
+function init() {
+  initQR();
+  initStars();
+  initSidebar();
+  initInput();
+  initVoice();
   setupRecognition();
   appendWelcome();
-});
+  initSuggestionStrip();
+}
 
-// ═══════════════════════════════
-// EVENT LISTENERS
-// ═══════════════════════════════
-function setupEventListeners() {
-  const inputField = document.getElementById('inputField');
-  const sendBtn    = document.getElementById('sendBtn');
-  const micBtn     = document.getElementById('micBtn');
-  const messages   = document.getElementById('messages');
+/* ═══════════════════════
+   QR CODE
+═══════════════════════ */
+function initQR() {
+  const el = document.getElementById('qrCode');
+  if (!el) return;
+  if (typeof QRCode === 'undefined') {
+    // Retry after delay
+    setTimeout(initQR, 500);
+    return;
+  }
+  el.innerHTML = '';
+  new QRCode(el, {
+    text:         'https://kalyanfinity-portfolio.netlify.app',
+    width:        108,
+    height:       108,
+    colorDark:    '#000000',
+    colorLight:   '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
 
-  // Send on button click
-  sendBtn?.addEventListener('click', () => sendMessage());
+/* ═══════════════════════
+   STAR FIELD
+═══════════════════════ */
+function initStars() {
+  const canvas = document.getElementById('stars');
+  if (!canvas) return;
+  const ctx  = canvas.getContext('2d');
+  let W, H, stars = [];
 
-  // Send on Enter (not Shift+Enter)
-  inputField?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    buildStars();
+  }
+
+  function buildStars() {
+    stars = Array.from({ length: 160 }, () => ({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      r:  Math.random() * 1.3 + 0.2,
+      a:  Math.random(),
+      da: (Math.random() - 0.5) * 0.004,
+      hue: Math.random() < 0.15 ? 190 : 210
+    }));
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (const s of stars) {
+      s.a += s.da;
+      if (s.a <= 0 || s.a >= 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${s.hue},80%,75%,${s.a * 0.5})`;
+      ctx.fill();
     }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+}
+
+/* ═══════════════════════
+   SIDEBAR
+═══════════════════════ */
+function initSidebar() {
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('backdrop');
+  const menuBtn  = document.getElementById('menuBtn');
+  const closeBtn = document.getElementById('sidebarClose');
+
+  const open  = () => { sidebar.classList.add('open'); backdrop.classList.add('active'); document.body.style.overflow = 'hidden'; };
+  const close = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); document.body.style.overflow = ''; };
+
+  menuBtn?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  backdrop?.addEventListener('click', close);
+
+  // Quick asks
+  document.getElementById('quickAskList')?.addEventListener('click', e => {
+    const btn = e.target.closest('.quick-ask');
+    if (!btn) return;
+    const q = btn.dataset.q;
+    if (q) { handleSend(q); if (window.innerWidth <= 768) close(); }
   });
 
-  // Auto-resize textarea + char count
-  inputField?.addEventListener('input', () => {
-    inputField.style.height = 'auto';
-    inputField.style.height = Math.min(inputField.scrollHeight, 120) + 'px';
-    const cc = document.getElementById('charCount');
-    if (cc) cc.textContent = `${inputField.value.length} / 500`;
+  // Clear btn
+  document.getElementById('clearBtn')?.addEventListener('click', () => {
+    chatHistory = [];
+    document.getElementById('messages').innerHTML = '';
+    appendWelcome();
+    showToast('Chat cleared');
+  });
+}
+
+/* ═══════════════════════
+   INPUT
+═══════════════════════ */
+function initInput() {
+  const field   = document.getElementById('inputField');
+  const sendBtn = document.getElementById('sendBtn');
+  const cc      = document.getElementById('charCount');
+
+  sendBtn?.addEventListener('click', sendMessage);
+
+  field?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
 
-  // Mic button
-  micBtn?.addEventListener('click', () => {
-    if (isListening) stopListening();
-    else startListening();
+  field?.addEventListener('input', () => {
+    // Auto-resize
+    field.style.height = 'auto';
+    field.style.height = Math.min(field.scrollHeight, 120) + 'px';
+    // Char count
+    const left = 500 - field.value.length;
+    if (cc) { cc.textContent = left; cc.classList.toggle('warn', left < 50); }
   });
 
-  // Smart chips in messages
-  messages?.addEventListener('click', e => {
-    const chip = e.target.closest('.chip');
+  // Suggestion strip chip clicks
+  document.getElementById('suggestStrip')?.addEventListener('click', e => {
+    const chip = e.target.closest('.strip-chip');
+    if (chip) { handleSend(chip.textContent.trim()); clearSuggestions(); }
+  });
+
+  // Message area chip clicks
+  document.getElementById('messages')?.addEventListener('click', e => {
+    const chip = e.target.closest('.chip, .sugg-chip');
     if (chip) {
-      const q = chip.dataset.q;
-      if (q) handleSend(q);
+      const q = chip.dataset.q || chip.textContent.trim();
+      handleSend(q);
     }
   });
 }
 
 function sendMessage() {
-  const inputField = document.getElementById('inputField');
-  const text = inputField?.value.trim();
+  const field = document.getElementById('inputField');
+  const text  = field?.value.trim();
   if (!text) return;
-  inputField.value = '';
-  inputField.style.height = 'auto';
+  field.value = '';
+  field.style.height = 'auto';
   const cc = document.getElementById('charCount');
-  if (cc) cc.textContent = '0 / 500';
+  if (cc) cc.textContent = '500';
   handleSend(text);
 }
 
-// ═══════════════════════════════
-// WELCOME
-// ═══════════════════════════════
+/* ═══════════════════════
+   VOICE
+═══════════════════════ */
+function initVoice() {
+  // Voice toggle in header
+  const btn = document.getElementById('voiceToggle');
+  const status = document.getElementById('voiceStatus');
+  btn?.addEventListener('click', () => {
+    voiceEnabled = !voiceEnabled;
+    if (!voiceEnabled) stopSpeaking();
+    if (btn) btn.classList.toggle('active', voiceEnabled);
+    if (status) status.textContent = voiceEnabled ? '🔊 Voice on' : '🔇 Voice off';
+    showToast(voiceEnabled ? 'Voice on' : 'Voice off');
+  });
+  if (btn) btn.classList.add('active');
+
+  // Voice status text click
+  status?.addEventListener('click', () => btn?.click());
+
+  // Mic btn
+  document.getElementById('micBtn')?.addEventListener('click', () => {
+    if (isListening) stopListening();
+    else startListening();
+  });
+
+  // Preload voices
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', () => {
+      if (pendingSpeak) { speak(pendingSpeak); pendingSpeak = null; }
+    });
+  }
+}
+
+function setupRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  recognition = new SR();
+  recognition.continuous      = false;
+  recognition.interimResults  = true;
+  recognition.lang            = 'en-IN';
+
+  recognition.onstart  = () => { isListening = true;  updateMicUI(true); };
+  recognition.onend    = () => { isListening = false; updateMicUI(false); };
+  recognition.onerror  = e  => { stopListening(); if (e.error === 'not-allowed') showToast('Mic access denied'); };
+  recognition.onresult = e  => {
+    const t = Array.from(e.results).map(r => r[0].transcript).join('');
+    const f = document.getElementById('inputField');
+    if (f) { f.value = t; f.dispatchEvent(new Event('input')); }
+    if (e.results[e.results.length - 1].isFinal) setTimeout(sendMessage, 400);
+  };
+}
+
+function startListening() {
+  if (!recognition) { showToast('Voice not supported in this browser'); return; }
+  stopSpeaking();
+  try { recognition.start(); } catch(e) { console.warn(e); }
+}
+function stopListening() {
+  if (recognition && isListening) recognition.stop();
+  isListening = false; updateMicUI(false);
+}
+function updateMicUI(on) {
+  const btn = document.getElementById('micBtn');
+  btn?.classList.toggle('listening', on);
+}
+
+function speak(text) {
+  if (!voiceEnabled || !window.speechSynthesis) return;
+  const clean = text.replace(/<[^>]+>/g, '').replace(/https?:\/\/\S+/g, '').replace(/\s+/g, ' ').trim();
+  if (!clean) return;
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) { pendingSpeak = text; return; }
+  stopSpeaking();
+  currentUtter = new SpeechSynthesisUtterance(clean);
+  currentUtter.lang = 'en-US'; currentUtter.rate = 1.0; currentUtter.pitch = 1.0;
+  const pref = voices.find(v => v.name.includes('Google US English')) ||
+               voices.find(v => v.lang === 'en-US' && !v.localService) ||
+               voices.find(v => v.lang.startsWith('en-'));
+  if (pref) currentUtter.voice = pref;
+  setTimeout(() => window.speechSynthesis.speak(currentUtter), 80);
+}
+function stopSpeaking() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+/* ═══════════════════════
+   WELCOME
+═══════════════════════ */
 function appendWelcome() {
-  const hour = new Date().getHours();
-  let greeting;
-  if (hour >= 5  && hour < 12) greeting = 'Good morning';
-  else if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
-  else if (hour >= 17 && hour < 21) greeting = 'Good evening';
-  else greeting = 'Hey, night owl';
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Working late?';
 
   const chips = [
     { label: 'Projects',   q: "What projects has Pavan built?" },
     { label: 'Skills',     q: "What are Pavan's strongest skills?" },
-    { label: 'Experience', q: "Tell me about Pavan's internship experience" },
-    { label: 'Hire',       q: "I am interested in hiring Pavan, how do I reach him?" },
+    { label: 'Experience', q: "Tell me about Pavan's internship" },
+    { label: 'Hire',       q: "Is Pavan available for hire?" },
   ];
-  const chipsHTML = `<div class="chips-row">${chips.map(c =>
-    `<button class="chip" data-q="${c.q}">${c.label}</button>`
-  ).join('')}</div>`;
 
-  appendMessage('assistant',
-    `${greeting}! I am <strong>Candy</strong>, Pavan's personal AI assistant. Ask me anything about his work, skills, or how to get in touch.${chipsHTML}`
-  );
+  const chipsHtml = `<div class="chips-row">${chips.map(c =>
+    `<button class="chip" data-q="${c.q}">${c.label}</button>`).join('')}</div>`;
+
+  const welcomeHtml = `
+    <div class="welcome-card">
+      <div class="welcome-card__title">${greet}! I'm <strong>Candy</strong></div>
+      <div class="welcome-card__sub">Pavan's personal AI — here to tell you anything about his work, skills, and story. What would you like to know?</div>
+      ${chipsHtml}
+    </div>`;
+
+  const body = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg--assistant';
+  wrap.innerHTML = `
+    <div class="msg-avatar"><span>C</span></div>
+    <div class="msg-content">${welcomeHtml}</div>`;
+  body.appendChild(wrap);
 }
 
-// ═══════════════════════════════
-// MAIN SEND
-// ═══════════════════════════════
+/* ═══════════════════════
+   MAIN SEND
+═══════════════════════ */
 async function handleSend(text) {
   stopListening();
-  appendMessage('user', escapeHTML(text));
+  clearSuggestions();
+  appendMsg('user', escapeHTML(text));
   chatHistory.push({ role: 'user', content: text });
 
-  const typingId = appendTyping();
+  const tid = appendTyping();
 
   try {
-    const response = await fetch(GROQ_ENDPOINT, {
+    const res = await fetch(GROQ_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -183,86 +375,77 @@ async function handleSend(text) {
       }),
     });
 
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `HTTP ${response.status}`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `HTTP ${res.status}`);
     }
 
-    const data  = await response.json();
-    const reply = data.choices?.[0]?.message?.content?.trim() || 'I got an empty response. Please try again.';
+    const data  = await res.json();
+    const reply = data.choices?.[0]?.message?.content?.trim() || 'Got an empty response — please try again.';
 
-    removeTyping(typingId);
-    appendMessage('assistant', formatReply(reply));
+    removeTyping(tid);
+    await typeMessage(formatReply(reply));
+    addSmartSuggestions(reply);
+    speak(reply);
     chatHistory.push({ role: 'assistant', content: reply });
-
     if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
 
   } catch (err) {
-    removeTyping(typingId);
-    appendMessage('error', `Something went wrong: ${escapeHTML(err.message)}`);
+    removeTyping(tid);
+    appendMsg('error', `Something went wrong: ${escapeHTML(err.message)}`);
     console.error('[Candy]', err);
   }
 }
 
-// ═══════════════════════════════
-// SPEECH RECOGNITION
-// ═══════════════════════════════
-function setupRecognition() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-  recognition = new SR();
-  recognition.continuous     = false;
-  recognition.interimResults = true;
-  recognition.lang           = 'en-IN';
+/* ═══════════════════════
+   SMART SUGGESTIONS
+═══════════════════════ */
+const SUGGESTIONS = {
+  project:    ['Which project is most impressive?', 'Does Pavan have live demos?', 'What tech stack does Pavan use?'],
+  skill:      ["What's Pavan's strongest skill?", 'Does Pavan know machine learning?', 'Can Pavan work with Power BI?'],
+  intern:     ['What did Pavan do in his internship?', 'Is Pavan open to new opportunities?', 'How do I contact Pavan?'],
+  contact:    ['What roles is Pavan looking for?', "What's Pavan's LinkedIn?", "Can I see Pavan's resume?"],
+  education:  ['What is Pavan studying?', 'When does Pavan graduate?', 'What projects has Pavan built?'],
+  default:    ["Tell me about Pavan's projects", "What are Pavan's skills?", 'How do I contact Pavan?'],
+};
 
-  recognition.onstart  = () => { isListening = true;  updateMicUI(true);  };
-  recognition.onend    = () => { isListening = false; updateMicUI(false); };
-  recognition.onerror  = e  => {
-    stopListening();
-    if (e.error === 'not-allowed') showToast('Microphone access denied');
-  };
-  recognition.onresult = e => {
-    const t = Array.from(e.results).map(r => r[0].transcript).join('');
-    const inputField = document.getElementById('inputField');
-    if (inputField) {
-      inputField.value = t;
-      inputField.dispatchEvent(new Event('input'));
-    }
-    if (e.results[e.results.length - 1].isFinal) {
-      setTimeout(() => sendMessage(), 400);
-    }
-  };
+function addSmartSuggestions(reply) {
+  const l = reply.toLowerCase();
+  let set = SUGGESTIONS.default;
+  if (l.includes('project') || l.includes('sparms') || l.includes('inventoryiq') || l.includes('digit')) set = SUGGESTIONS.project;
+  else if (l.includes('skill') || l.includes('python') || l.includes('sql') || l.includes('power bi')) set = SUGGESTIONS.skill;
+  else if (l.includes('intern') || l.includes('interncall') || l.includes('experience')) set = SUGGESTIONS.intern;
+  else if (l.includes('contact') || l.includes('email') || l.includes('hire') || l.includes('linkedin')) set = SUGGESTIONS.contact;
+  else if (l.includes('education') || l.includes('mca') || l.includes('degree')) set = SUGGESTIONS.education;
+
+  const strip = document.getElementById('suggestStrip');
+  if (!strip) return;
+  strip.innerHTML = set.map(s => `<button class="strip-chip">${s}</button>`).join('');
+  // Auto-clear after next send
+  document.getElementById('inputField')?.addEventListener('keydown', clearSuggestions, { once: true });
 }
 
-function startListening() {
-  if (!recognition) { showToast('Voice input not supported in this browser'); return; }
-  try { recognition.start(); } catch(e) { console.warn(e); }
+function clearSuggestions() {
+  const strip = document.getElementById('suggestStrip');
+  if (strip) strip.innerHTML = '';
 }
 
-function stopListening() {
-  if (recognition && isListening) recognition.stop();
-  isListening = false;
-  updateMicUI(false);
+function initSuggestionStrip() {
+  // Pre-populate with starter chips
+  const strip = document.getElementById('suggestStrip');
+  if (!strip) return;
+  const starters = ['What projects has Pavan built?', "What are Pavan's skills?", 'Is Pavan available for hire?'];
+  strip.innerHTML = starters.map(s => `<button class="strip-chip">${s}</button>`).join('');
 }
 
-function updateMicUI(active) {
-  const micBtn = document.getElementById('micBtn');
-  if (!micBtn) return;
-  micBtn.classList.toggle('listening', active);
-  micBtn.title = active ? 'Listening — click to stop' : 'Click to speak';
-}
-
-// ═══════════════════════════════
-// DOM HELPERS
-// ═══════════════════════════════
-function appendMessage(role, html) {
+/* ═══════════════════════
+   DOM HELPERS
+═══════════════════════ */
+function appendMsg(role, html) {
   const body = document.getElementById('messages');
   const wrap = document.createElement('div');
   wrap.className = `msg msg--${role}`;
-
-  const time = new Date().toLocaleTimeString('en-IN', {
-    hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
-  });
+  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
 
   if (role === 'user') {
     wrap.innerHTML = `
@@ -287,53 +470,80 @@ function appendMessage(role, html) {
 }
 
 function appendTyping() {
-  const id   = 'typing-' + Date.now();
+  const id   = 'ty-' + Date.now();
   const body = document.getElementById('messages');
   const wrap = document.createElement('div');
-  wrap.className = 'msg msg--assistant';
-  wrap.id = id;
+  wrap.className = 'msg msg--assistant'; wrap.id = id;
   wrap.innerHTML = `
     <div class="msg-avatar"><span>C</span></div>
-    <div class="bubble bubble--assistant">
-      <div class="typing-dots"><span></span><span></span><span></span></div>
-    </div>`;
+    <div class="bubble bubble--assistant"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
   body.appendChild(wrap);
   body.scrollTop = body.scrollHeight;
   return id;
 }
-
 function removeTyping(id) { document.getElementById(id)?.remove(); }
 
-function escapeHTML(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* Word-by-word typing effect */
+async function typeMessage(html) {
+  const body = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg--assistant';
+  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+  wrap.innerHTML = `
+    <div class="msg-avatar"><span>C</span></div>
+    <div class="msg-content">
+      <div class="bubble bubble--assistant" id="_tb"></div>
+      <div class="msg-time">${time}</div>
+    </div>`;
+  body.appendChild(wrap);
+  body.scrollTop = body.scrollHeight;
+
+  const bubble = document.getElementById('_tb');
+  bubble?.removeAttribute('id');
+  if (!bubble) return;
+
+  // Strip tags for typing animation
+  const plain = html.replace(/<[^>]+>/g, '');
+  const words = plain.split(' ');
+  let built = '';
+  for (let i = 0; i < words.length; i++) {
+    built += (i === 0 ? '' : ' ') + words[i];
+    bubble.textContent = built;
+    body.scrollTop = body.scrollHeight;
+    await sleep(55);
+  }
+  bubble.innerHTML = html;
+  body.scrollTop = body.scrollHeight;
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function escapeHTML(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function formatReply(text) {
-  // Strip emojis
   text = text.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
   return text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
     .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
     .replace(/\n\n/g,'</p><p>')
     .replace(/\n/g,'<br>');
 }
 
 function showToast(msg) {
+  const wrap = document.getElementById('toastWrap');
+  if (!wrap) return;
   const t = document.createElement('div');
-  t.style.cssText = `
-    position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
-    background:rgba(0,212,255,0.15); border:1px solid rgba(0,212,255,0.3);
-    color:#7dd3fc; padding:8px 18px; border-radius:100px;
-    font-family:'Syne',sans-serif; font-size:0.8rem;
-    z-index:9999; opacity:0; transition:opacity 0.3s;
-  `;
+  t.className = 'toast';
   t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.style.opacity = '1', 10);
+  wrap.appendChild(t);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
   setTimeout(() => {
-    t.style.opacity = '0';
+    t.classList.remove('show');
     setTimeout(() => t.remove(), 400);
-  }, 2500);
+  }, 2400);
 }
