@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Candy — Pavan's AI Assistant</title>
+  <meta name="description" content="Chat with Candy, Pavan Kalyan's personal AI assistant. Ask anything about his skills, projects, and experience."/>
+  <meta property="og:title" content="Candy — Pavan Kalyan's AI Assistant"/>
+  <meta property="og:description" content="Ask Candy anything about Pavan Kalyan — Data Analyst, MCA Student."/>
+  <meta property="og:url" content="https://candy-agent.netlify.app"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@1,9..144,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="stylesheet" href="candy.css">
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- Floating particles overlay -->
+<div id="floatParticles"></div>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Mobile close -->
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <div class="brand">
+      <div class="brand-avatar">
+        <span>C</span>
+        <div class="avatar-ring"></div>
+      </div>
+      <div>
+        <div class="brand-name">Candy</div>
+        <div class="brand-sub">
+          <span class="online-dot"></span>
+          Pavan's AI Assistant
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- About Pavan -->
+    <div class="about-card">
+      <div class="about-label">About Pavan</div>
+      <img src="https://kalyanfinity-portfolio.netlify.app/pavankalyan.jpg"
+           alt="Pavan Kalyan" class="about-photo"
+           onerror="this.src='https://ui-avatars.com/api/?name=Pavan+Kalyan&size=64&background=0a0a1a&color=00d4ff&bold=true'">
+      <div class="about-name">D. Pavan Kalyan</div>
+      <div class="about-role">Data Analyst · MCA Student</div>
+      <div class="about-links">
+        <a href="https://github.com/kalyan-91" target="_blank" class="about-link">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" class="about-link">
+          <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+        <a href="mailto:daroorpavankalyan@gmail.com" class="about-link">
+          <i class="fas fa-envelope"></i> Email
+        </a>
+        <a href="https://wa.me/918919944203" target="_blank" class="about-link">
+          <i class="fab fa-whatsapp"></i> WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- QR Code -->
+    <div class="qr-section">
+      <div class="qr-label">Visit Portfolio</div>
+      <div class="qr-box">
+        <div id="qrCode"></div>
+        <div class="qr-desc">Scan to visit Pavan's full portfolio with projects and resume</div>
+        <div class="qr-btns">
+          <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="qr-btn qr-btn--portfolio">
+            <i class="fas fa-external-link-alt"></i> Visit Portfolio
+          </a>
+          <a href="mailto:daroorpavankalyan@gmail.com" class="qr-btn qr-btn--contact">
+            <i class="fas fa-envelope"></i> Contact Pavan
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Suggested questions -->
+    <div>
+      <div class="suggestions-label">Quick Questions</div>
+      <div class="suggestions-list" id="suggestionsList">
+        <button class="suggestion-btn" data-q="What projects has Pavan built?">
+          <i class="fas fa-folder-open"></i> What projects has Pavan built?
+        </button>
+        <button class="suggestion-btn" data-q="What are Pavan's strongest skills?">
+          <i class="fas fa-bolt"></i> What are Pavan's strongest skills?
+        </button>
+        <button class="suggestion-btn" data-q="Tell me about Pavan's internship">
+          <i class="fas fa-briefcase"></i> Tell me about Pavan's internship
+        </button>
+        <button class="suggestion-btn" data-q="Is Pavan available for hire?">
+          <i class="fas fa-user-check"></i> Is Pavan available for hire?
+        </button>
+        <button class="suggestion-btn" data-q="How do I contact Pavan?">
+          <i class="fas fa-paper-plane"></i> How do I contact Pavan?
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── CHAT AREA ── -->
+  <main class="chat-area">
+
+    <header class="chat-header">
+      <!-- Mobile menu toggle -->
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="chat-header-left">
+        <div class="chat-header-avatar">
+          <span>C</span>
+          <span class="header-avatar-pulse"></span>
+        </div>
+        <div>
+          <div class="chat-header-name">Candy</div>
+          <div class="chat-header-status">
+            <span class="online-dot"></span>
+            Online · Pavan's Personal AI
+          </div>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="header-btn" id="clearBtn" title="Clear chat">
+          <i class="fas fa-redo-alt"></i>
+        </button>
+        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="header-btn" title="Visit Portfolio" style="text-decoration:none">
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+    </header>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-area">
+      <div class="input-row" id="inputRow">
+        <button class="mic-btn" id="micBtn" title="Click to speak">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <textarea class="input-field" id="inputField"
+          placeholder="Ask me about Pavan..." rows="1" maxlength="500"></textarea>
+        <button class="send-btn" id="sendBtn" aria-label="Send">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span class="input-hint">Press Enter to send · Shift+Enter for new line</span>
+        <span class="input-hint" id="charCount">0 / 500</span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Mobile sidebar backdrop -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<script src="candy.js"></script>
+</body>
+</html>
