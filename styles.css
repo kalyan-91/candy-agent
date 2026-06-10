@@ -809,6 +809,8 @@ a.hdr-btn {
 
   /* ── 4. SIDEBAR: proper opaque overlay — nothing bleeds through ── */
   .sidebar {
+    opacity: 1 !important;
+    filter: none !important;
     position: fixed;
     top: 0; left: 0; bottom: 0;
     width: min(300px, 88vw);
@@ -1035,7 +1037,7 @@ a.hdr-btn {
   .welcome-card__title { font-size: 0.98rem; }
 
   /* ── 15. Ambient blobs lighter on mobile ── */
-  .ambient__blob { filter: blur(60px); }
+  .ambient__blob {  filter: none; }
 
   /* ── 16. Social buttons bigger tap targets ── */
   .social-btn { width: 46px; height: 46px; }
