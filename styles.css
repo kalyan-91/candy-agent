@@ -1,8 +1,3 @@
-/* ══════════════════════════════════════════════════
-   CANDY v3 — styles.css
-   Deep space · Cyan-Violet · Ultra-polished mobile
-   ══════════════════════════════════════════════════ */
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -126,7 +121,7 @@ html, body {
 }
 
 /* ══════════════════════════════════════════════════
-   SIDEBAR — fully bright & vivid (no dim!)
+   SIDEBAR
    ══════════════════════════════════════════════════ */
 .sidebar {
   display: flex; flex-direction: column; gap: 16px;
@@ -143,7 +138,6 @@ html, body {
 }
 .sidebar::-webkit-scrollbar { display: none; }
 
-/* bright top shimmer line */
 .sidebar::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 2px;
@@ -152,7 +146,6 @@ html, body {
   pointer-events: none;
 }
 
-/* left edge cyan accent */
 .sidebar::after {
   content: '';
   position: absolute; top: 10%; left: 0; bottom: 10%; width: 2px;
@@ -477,7 +470,6 @@ html, body {
   color: var(--cyan); transform: scale(1.1);
 }
 .hdr-btn.active { color: var(--cyan); border-color: var(--cyan-mid); background: var(--cyan-lo); }
-/* Fix for the link button — ensure it's tappable */
 a.hdr-btn {
   display: flex;
   cursor: pointer;
@@ -516,12 +508,20 @@ a.hdr-btn {
   box-shadow: 0 0 12px rgba(0,212,255,0.25);
 }
 
-.msg-content { display: flex; flex-direction: column; gap: 5px; max-width: 78%; }
+/* ── FIX: msg-content takes full available width ── */
+.msg-content {
+  display: flex; flex-direction: column; gap: 5px;
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 43px); /* avatar(33) + gap(10) */
+}
 
 .bubble {
   padding: 13px 17px; border-radius: 20px;
   font-size: 0.88rem; line-height: 1.72;
   position: relative;
+  width: 100%;
+  word-break: break-word;
 }
 .bubble--assistant {
   background: linear-gradient(135deg,
@@ -558,10 +558,19 @@ a.hdr-btn {
   color: var(--t1);
   border-bottom-right-radius: 4px;
   box-shadow: 0 4px 18px rgba(0,180,255,0.1);
+  /* User bubbles should hug their content, not stretch full width */
+  width: auto;
+  align-self: flex-end;
+  max-width: 100%;
 }
 .bubble--error {
   background: rgba(244,63,94,0.07); border: 1px solid rgba(244,63,94,0.2);
   color: #fda4af; border-radius: 12px; font-size: 0.83rem;
+}
+
+/* User message: align right, content shrinks to fit */
+.msg--user .msg-content {
+  align-items: flex-end;
 }
 
 .msg-time {
@@ -772,38 +781,84 @@ a.hdr-btn {
    MOBILE  ≤ 768px
    ══════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  /* Show mobile layout */
+  /* Single column layout */
   .app { grid-template-columns: 1fr; }
 
-  /* Sidebar slides in from left — fully opaque, not dim */
+  /* ── SIDEBAR FIX: solid opaque background, nothing bleeds through ── */
   .sidebar {
     position: fixed;
     top: 0; left: 0; bottom: 0;
     width: min(300px, 88vw);
     z-index: 100;
-    /* FULLY OPAQUE background — no more dim look */
-    background: linear-gradient(180deg,
-      #04071a 0%,
-      #060a20 50%,
-      #050820 100%
-    ) !important;
+    /* Fully solid — no transparency whatsoever */
+    background: #04071a !important;
     transform: translateX(-110%);
     transition: transform 0.38s var(--ease-smooth), box-shadow 0.38s;
     box-shadow: none;
+    /* Prevent any parent opacity leaking in */
+    isolation: isolate;
   }
   .sidebar.open {
     transform: translateX(0);
-    box-shadow: 8px 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,212,255,0.12);
+    box-shadow: 8px 0 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(0,212,255,0.15);
   }
+
+  /* All sidebar children must be fully visible */
+  .sidebar > *,
+  .sidebar .candy-card,
+  .sidebar .candy-card__header,
+  .sidebar .candy-card__orb,
+  .sidebar .candy-card__name,
+  .sidebar .candy-card__sub,
+  .sidebar .candy-card__desc,
+  .sidebar .candy-card__caps,
+  .sidebar .cap-item,
+  .sidebar .qr-card,
+  .sidebar .qr-card__code,
+  .sidebar .brand,
+  .sidebar .brand-orb__inner,
+  .sidebar .brand-name,
+  .sidebar .brand-tag,
+  .sidebar .section-label,
+  .sidebar .quick-ask,
+  .sidebar .social-btn,
+  .sidebar .pill-btn,
+  .sidebar .divider {
+    opacity: 1 !important;
+  }
+
+  /* Override any translucent backgrounds inside sidebar on mobile */
+  .sidebar .candy-card {
+    background: rgba(0,212,255,0.08) !important;
+    border-color: rgba(0,212,255,0.2) !important;
+  }
+  .sidebar .cap-item {
+    background: rgba(255,255,255,0.06) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+  }
+  .sidebar .quick-ask {
+    background: rgba(255,255,255,0.05) !important;
+    border-color: rgba(255,255,255,0.08) !important;
+  }
+  .sidebar .qr-card {
+    background: rgba(255,255,255,0.05) !important;
+    border-color: rgba(0,212,255,0.18) !important;
+  }
+  .sidebar .social-btn {
+    background: rgba(255,255,255,0.07) !important;
+    border-color: rgba(255,255,255,0.12) !important;
+    color: var(--t2) !important;
+  }
+
   .sidebar-close { display: flex; }
   .menu-btn { display: flex; }
 
-  /* Remove backdrop filters on mobile (perf) */
+  /* Remove backdrop-filter on mobile for performance */
   .chat-header,
   .input-wrap {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: rgba(3,5,18,0.96) !important;
+    background: rgba(3,5,18,0.97) !important;
   }
   .bubble--assistant {
     backdrop-filter: none !important;
@@ -815,26 +870,65 @@ a.hdr-btn {
     background: rgba(0,0,0,0.75) !important;
   }
 
-  /* Header tighter on mobile */
+  /* Header */
   .chat-header { padding: 0 14px; }
   .chat-header__status { display: none; }
   .chat-header__name { font-size: 0.92rem; }
 
-  /* Messages spacing */
-  .messages { padding: 16px 13px; gap: 16px; }
-  .msg-content { max-width: 88%; }
-  .bubble { font-size: 0.87rem; padding: 12px 15px; }
+  /* ── MESSAGE FIX: full-width bubbles on mobile ── */
+  .messages {
+    padding: 14px 10px;
+    gap: 14px;
+  }
+
+  .msg {
+    gap: 8px;
+    width: 100%;
+  }
+
+  /* Hide avatar on mobile to free up full width for bubbles */
+  .msg .msg-avatar {
+    display: none;
+  }
+
+  /* Content takes the full width now that avatar is hidden */
+  .msg-content {
+    max-width: 100%;
+    width: 100%;
+    flex: 1;
+  }
+
+  /* Assistant bubbles: full width */
+  .msg--assistant .bubble--assistant {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* User bubbles: hug text, align right, max 88% */
+  .msg--user .msg-content {
+    align-items: flex-end;
+    width: 100%;
+  }
+  .msg--user .bubble--user {
+    width: auto;
+    max-width: 88%;
+  }
+
+  .bubble {
+    font-size: 0.87rem;
+    padding: 12px 15px;
+  }
+
+  /* Input area */
+  .input-wrap { padding: 10px 10px calc(14px + var(--safe-bottom)); }
+  .input-field { font-size: 16px; } /* prevent iOS zoom */
+  .input-footer .input-hint { display: none; }
 
   /* Bigger touch targets */
   .chip { padding: 8px 15px; font-size: 0.76rem; }
   .quick-ask { padding: 11px 12px; min-height: 44px; }
   .hdr-btn { width: 40px; height: 40px; }
   .send-btn, .mic-btn { width: 42px; height: 42px; }
-
-  /* Input area */
-  .input-wrap { padding: 10px 13px calc(14px + var(--safe-bottom)); }
-  .input-field { font-size: 16px; } /* prevent zoom on iOS */
-  .input-footer .input-hint { display: none; }
 
   /* Suggestions strip scrollable */
   .suggestions-strip { flex-wrap: nowrap; overflow-x: auto; }
@@ -843,7 +937,7 @@ a.hdr-btn {
   .welcome-card { padding: 18px; }
   .welcome-card__title { font-size: 0.98rem; }
 
-  /* No animations on certain elements for perf */
+  /* Ambient perf */
   .ambient__blob { filter: blur(60px); }
 
   /* Social row bigger touch */
@@ -856,6 +950,7 @@ a.hdr-btn {
   .candy-card__caps { grid-template-columns: 1fr; }
   .quick-asks__list { grid-template-columns: 1fr; }
   .bubble { font-size: 0.84rem; }
+  .messages { padding: 12px 8px; }
 }
 
 /* ── Reduced motion ── */
