@@ -783,40 +783,37 @@ a.hdr-btn {
 
   /* ── 1. Single-column layout: chat fills full screen ── */
   .app {
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-  height: 100dvh;
-  overflow: hidden; /* add this */
-}
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    height: 100dvh;
+    overflow: hidden;
+  }
 
-.chat {
-  grid-column: 1;  /* add this — pin to first column */
-  width: 100%;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: #060a1e; /* add this — solid bg */
-  position: relative; /* add this */
-  z-index: 1;         /* add this — sits above ambient blobs */
-}
+  /* ── 2. Chat column fills the whole viewport ── */
+  .chat {
+    grid-column: 1;
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #060a1e;
+    position: relative;
+    z-index: 1;
+    color: var(--t1, #e8eaf6);
+  }
 
   /* ── 3. Messages flex-fills remaining space, scrolls internally ── */
-.messages {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 14px 12px;
-  gap: 14px;
-  -webkit-overflow-scrolling: touch;
-  position: relative; /* add this */
-  z-index: 2;         /* add this */
-}
-
-.welcome-card {
-  position: relative; /* add this */
-  z-index: 2;         /* add this */
-}
+  .messages {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px 12px;
+    gap: 14px;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    z-index: 2;
+  }
 
   /* ── 4. SIDEBAR: proper opaque overlay — nothing bleeds through ── */
   .sidebar {
@@ -828,11 +825,9 @@ a.hdr-btn {
     height: 100%;
     z-index: 1000;
 
-    /* Fully opaque — no transparency, no backdrop-filter */
     background: #060a1e !important;
     border-right: 1px solid rgba(0,212,255,0.18) !important;
 
-    /* Ensure nothing from the page behind bleeds through */
     isolation: isolate;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -841,11 +836,10 @@ a.hdr-btn {
     transition: transform 0.36s var(--ease-smooth), box-shadow 0.36s;
     box-shadow: none;
 
-    /* Make sure content is fully scrollable */
     overflow-y: auto;
     overflow-x: hidden;
     padding: 22px 16px;
-    padding-top: 60px; /* room for close button */
+    padding-top: 60px;
     gap: 16px;
     display: flex;
     flex-direction: column;
@@ -857,13 +851,6 @@ a.hdr-btn {
   }
 
   /* ── 5. ALL sidebar children: full opacity, readable colors ── */
-  .sidebar *,
-  .sidebar *::before,
-  .sidebar *::after {
-    /* Don't inherit opacity from parent */
-  }
-
-  /* Text colors inside sidebar */
   .sidebar .brand-name,
   .sidebar .candy-card__name,
   .sidebar .candy-card__desc,
@@ -885,7 +872,6 @@ a.hdr-btn {
     color: var(--cyan) !important;
   }
 
-  /* Card backgrounds — slightly more visible on solid dark bg */
   .sidebar .candy-card {
     background: rgba(0,212,255,0.07) !important;
     border-color: rgba(0,212,255,0.22) !important;
@@ -934,24 +920,24 @@ a.hdr-btn {
 
   /* ── 6. Sidebar close button always visible ── */
   .sidebar-close {
-  display: flex;
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  left: auto;
-  z-index: 1001;
+    display: flex;
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    left: auto;
+    z-index: 1001;
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--cyan);
+    opacity: 1;
+    pointer-events: auto;
+  }
 
-  background: rgba(0,212,255,0.12);
-  border: 1px solid rgba(0,212,255,0.3);
-  color: var(--cyan);
-
-  opacity: 1;
-  pointer-events: auto;
-}
   .sidebar.open .sidebar-close {
     opacity: 1;
     pointer-events: all;
   }
+
   .sidebar-close:hover {
     background: rgba(0,212,255,0.25) !important;
     transform: rotate(90deg) !important;
@@ -966,6 +952,8 @@ a.hdr-btn {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: rgba(4,6,20,0.98) !important;
+    position: relative;
+    z-index: 3;
   }
 
   .bubble--assistant {
@@ -973,23 +961,22 @@ a.hdr-btn {
     -webkit-backdrop-filter: none !important;
   }
 
- .backdrop {
+  /* ── Backdrop overlay ── */
+  .backdrop {
     position: fixed;
     inset: 0;
     z-index: 999;
-
     background: rgba(0,0,0,0.78);
-
     opacity: 0;
     pointer-events: none;
-
     transition: opacity 0.3s ease;
-}
+  }
 
-.backdrop.active {
+  .backdrop.active {
     opacity: 1;
     pointer-events: auto;
-}
+  }
+
   /* ── 9. Header tweaks ── */
   .chat-header { padding: 0 12px; }
   .chat-header__status { display: none; }
@@ -1001,23 +988,19 @@ a.hdr-btn {
     width: 100%;
   }
 
-  /* Hide avatar: frees full width for bubble */
   .msg .msg-avatar { display: none; }
 
-  /* Content takes full row */
   .msg-content {
     max-width: 100%;
     width: 100%;
     flex: 1;
   }
 
-  /* Assistant bubble: full width */
   .msg--assistant .bubble--assistant {
     width: 100%;
     max-width: 100%;
   }
 
-  /* User bubble: hug text, right-aligned, max 85% */
   .msg--user .msg-content { align-items: flex-end; }
   .msg--user .bubble--user {
     width: auto;
@@ -1027,11 +1010,12 @@ a.hdr-btn {
   .bubble {
     font-size: 0.87rem;
     padding: 11px 14px;
+    color: var(--t1, #e8eaf6);
   }
 
   /* ── 11. Input area ── */
   .input-wrap { padding: 10px 10px calc(12px + var(--safe-bottom)); }
-  .input-field { font-size: 16px; } /* prevent iOS auto-zoom */
+  .input-field { font-size: 16px; }
   .input-footer .input-hint { display: none; }
 
   /* ── 12. Bigger touch targets ── */
@@ -1044,11 +1028,24 @@ a.hdr-btn {
   .suggestions-strip { flex-wrap: nowrap; overflow-x: auto; }
 
   /* ── 14. Welcome card ── */
-  .welcome-card { padding: 18px; }
-  .welcome-card__title { font-size: 0.98rem; }
+  .welcome-card {
+    padding: 18px;
+    position: relative;
+    z-index: 2;
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.18);
+    color: var(--t1, #e8eaf6);
+  }
+  .welcome-card__title {
+    font-size: 0.98rem;
+    color: var(--t1, #e8eaf6);
+  }
 
-  /* ── 15. Ambient blobs lighter on mobile ── */
-  .ambient__blob {  filter: none; }
+  /* ── 15. Ambient blobs pushed behind content ── */
+  .ambient__blob {
+    filter: none;
+    z-index: 0;
+  }
 
   /* ── 16. Social buttons bigger tap targets ── */
   .social-btn { width: 46px; height: 46px; }
