@@ -1,5 +1,3 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
   --ink:         #03040f;
   --surface:     #080b1e;
@@ -479,7 +477,7 @@ a.hdr-btn {
 /* ── Messages ── */
 .messages {
   flex: 1;
-  min-height: 0; /* CRITICAL: allows flex child to shrink below content size */
+  min-height: 0;
   overflow-y: auto; overflow-x: hidden;
   padding: 24px 20px;
   display: flex; flex-direction: column; gap: 20px;
@@ -747,17 +745,19 @@ a.hdr-btn {
 }
 
 /* ── Backdrop ── */
+/* Base: hidden via opacity+pointer-events (NOT display:none) so mobile transition works */
 .backdrop {
-  display: none; position: fixed; inset: 0;
-  background: rgba(3,4,20,0.82); z-index: 90;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  position: fixed; inset: 0;
+  background: rgba(3,4,20,0.82);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 .backdrop.active {
-  display: block;
-  animation: fadeIn 0.25s ease;
+  opacity: 1;
+  pointer-events: auto;
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* ── Toast ── */
 .toast-wrap {
@@ -781,15 +781,24 @@ a.hdr-btn {
    ══════════════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-  /* ── 1. Single-column layout: chat fills full screen ── */
+  /* ── Kill ALL background effects — they cause the black screen ── */
+  .ambient,
+  #stars,
+  .grid-overlay,
+  .particles {
+    display: none !important;
+  }
+
+  /* ── 1. App grid: single column ── */
   .app {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     height: 100dvh;
     overflow: hidden;
+    background: #060a1e;
   }
 
-  /* ── 2. Chat column fills the whole viewport ── */
+  /* ── 2. Chat fills viewport with solid background ── */
   .chat {
     grid-column: 1;
     width: 100%;
@@ -800,42 +809,36 @@ a.hdr-btn {
     background: #060a1e;
     position: relative;
     z-index: 1;
-    color: var(--t1, #e8eaf6);
   }
 
-  /* ── 3. Messages flex-fills remaining space, scrolls internally ── */
+  /* ── 3. Messages area ── */
   .messages {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     padding: 14px 12px;
     gap: 14px;
+    display: flex;
+    flex-direction: column;
     -webkit-overflow-scrolling: touch;
     position: relative;
     z-index: 2;
   }
 
-  /* ── 4. SIDEBAR: proper opaque overlay — nothing bleeds through ── */
+  /* ── 4. SIDEBAR: slide-in overlay ── */
   .sidebar {
-    opacity: 1 !important;
-    filter: none !important;
     position: fixed;
     top: 0; left: 0; bottom: 0;
     width: min(300px, 88vw);
     height: 100%;
     z-index: 1000;
-
     background: #060a1e !important;
     border-right: 1px solid rgba(0,212,255,0.18) !important;
-
-    isolation: isolate;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-
     transform: translateX(-110%);
     transition: transform 0.36s var(--ease-smooth), box-shadow 0.36s;
     box-shadow: none;
-
     overflow-y: auto;
     overflow-x: hidden;
     padding: 22px 16px;
@@ -843,6 +846,9 @@ a.hdr-btn {
     gap: 16px;
     display: flex;
     flex-direction: column;
+    opacity: 1 !important;
+    filter: none !important;
+    isolation: isolate;
   }
 
   .sidebar.open {
@@ -850,81 +856,34 @@ a.hdr-btn {
     box-shadow: 6px 0 48px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,212,255,0.15);
   }
 
-  /* ── 5. ALL sidebar children: full opacity, readable colors ── */
+  /* ── 5. Sidebar text colors ── */
   .sidebar .brand-name,
   .sidebar .candy-card__name,
   .sidebar .candy-card__desc,
   .sidebar .section-label,
   .sidebar .quick-ask,
-  .sidebar .cap-item {
-    color: var(--t1) !important;
-  }
-
+  .sidebar .cap-item { color: var(--t1) !important; }
   .sidebar .brand-tag,
-  .sidebar .cap-item {
-    color: var(--t2) !important;
-  }
-
+  .sidebar .cap-item { color: var(--t2) !important; }
   .sidebar .candy-card__sub,
   .sidebar .brand-version,
   .sidebar .section-label i,
-  .sidebar .cap-item i {
-    color: var(--cyan) !important;
-  }
+  .sidebar .cap-item i { color: var(--cyan) !important; }
+  .sidebar .candy-card { background: rgba(0,212,255,0.07) !important; border-color: rgba(0,212,255,0.22) !important; }
+  .sidebar .cap-item { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,255,255,0.1) !important; }
+  .sidebar .quick-ask { background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important; color: var(--t2) !important; }
+  .sidebar .qr-card { background: rgba(255,255,255,0.05) !important; border-color: rgba(0,212,255,0.2) !important; }
+  .sidebar .qr-card__hint { color: var(--t2) !important; }
+  .sidebar .social-btn { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.14) !important; color: var(--t2) !important; }
+  .sidebar .divider { background: linear-gradient(90deg, transparent, rgba(0,212,255,0.25), transparent) !important; }
+  .sidebar .pill-btn--primary { background: linear-gradient(135deg, var(--cyan), #0099cc) !important; color: var(--ink) !important; }
+  .sidebar .pill-btn--ghost { background: rgba(139,92,246,0.15) !important; border-color: rgba(139,92,246,0.35) !important; color: #c4b5fd !important; }
 
-  .sidebar .candy-card {
-    background: rgba(0,212,255,0.07) !important;
-    border-color: rgba(0,212,255,0.22) !important;
-  }
-
-  .sidebar .cap-item {
-    background: rgba(255,255,255,0.06) !important;
-    border-color: rgba(255,255,255,0.1) !important;
-  }
-
-  .sidebar .quick-ask {
-    background: rgba(255,255,255,0.05) !important;
-    border-color: rgba(255,255,255,0.1) !important;
-    color: var(--t2) !important;
-  }
-
-  .sidebar .qr-card {
-    background: rgba(255,255,255,0.05) !important;
-    border-color: rgba(0,212,255,0.2) !important;
-  }
-
-  .sidebar .qr-card__hint {
-    color: var(--t2) !important;
-  }
-
-  .sidebar .social-btn {
-    background: rgba(255,255,255,0.08) !important;
-    border-color: rgba(255,255,255,0.14) !important;
-    color: var(--t2) !important;
-  }
-
-  .sidebar .divider {
-    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.25), transparent) !important;
-  }
-
-  .sidebar .pill-btn--primary {
-    background: linear-gradient(135deg, var(--cyan), #0099cc) !important;
-    color: var(--ink) !important;
-  }
-
-  .sidebar .pill-btn--ghost {
-    background: rgba(139,92,246,0.15) !important;
-    border-color: rgba(139,92,246,0.35) !important;
-    color: #c4b5fd !important;
-  }
-
-  /* ── 6. Sidebar close button always visible ── */
+  /* ── 6. Sidebar close button ── */
   .sidebar-close {
     display: flex;
     position: absolute;
-    top: 14px;
-    right: 14px;
-    left: auto;
+    top: 14px; right: 14px; left: auto;
     z-index: 1001;
     background: rgba(0,212,255,0.12);
     border: 1px solid rgba(0,212,255,0.3);
@@ -932,28 +891,29 @@ a.hdr-btn {
     opacity: 1;
     pointer-events: auto;
   }
+  .sidebar-close:hover { background: rgba(0,212,255,0.25) !important; transform: rotate(90deg) !important; }
 
-  .sidebar.open .sidebar-close {
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  .sidebar-close:hover {
-    background: rgba(0,212,255,0.25) !important;
-    transform: rotate(90deg) !important;
-  }
-
-  /* ── 7. Menu button always visible in header ── */
+  /* ── 7. Menu button ── */
   .menu-btn { display: flex; }
 
-  /* ── 8. Remove expensive filters on mobile ── */
-  .chat-header,
+  /* ── 8. Header & input: no blur, solid bg ── */
+  .chat-header {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #060a1e !important;
+    border-bottom: 1px solid rgba(0,212,255,0.1) !important;
+    padding: 0 12px;
+    position: relative;
+    z-index: 10;
+  }
   .input-wrap {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: rgba(4,6,20,0.98) !important;
+    background: #060a1e !important;
+    border-top: 1px solid rgba(0,212,255,0.08) !important;
     position: relative;
-    z-index: 3;
+    z-index: 10;
+    padding: 10px 10px calc(12px + var(--safe-bottom));
   }
 
   .bubble--assistant {
@@ -961,94 +921,44 @@ a.hdr-btn {
     -webkit-backdrop-filter: none !important;
   }
 
-  /* ── Backdrop overlay ── */
-  .backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: rgba(0,0,0,0.78);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .backdrop.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
   /* ── 9. Header tweaks ── */
-  .chat-header { padding: 0 12px; }
   .chat-header__status { display: none; }
   .chat-header__name { font-size: 0.92rem; }
 
-  /* ── 10. Message bubbles — full width on mobile ── */
-  .msg {
-    gap: 8px;
-    width: 100%;
-  }
-
+  /* ── 10. Message bubbles ── */
+  .msg { gap: 8px; width: 100%; }
   .msg .msg-avatar { display: none; }
-
-  .msg-content {
-    max-width: 100%;
-    width: 100%;
-    flex: 1;
-  }
-
-  .msg--assistant .bubble--assistant {
-    width: 100%;
-    max-width: 100%;
-  }
-
+  .msg-content { max-width: 100%; width: 100%; flex: 1; }
+  .msg--assistant .bubble--assistant { width: 100%; max-width: 100%; }
   .msg--user .msg-content { align-items: flex-end; }
-  .msg--user .bubble--user {
-    width: auto;
-    max-width: 85%;
-  }
+  .msg--user .bubble--user { width: auto; max-width: 85%; }
+  .bubble { font-size: 0.87rem; padding: 11px 14px; }
 
-  .bubble {
-    font-size: 0.87rem;
-    padding: 11px 14px;
-    color: var(--t1, #e8eaf6);
-  }
-
-  /* ── 11. Input area ── */
-  .input-wrap { padding: 10px 10px calc(12px + var(--safe-bottom)); }
+  /* ── 11. Input field ── */
   .input-field { font-size: 16px; }
   .input-footer .input-hint { display: none; }
 
-  /* ── 12. Bigger touch targets ── */
+  /* ── 12. Touch targets ── */
   .chip { padding: 8px 15px; font-size: 0.76rem; }
   .quick-ask { padding: 11px 12px; min-height: 44px; }
   .hdr-btn { width: 40px; height: 40px; }
   .send-btn, .mic-btn { width: 42px; height: 42px; }
 
-  /* ── 13. Suggestions strip ── */
+  /* ── 13. Suggestions ── */
   .suggestions-strip { flex-wrap: nowrap; overflow-x: auto; }
 
   /* ── 14. Welcome card ── */
-  .welcome-card {
-    padding: 18px;
-    position: relative;
-    z-index: 2;
-    background: rgba(0,212,255,0.06);
-    border: 1px solid rgba(0,212,255,0.18);
-    color: var(--t1, #e8eaf6);
-  }
-  .welcome-card__title {
-    font-size: 0.98rem;
-    color: var(--t1, #e8eaf6);
-  }
+  .welcome-card { padding: 18px; }
+  .welcome-card__title { font-size: 0.98rem; }
 
-  /* ── 15. Ambient blobs pushed behind content ── */
-  .ambient__blob {
-    filter: none;
-    z-index: 0;
-  }
-
-  /* ── 16. Social buttons bigger tap targets ── */
+  /* ── 15. Social buttons ── */
   .social-btn { width: 46px; height: 46px; }
+
+  /* ── 16. Backdrop on mobile ── */
+  .backdrop {
+    z-index: 999;
+    background: rgba(0,0,0,0.78);
+  }
 }
 
 /* ── Small phones ── */
