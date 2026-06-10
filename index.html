@@ -4,319 +4,197 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Candy — Pavan's AI Assistant</title>
-  <meta name="description" content="Chat with Candy, Pavan Kalyan's personal AI assistant. Ask anything about his skills, projects, and experience."/>
-  <meta property="og:title" content="Candy — Pavan Kalyan's AI Assistant"/>
-  <meta property="og:description" content="Ask Candy anything about Pavan Kalyan — Data Analyst, MCA Student."/>
-  <meta property="og:url" content="https://candy-agent.netlify.app"/>
+  <meta name="description" content="Chat with Candy, Pavan Kalyan's personal AI assistant."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@1,9..144,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<canvas id="bgCanvas"></canvas>
-<div id="floatParticles"></div>
+<!-- ── Ambient background ── -->
+<div class="ambient">
+  <div class="ambient__blob ambient__blob--1"></div>
+  <div class="ambient__blob ambient__blob--2"></div>
+  <div class="ambient__blob ambient__blob--3"></div>
+</div>
 
-<div class="app">
+<!-- ── Starfield canvas ── -->
+<canvas id="stars"></canvas>
 
-  <!-- ── SIDEBAR ── -->
+<!-- ── Grid overlay ── -->
+<div class="grid-overlay"></div>
+
+<div class="app" id="app">
+
+  <!-- ════════════════════ SIDEBAR ════════════════════ -->
   <aside class="sidebar" id="sidebar">
+    <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
 
-    <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
-      <i class="fas fa-times"></i>
-    </button>
-
+    <!-- Brand -->
     <div class="brand">
-      <div class="brand-avatar">
-        <span>C</span>
-        <div class="avatar-ring"></div>
+      <div class="brand-orb">
+        <svg class="brand-orb__wave" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="1" stroke-dasharray="6 4"/>
+          <circle cx="40" cy="40" r="26" fill="none" stroke="rgba(0,212,255,0.15)" stroke-width="1"/>
+        </svg>
+        <div class="brand-orb__inner">C</div>
+        <div class="brand-orb__pulse"></div>
       </div>
-      <div>
+      <div class="brand-text">
         <div class="brand-name">Candy</div>
-        <div class="brand-sub">
-          <span class="online-dot"></span>
-          Pavan's AI Assistant
+        <div class="brand-tag"><span class="status-dot"></span>Pavan's AI · Online</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Profile card -->
+    <div class="profile-card">
+      <div class="profile-card__header">
+        <div class="profile-card__img-wrap">
+          <img src="https://kalyanfinity-portfolio.netlify.app/pavankalyan.jpg"
+               alt="Pavan Kalyan"
+               onerror="this.src='https://ui-avatars.com/api/?name=Pavan+Kalyan&size=80&background=050714&color=00d4ff&bold=true'">
+          <div class="profile-card__img-ring"></div>
+        </div>
+        <div class="profile-card__meta">
+          <div class="profile-card__name">D. Pavan Kalyan</div>
+          <div class="profile-card__role">
+            <span class="role-badge">Data Analytics</span>
+            <span class="role-badge role-badge--dim">MCA '27</span>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="sidebar-divider"></div>
-
-    <!-- About Pavan -->
-    <div class="about-card">
-      <div class="about-label">About Pavan</div>
-      <img src="https://kalyanfinity-portfolio.netlify.app/pavankalyan.jpg"
-           alt="Pavan Kalyan" class="about-photo"
-           onerror="this.src='https://ui-avatars.com/api/?name=Pavan+Kalyan&size=64&background=0a0a1a&color=00d4ff&bold=true'">
-      <div class="about-name">D. Pavan Kalyan</div>
-      <div class="about-role">Data Analyst · MCA Student</div>
-      <div class="about-links">
-        <a href="https://github.com/kalyan-91" target="_blank" class="about-link">
-          <i class="fab fa-github"></i> GitHub
-        </a>
-        <a href="https://www.linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" class="about-link">
-          <i class="fab fa-linkedin"></i> LinkedIn
-        </a>
-        <a href="mailto:daroorpavankalyan@gmail.com" class="about-link">
-          <i class="fas fa-envelope"></i> Email
-        </a>
-        <a href="https://wa.me/918919944203" target="_blank" class="about-link">
-          <i class="fab fa-whatsapp"></i> WhatsApp
-        </a>
+      <div class="profile-card__stats">
+        <div class="stat-item">
+          <div class="stat-item__val">6+</div>
+          <div class="stat-item__lbl">Projects</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__val">4mo</div>
+          <div class="stat-item__lbl">Internship</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__val">10+</div>
+          <div class="stat-item__lbl">Skills</div>
+        </div>
+      </div>
+      <div class="profile-card__links">
+        <a href="https://github.com/kalyan-91" target="_blank" class="icon-link" title="GitHub"><i class="fab fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" class="icon-link" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="mailto:daroorpavankalyan@gmail.com" class="icon-link" title="Email"><i class="fas fa-envelope"></i></a>
+        <a href="https://wa.me/918919944203" target="_blank" class="icon-link" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
       </div>
     </div>
 
-    <div class="sidebar-divider"></div>
+    <div class="divider"></div>
 
-    <!-- QR Code Section -->
+    <!-- QR section -->
     <div class="qr-section">
-      <div class="qr-label">Visit Portfolio</div>
-      <div class="qr-box">
-        <!-- QR renders here via JS -->
-        <div id="qrCode"></div>
-        <div class="qr-desc">Scan to visit Pavan's full portfolio with projects and resume</div>
-        <div class="qr-btns">
-          <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="qr-btn qr-btn--portfolio">
-            <i class="fas fa-external-link-alt"></i> Visit Portfolio
+      <div class="section-label"><i class="fas fa-qrcode"></i> Portfolio</div>
+      <div class="qr-card">
+        <div class="qr-card__code" id="qrCode"></div>
+        <p class="qr-card__hint">Scan to visit full portfolio</p>
+        <div class="qr-card__actions">
+          <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="pill-btn pill-btn--primary">
+            <i class="fas fa-external-link-alt"></i> Portfolio
           </a>
-          <a href="mailto:daroorpavankalyan@gmail.com" class="qr-btn qr-btn--contact">
-            <i class="fas fa-envelope"></i> Contact Pavan
+          <a href="mailto:daroorpavankalyan@gmail.com" class="pill-btn pill-btn--ghost">
+            <i class="fas fa-envelope"></i> Contact
           </a>
         </div>
       </div>
     </div>
 
-    <div class="sidebar-divider"></div>
+    <div class="divider"></div>
 
-    <!-- Suggested questions -->
-    <div>
-      <div class="suggestions-label">Quick Questions</div>
-      <div class="suggestions-list" id="suggestionsList">
-        <button class="suggestion-btn" data-q="What projects has Pavan built?">
-          <i class="fas fa-folder-open"></i> What projects has Pavan built?
-        </button>
-        <button class="suggestion-btn" data-q="What are Pavan's strongest skills?">
-          <i class="fas fa-bolt"></i> What are Pavan's strongest skills?
-        </button>
-        <button class="suggestion-btn" data-q="Tell me about Pavan's internship">
-          <i class="fas fa-briefcase"></i> Tell me about Pavan's internship
-        </button>
-        <button class="suggestion-btn" data-q="Is Pavan available for hire?">
-          <i class="fas fa-user-check"></i> Is Pavan available for hire?
-        </button>
-        <button class="suggestion-btn" data-q="How do I contact Pavan?">
-          <i class="fas fa-paper-plane"></i> How do I contact Pavan?
-        </button>
+    <!-- Quick asks -->
+    <div class="quick-asks">
+      <div class="section-label"><i class="fas fa-bolt"></i> Quick asks</div>
+      <div class="quick-asks__list" id="quickAskList">
+        <button class="quick-ask" data-q="What projects has Pavan built?"><span class="quick-ask__icon">🗂</span>Projects</button>
+        <button class="quick-ask" data-q="What are Pavan's strongest skills?"><span class="quick-ask__icon">⚡</span>Skills</button>
+        <button class="quick-ask" data-q="Tell me about Pavan's internship"><span class="quick-ask__icon">💼</span>Experience</button>
+        <button class="quick-ask" data-q="Is Pavan available for hire?"><span class="quick-ask__icon">🎯</span>Hire</button>
+        <button class="quick-ask" data-q="How do I contact Pavan?"><span class="quick-ask__icon">📬</span>Contact</button>
+        <button class="quick-ask" data-q="What is Pavan studying?"><span class="quick-ask__icon">🎓</span>Education</button>
       </div>
     </div>
 
   </aside>
 
-  <!-- ── CHAT AREA ── -->
-  <main class="chat-area">
+  <!-- ════════════════════ CHAT ════════════════════ -->
+  <main class="chat">
 
+    <!-- Header -->
     <header class="chat-header">
-      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
-        <i class="fas fa-bars"></i>
-      </button>
+      <button class="menu-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
 
-      <div class="chat-header-left">
-        <div class="chat-header-avatar">
+      <div class="chat-header__info">
+        <div class="chat-header__avatar">
           <span>C</span>
-          <span class="header-avatar-pulse"></span>
+          <span class="chat-header__ping"></span>
         </div>
         <div>
-          <div class="chat-header-name">Candy</div>
-          <div class="chat-header-status">
-            <span class="online-dot"></span>
-            Online · Pavan's Personal AI
-          </div>
+          <div class="chat-header__name">Candy <span class="chat-header__ai-tag">AI</span></div>
+          <div class="chat-header__status"><span class="status-dot"></span>Pavan's personal assistant · always on</div>
         </div>
       </div>
-      <div class="chat-header-actions">
-        <button class="header-btn" id="clearBtn" title="Clear chat">
-          <i class="fas fa-redo-alt"></i>
+
+      <div class="chat-header__actions">
+        <button class="hdr-btn" id="voiceToggle" title="Toggle voice">
+          <i class="fas fa-volume-up"></i>
         </button>
-        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="header-btn" title="Visit Portfolio" style="text-decoration:none">
+        <button class="hdr-btn" id="clearBtn" title="New chat">
+          <i class="fas fa-pen"></i>
+        </button>
+        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="hdr-btn" title="Portfolio">
           <i class="fas fa-external-link-alt"></i>
         </a>
       </div>
     </header>
 
+    <!-- Messages -->
     <div class="messages" id="messages"></div>
 
-    <div class="input-area">
-      <div class="input-row" id="inputRow">
-        <button class="mic-btn" id="micBtn" title="Click to speak">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-            <line x1="8" y1="23" x2="16" y2="23"/>
-          </svg>
+    <!-- Input -->
+    <div class="input-wrap">
+
+      <!-- Suggestions strip (shows above input, context-aware) -->
+      <div class="suggestions-strip" id="suggestStrip"></div>
+
+      <div class="input-box" id="inputBox">
+        <button class="mic-btn" id="micBtn" title="Speak">
+          <i class="fas fa-microphone"></i>
         </button>
         <textarea class="input-field" id="inputField"
-          placeholder="Ask me about Pavan..." rows="1" maxlength="500"></textarea>
-        <button class="send-btn" id="sendBtn" aria-label="Send">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-        </button>
+          placeholder="Ask me anything about Pavan…" rows="1" maxlength="500"></textarea>
+        <div class="input-right">
+          <span class="char-count" id="charCount">500</span>
+          <button class="send-btn" id="sendBtn" aria-label="Send">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
       </div>
       <div class="input-footer">
-        <span class="input-hint">Press Enter to send · Shift+Enter for new line</span>
-        <span class="input-hint" id="charCount">0 / 500</span>
+        <span>↩ send &nbsp;·&nbsp; shift+↩ newline</span>
+        <span id="voiceStatus" class="voice-status">🔊 Voice on</span>
       </div>
     </div>
 
   </main>
 </div>
 
-<!-- Mobile sidebar backdrop -->
-<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+<!-- Sidebar backdrop -->
+<div class="backdrop" id="backdrop"></div>
 
-<!-- QRCode.js library -->
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- QRCode lib -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<script>
-// ═══════════════════════════════════════════════════
-// QR CODE INIT — runs after qrcode.min.js is loaded
-// ═══════════════════════════════════════════════════
-(function initQR() {
-  const el = document.getElementById('qrCode');
-  if (!el || typeof QRCode === 'undefined') return;
-  // Clear any placeholder content
-  el.innerHTML = '';
-  new QRCode(el, {
-    text:         'https://kalyanfinity-portfolio.netlify.app',
-    width:        110,
-    height:       110,
-    colorDark:    '#000000',
-    colorLight:   '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
-})();
-</script>
-
 <script src="script.js"></script>
-
-<script>
-// ═══════════════════════════════════════════════════
-// MAIN CHAT — sidebar + mobile menu + suggestions
-// ═══════════════════════════════════════════════════
-(function initUI() {
-
-  // ── Mobile sidebar toggle ──
-  const sidebar  = document.getElementById('sidebar');
-  const backdrop = document.getElementById('sidebarBackdrop');
-  const menuBtn  = document.getElementById('mobileMenuBtn');
-  const closeBtn = document.getElementById('sidebarClose');
-
-  function openSidebar() {
-    sidebar.classList.add('open');
-    backdrop.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    backdrop.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  if (menuBtn)  menuBtn.addEventListener('click', openSidebar);
-  if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-  if (backdrop) backdrop.addEventListener('click', closeSidebar);
-
-  // ── Clear button ──
-  const clearBtn = document.getElementById('clearBtn');
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      chatHistory = [];
-      document.getElementById('messages').innerHTML = '';
-      appendWelcome();
-    });
-  }
-
-  // ── Sidebar suggestion buttons ──
-  document.getElementById('suggestionsList')?.addEventListener('click', e => {
-    const btn = e.target.closest('.suggestion-btn');
-    if (!btn) return;
-    const q = btn.dataset.q;
-    if (!q) return;
-    const inputField = document.getElementById('inputField');
-    if (inputField) {
-      inputField.value = q;
-      inputField.dispatchEvent(new Event('input'));
-    }
-    // Trigger send
-    handleSend(q).then(() => {
-      if (inputField) inputField.value = '';
-    });
-    // Close sidebar on mobile after selecting
-    if (window.innerWidth <= 768) closeSidebar();
-  });
-
-  // ── Background canvas animation ──
-  const canvas = document.getElementById('bgCanvas');
-  if (canvas) {
-    const ctx  = canvas.getContext('2d');
-    let W, H, stars = [];
-    function resize() {
-      W = canvas.width  = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-    }
-    function initStars() {
-      stars = [];
-      for (let i = 0; i < 120; i++) {
-        stars.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          r: Math.random() * 1.2 + 0.3,
-          a: Math.random(),
-          s: (Math.random() - 0.5) * 0.003
-        });
-      }
-    }
-    function drawFrame() {
-      ctx.clearRect(0, 0, W, H);
-      for (const s of stars) {
-        s.a += s.s;
-        if (s.a <= 0 || s.a >= 1) s.s *= -1;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(125,211,252,${s.a * 0.6})`;
-        ctx.fill();
-      }
-      requestAnimationFrame(drawFrame);
-    }
-    window.addEventListener('resize', () => { resize(); initStars(); });
-    resize(); initStars(); drawFrame();
-  }
-
-  // ── Float orbs ──
-  const fp = document.getElementById('floatParticles');
-  if (fp) {
-    const colors = ['rgba(0,212,255,0.35)', 'rgba(139,92,246,0.3)', 'rgba(125,211,252,0.25)'];
-    for (let i = 0; i < 6; i++) {
-      const orb = document.createElement('div');
-      orb.className = 'float-orb';
-      const size = 80 + Math.random() * 120;
-      orb.style.cssText = `
-        width:${size}px; height:${size}px;
-        left:${Math.random()*100}%;
-        background:${colors[i % colors.length]};
-        animation-duration:${14 + Math.random()*14}s;
-        animation-delay:${-Math.random()*20}s;
-      `;
-      fp.appendChild(orb);
-    }
-  }
-
-})();
-</script>
-
 </body>
 </html>
