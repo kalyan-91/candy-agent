@@ -955,10 +955,23 @@ a.hdr-btn {
   .social-btn { width: 46px; height: 46px; }
 
   /* ── 16. Backdrop on mobile ── */
-  .backdrop {
-    z-index: 999;
-    background: rgba(0,0,0,0.78);
-  }
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 999;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition: opacity .3s ease;
+}
+
+.backdrop.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* ── Small phones ── */
