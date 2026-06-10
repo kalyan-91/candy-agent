@@ -724,3 +724,14 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+@media (max-width: 768px) {
+  .chat-header,
+  .input-wrap,
+  .bubble--assistant,
+  .sidebar,
+  .backdrop {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
