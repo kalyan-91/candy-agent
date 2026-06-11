@@ -787,10 +787,19 @@ function getFollowUps(lastMsg) {
    INIT
    ══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Ensure sidebar is always closed on load
+  // Force sidebar closed on load — belt AND suspenders
   sidebar.classList.remove('open');
+  sidebar.style.transform = 'translateX(-110%)';
   backdrop.classList.remove('active');
+  backdrop.style.opacity = '0';
+  backdrop.style.pointerEvents = 'none';
   document.body.style.overflow = '';
+  // Remove inline styles after first frame so CSS transitions take over
+  requestAnimationFrame(() => {
+    sidebar.style.transform = '';
+    backdrop.style.opacity = '';
+    backdrop.style.pointerEvents = '';
+  });
 
   initStars();
   initParticles();
@@ -808,18 +817,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => inputField.focus(), 400);
   }
 
+  // Swipe gestures — single unified handler
   let touchStartX = 0;
-  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  document.addEventListener('touchend', e => {
-    const dx = touchStartX - e.changedTouches[0].clientX;
-    if (dx > 60 && sidebar.classList.contains('open')) closeSidebar();
+  let touchStartY = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
   }, { passive: true });
 
-  document.addEventListener('touchstart', e => {
-    if (e.touches[0].clientX < 24) touchStartX = e.touches[0].clientX;
-  }, { passive: true });
   document.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - touchStartX;
-    if (dx > 70 && touchStartX < 24 && !sidebar.classList.contains('open')) openSidebar();
+    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    if (dy > 40) return; // ignore vertical swipes
+
+    // Swipe left to close
+    if (dx < -60 && sidebar.classList.contains('open')) {
+      closeSidebar();
+    }
+    // Swipe right from left edge to open
+    if (dx > 70 && touchStartX < 24 && !sidebar.classList.contains('open')) {
+      openSidebar();
+    }
   }, { passive: true });
 });
