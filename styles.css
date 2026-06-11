@@ -135,6 +135,8 @@ html, body {
   overflow-y: auto; overflow-x: hidden;
   scrollbar-width: none;
   position: relative; z-index: 2;
+  /* Ensure transition is always defined */
+  transition: transform 0.36s cubic-bezier(0.4,0,0.2,1), box-shadow 0.36s;
 }
 .sidebar::-webkit-scrollbar { display: none; }
 
