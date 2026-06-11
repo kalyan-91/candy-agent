@@ -787,6 +787,11 @@ function getFollowUps(lastMsg) {
    INIT
    ══════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
+  // Ensure sidebar is always closed on load
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('active');
+  document.body.style.overflow = '';
+
   initStars();
   initParticles();
   initQR();
