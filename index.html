@@ -1,95 +1,1527 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>Candy — Pavan's AI Assistant</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Candy AI — Ask me about Pavan Kalyan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+ 
+<style>
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:         #02030d;
+  --card:       #070b1a;
+  --card2:      #0a0f22;
+  --cyan:       #00d4ff;
+  --sky:        #7dd3fc;
+  --amber:      #fbbf24;
+  --violet:     #a78bfa;
+  --rose:       #f43f5e;
+  --text:       #e2e8f0;
+  --muted:      #64748b;
+  --subtle:     #1e2a45;
+  --border:     rgba(0,212,255,0.12);
+  --border2:    rgba(139,92,246,0.15);
+}
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  overflow: hidden;
+}
+ 
+/* ─── Star field ─── */
+.stars {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.star {
+  position: absolute;
+  width: 1.5px; height: 1.5px;
+  background: #02030d;
+  border-radius: 50%;
+  animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+}
+@keyframes twinkle {
+  0%,100% { opacity: 0.1; transform: scale(1); }
+  50%      { opacity: 0.7; transform: scale(1.4); }
+}
+ 
+/* ─── Layout ─── */
+.page {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+ 
+/* ─── Left Panel ─── */
+.left-panel {
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+  border-right: 1px solid var(--border2);
+  background: linear-gradient(180deg, rgba(0,212,255,0.03) 0%, transparent 60%);
+  position: relative;
+  overflow: hidden;
+  gap: 28px;
+}
+ 
+/* ambient glow behind character */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -60%);
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+ 
+/* Identity badge */
+.identity {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.identity-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.identity-name span { color: var(--cyan); }
+.identity-role {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.identity-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 14px;
+}
+.tag {
+  padding: 4px 11px;
+  border-radius: 100px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: 1px solid;
+}
+.tag--cyan   { background: rgba(0,212,255,0.07); border-color: rgba(0,212,255,0.25); color: var(--sky); }
+.tag--violet { background: rgba(167,139,250,0.07); border-color: rgba(167,139,250,0.25); color: var(--violet); }
+.tag--amber  { background: rgba(251,191,36,0.07); border-color: rgba(251,191,36,0.25); color: var(--amber); }
+ 
+/* Candy character */
+.candy-wrap {
+  position: relative;
+  z-index: 2;
+  width: 120px; height: 140px;
+  flex-shrink: 0;
+}
+.candy-wrap svg { width: 100%; height: 100%; overflow: visible; }
+ 
+/* idle float */
+@keyframes candyFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.candy-wrap { animation: candyFloat 3.2s ease-in-out infinite; }
+.candy-wrap.talking { animation: candyTalk 0.4s ease-in-out infinite; }
+.candy-wrap.listening-anim { animation: candyListen 0.8s ease-in-out infinite; }
+@keyframes candyTalk {
+  0%,100% { transform: translateY(0) scaleY(1); }
+  25%      { transform: translateY(-3px) scaleY(1.02); }
+  75%      { transform: translateY(2px) scaleY(0.98); }
+}
+@keyframes candyListen {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+ 
+/* Glow rings around character */
+.candy-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(0,212,255,0.1);
+  animation: ringPulse var(--rd, 3s) ease-in-out infinite var(--rdelay, 0s);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+@keyframes ringPulse {
+  0%,100% { opacity: 0.5; transform: translate(-50%,-50%) scale(1); }
+  50%      { opacity: 0.15; transform: translate(-50%,-50%) scale(1.12); }
+}
+ 
+/* Status chip */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  background: rgba(0,200,100,0.07);
+  border: 1px solid rgba(0,200,100,0.2);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: #4ade80;
+  letter-spacing: 0.06em;
+}
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  animation: statusGlow 2s ease-in-out infinite;
+}
+@keyframes statusGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
+  50%      { box-shadow: 0 0 0 5px rgba(74,222,128,0); }
+}
+ 
+/* QR card */
+.qr-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.qr-card:hover {
+  border-color: rgba(0,212,255,0.3);
+  box-shadow: 0 0 18px rgba(0,212,255,0.08);
+}
+.qr-card-mobile-label { display: none; }
+.qr-box {
+  flex-shrink: 0;
+  width: 68px; height: 68px;
+  background: #02030d;
+  border-radius: 10px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0,212,255,0.2);
+  box-shadow: 0 0 14px rgba(0,212,255,0.1);
+}
+.qr-box svg { width: 100%; height: 100%; }
+.qr-info { flex: 1; min-width: 0; }
+.qr-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.qr-url {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--sky);
+  word-break: break-all;
+  line-height: 1.3;
+}
+.qr-sub {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+ 
+/* Social links */
+.socials {
+  display: flex;
+  gap: 8px;
+  position: relative;
+  z-index: 2;
+}
+.social-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.63rem;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: all 0.22s;
+  cursor: pointer;
+}
+.social-btn:hover {
+  background: rgba(0,212,255,0.08);
+  border-color: rgba(0,212,255,0.25);
+  color: var(--sky);
+  transform: translateY(-2px);
+}
+.social-btn svg { flex-shrink: 0; }
+ 
+/* ─── Right Panel / Chat ─── */
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+ 
+/* Top gradient bar */
+.chat-border-glow {
+  height: 2px;
+  background: linear-gradient(90deg, #00d4ff, #7dd3fc, #fbbf24, #a78bfa, #00d4ff);
+  background-size: 300% 100%;
+  animation: borderFlow 4s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes borderFlow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 300% 0%; }
+}
+ 
+/* Chat header */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(7,11,26,0.8);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+}
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-avatar {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00d4ff, #7dd3fc);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem; font-weight: 800;
+  color: #02030d;
+  box-shadow: 0 0 14px rgba(0,212,255,0.3);
+}
+.chat-header-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--text);
+}
+.chat-header-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem; color: var(--muted);
+  display: flex; align-items: center; gap: 5px;
+  letter-spacing: 0.04em;
+}
+.online-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #4ade80;
+  animation: statusGlow 2s infinite;
+}
+.chat-header-actions { display: flex; gap: 6px; }
+.hdr-btn {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+}
+.hdr-btn:hover {
+  background: rgba(0,212,255,0.08);
+  border-color: rgba(0,212,255,0.2);
+  color: var(--sky);
+}
+/* Mode toggle pill */
+.mode-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 11px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem; color: var(--muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.25s; height: 28px;
+  user-select: none;
+}
+.mode-pill.voice { border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.07); color: var(--sky); }
+.mode-pill.text  { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.07); color: var(--violet); }
+.mode-pill.speaking { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.07); color: var(--amber); animation: speakPulse 1.2s ease-in-out infinite; }
+@keyframes speakPulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+ 
+/* Messages area */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.2); border-radius: 4px; }
+ 
+/* Message rows */
+.msg-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  animation: msgIn 0.25s ease both;
+}
+.msg-row--user { flex-direction: row-reverse; }
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+ 
+.msg-mini-avatar {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00d4ff, #7dd3fc);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 0.55rem; font-weight: 800;
+  color: #02030d; flex-shrink: 0;
+}
+.bubble {
+  max-width: 75%;
+  padding: 11px 15px;
+  border-radius: 18px;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+.bubble--user {
+  background: linear-gradient(135deg, rgba(0,212,255,0.14), rgba(125,211,252,0.1));
+  border: 1px solid rgba(0,212,255,0.2);
+  color: var(--text);
+  border-bottom-right-radius: 4px;
+}
+.bubble--ai {
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: #cbd5e1;
+  border-bottom-left-radius: 4px;
+}
+.bubble--ai strong { color: var(--sky); }
+.bubble--ai code {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  background: rgba(0,212,255,0.1);
+  border: 1px solid rgba(0,212,255,0.15);
+  padding: 1px 5px; border-radius: 4px;
+  color: var(--sky);
+}
+.bubble--error {
+  background: rgba(244,63,94,0.07);
+  border: 1px solid rgba(244,63,94,0.2);
+  color: #fda4af; font-size: 0.82rem;
+  max-width: 88%;
+  border-radius: 14px;
+}
+.msg-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.57rem;
+  color: var(--muted);
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+.msg-time--user { text-align: right; }
+ 
+/* Typing dots */
+.typing-dots { display: flex; align-items: center; gap: 5px; padding: 4px 0; }
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sky);
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce {
+  0%,80%,100% { transform: scale(0.65); opacity: 0.3; }
+  40%          { transform: scale(1.1); opacity: 1; }
+}
+ 
+/* Chips */
+.chips-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.chip {
+  padding: 5px 13px;
+  background: rgba(0,212,255,0.05);
+  border: 1px solid rgba(0,212,255,0.18);
+  border-radius: 100px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.71rem; font-weight: 600;
+  color: var(--sky); cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.chip:hover {
+  background: rgba(0,212,255,0.14);
+  border-color: rgba(0,212,255,0.35);
+  transform: translateY(-1px);
+}
+ 
+/* Smart suggestions */
+.suggestions-row { display: flex; flex-wrap: wrap; gap: 6px; animation: msgIn 0.2s ease both; }
+ 
+/* Input row */
+.chat-input-area {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border2);
+  background: rgba(4,6,16,0.6);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+}
+.input-row { display: flex; align-items: flex-end; gap: 9px; }
+.mic-btn {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: all 0.22s;
+}
+.mic-btn:hover { background: rgba(0,212,255,0.08); border-color: rgba(0,212,255,0.25); color: var(--sky); }
+.mic-btn.listening {
+  background: rgba(244,63,94,0.1); border-color: rgba(244,63,94,0.4); color: var(--rose);
+  animation: micPulse 1s ease-in-out infinite;
+}
+@keyframes micPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(244,63,94,0.4); }
+  70%  { box-shadow: 0 0 0 8px rgba(244,63,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); }
+}
+.chat-textarea {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  resize: none; outline: none;
+  min-height: 42px; max-height: 120px;
+  line-height: 1.55; transition: border-color 0.22s, box-shadow 0.22s;
+}
+.chat-textarea:focus {
+  border-color: rgba(0,212,255,0.28);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.06);
+}
+.chat-textarea::placeholder { color: #2d3f5a; }
+.send-btn {
+  width: 42px; height: 42px;
+  border-radius: 12px; border: none;
+  background: linear-gradient(135deg, #00d4ff, #0099bb);
+  color: #02030d;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; transition: all 0.22s;
+  box-shadow: 0 4px 14px rgba(0,212,255,0.25);
+}
+.send-btn:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(0,212,255,0.4); }
+.send-btn:active { transform: scale(0.94); }
+ 
+/* input hint */
+.input-hint {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 9px;
+  font-family: 'DM Mono', monospace; font-size: 0.6rem;
+  color: #1e2a45; letter-spacing: 0.06em;
+}
+ 
+/* ─── Toast ─── */
+.toast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(10,15,34,0.96);
+  border: 1px solid rgba(139,92,246,0.3);
+  color: var(--text);
+  font-family: 'DM Mono', monospace; font-size: 0.72rem;
+  padding: 8px 20px; border-radius: 100px;
+  opacity: 0; transition: all 0.28s; z-index: 9999;
+  white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+ 
+/* ─── Mobile ─── */
+@media (max-width: 700px) {
+  html, body { overflow: hidden; }
+  .page { flex-direction: column; }
+  .left-panel {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--border2);
+    background: rgba(7,11,26,0.95);
+    overflow-x: auto;
+  }
+  .left-panel::before { display: none; }
+  .candy-wrap { width: 54px; height: 66px; flex-shrink: 0; animation: none; }
+  .candy-ring { display: none; }
+  .identity { text-align: left; white-space: nowrap; }
+  .identity-name { font-size: 1rem; }
+  .identity-role { font-size: 0.58rem; }
+  .identity-tags { justify-content: flex-start; }
+  .tag { font-size: 0.58rem; padding: 3px 8px; }
+  .status-chip { font-size: 0.58rem; padding: 4px 10px; }
+  .socials { display: none; }
+  /* QR card — compact horizontal strip on mobile */
+  .qr-card {
+    flex-shrink: 0;
+    padding: 8px 10px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+  .qr-box {
+    width: 46px; height: 46px;
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .qr-info { display: none; }
+  .qr-card-mobile-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+  }
+  .right-panel { flex: 1; overflow: hidden; }
+  .bubble { max-width: 88%; font-size: 0.84rem; }
+  .chat-messages { padding: 14px 14px 10px; }
+  .chat-header { padding: 10px 14px; }
+  .chat-input-area { padding: 10px 14px; }
+}
+</style>
 </head>
 <body>
-
-<canvas id="stars"></canvas>
-<div class="grid-overlay"></div>
-
-<!-- Ambient orbs -->
-<div class="chat-ambient">
-  <div class="ca-orb ca-orb--1"></div>
-  <div class="ca-orb ca-orb--2"></div>
-  <div class="ca-orb ca-orb--3"></div>
-</div>
-
-<div class="app" id="app">
-
-  <!-- ════════ FULL-SCREEN CHAT ════════ -->
-  <main class="chat">
-
-    <!-- Header -->
-    <header class="chat-header">
-
-      <!-- Candy branding -->
-      <div class="chat-header__brand">
-        <div class="brand-orb">
-          <svg class="brand-orb__ring" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(0,212,255,0.35)" stroke-width="1.5" stroke-dasharray="6 4"/>
-            <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(139,92,246,0.25)" stroke-width="1" stroke-dasharray="3 6"/>
-          </svg>
-          <div class="brand-orb__inner">C</div>
-          <div class="brand-orb__pulse"></div>
-        </div>
-        <div class="brand-info">
-          <div class="brand-name">Candy <span class="brand-version">v2</span></div>
-          <div class="brand-sub"><span class="status-dot"></span>Pavan's AI assistant · always on</div>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="chat-header__actions">
-        <button class="hdr-btn" id="voiceToggle" title="Toggle voice" aria-label="Toggle voice">
-          <i class="fas fa-volume-up"></i>
-        </button>
-        <button class="hdr-btn" id="clearBtn" title="New chat" aria-label="New chat">
-          <i class="fas fa-pen-to-square"></i>
-        </button>
-        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" rel="noopener noreferrer" class="hdr-btn" title="Visit Portfolio">
-          <i class="fas fa-external-link-alt"></i>
-        </a>
-      </div>
-    </header>
-
-    <!-- Messages -->
-    <div class="messages" id="messages" role="log" aria-live="polite"></div>
-
-    <!-- Input -->
-    <div class="input-wrap">
-      <div class="suggestions-strip" id="suggestStrip"></div>
-
-      <div class="input-box" id="inputBox">
-        <button class="mic-btn" id="micBtn" title="Speak" aria-label="Voice input">
-          <i class="fas fa-microphone"></i>
-        </button>
-        <textarea class="input-field" id="inputField"
-          placeholder="Ask anything about Pavan…" rows="1" maxlength="500" aria-label="Message input"></textarea>
-        <div class="input-right">
-          <span class="char-count" id="charCount">500</span>
-          <button class="send-btn" id="sendBtn" aria-label="Send message">
-            <i class="fas fa-paper-plane"></i>
-          </button>
-        </div>
-      </div>
-      <div class="input-footer">
-        <span class="input-hint">↩ send · shift+↩ newline</span>
-        <span id="voiceStatus" class="voice-status">🔊 Voice on</span>
+ 
+<!-- Star field -->
+<div class="stars" id="stars"></div>
+ 
+<div class="page">
+ 
+  <!-- ─── LEFT PANEL ─── -->
+  <aside class="left-panel" id="leftPanel">
+ 
+    <!-- Candy character -->
+    <div class="candy-wrap" id="candyChar">
+      <!-- Glow rings -->
+      <div class="candy-ring" style="width:160px;height:160px;--rd:3s;--rdelay:0s;"></div>
+      <div class="candy-ring" style="width:210px;height:210px;--rd:3.8s;--rdelay:0.6s;border-color:rgba(167,139,250,0.07);"></div>
+ 
+      <svg viewBox="0 0 90 110" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="45" cy="107" rx="22" ry="4" fill="rgba(0,0,0,0.12)"/>
+        <ellipse cx="45" cy="80" rx="22" ry="24" fill="#7dd3fc"/>
+        <ellipse cx="45" cy="76" rx="12" ry="14" fill="rgba(255,255,255,0.18)"/>
+        <ellipse cx="20" cy="78" rx="6" ry="10" fill="#7dd3fc" transform="rotate(-20 20 78)"/>
+        <ellipse cx="70" cy="78" rx="6" ry="10" fill="#7dd3fc" transform="rotate(20 70 78)"/>
+        <rect x="38" y="52" width="14" height="8" rx="4" fill="#93c5fd"/>
+        <circle cx="45" cy="42" r="26" fill="#bfdbfe"/>
+        <ellipse cx="36" cy="30" rx="8" ry="6" fill="rgba(255,255,255,0.35)" transform="rotate(-20 36 30)"/>
+        <circle cx="19" cy="42" r="7" fill="#93c5fd"/>
+        <circle cx="19" cy="42" r="4" fill="#bfdbfe"/>
+        <circle cx="71" cy="42" r="7" fill="#93c5fd"/>
+        <circle cx="71" cy="42" r="4" fill="#bfdbfe"/>
+        <g id="candyEyes">
+          <circle cx="36" cy="40" r="8" fill="#02030d"/>
+          <circle cx="54" cy="40" r="8" fill="#02030d"/>
+          <circle id="pL" cx="37" cy="41" r="4" fill="#1e3a5f"/>
+          <circle id="pR" cx="55" cy="41" r="4" fill="#1e3a5f"/>
+          <circle cx="38" cy="39" r="1.5" fill="#02030d"/>
+          <circle cx="56" cy="39" r="1.5" fill="#02030d"/>
+        </g>
+        <g id="candyBlink" style="display:none">
+          <rect x="28" y="37" width="16" height="6" rx="3" fill="#bfdbfe"/>
+          <rect x="46" y="37" width="16" height="6" rx="3" fill="#bfdbfe"/>
+        </g>
+        <g id="mouthHappy">
+          <path d="M36 52 Q45 60 54 52" stroke="#1e3a5f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </g>
+        <g id="mouthTalk" style="display:none">
+          <ellipse cx="45" cy="54" rx="6" ry="4" fill="#1e3a5f"/>
+        </g>
+        <g id="mouthListen" style="display:none">
+          <circle cx="45" cy="54" r="3" fill="none" stroke="#1e3a5f" stroke-width="2"/>
+        </g>
+        <ellipse cx="27" cy="50" rx="6" ry="4" fill="rgba(251,113,133,0.35)"/>
+        <ellipse cx="63" cy="50" rx="6" ry="4" fill="rgba(251,113,133,0.35)"/>
+        <line x1="45" y1="16" x2="45" y2="4" stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="45" cy="3" r="4" fill="#fbbf24"/>
+        <circle cx="45" cy="3" r="2" fill="#fff"/>
+      </svg>
+    </div>
+ 
+    <!-- Identity -->
+    <div class="identity">
+      <div class="identity-name">Pavan <span>Kalyan</span></div>
+      <div class="identity-role">MCA Student · Data Analytics</div>
+      <div class="identity-tags">
+        <span class="tag tag--cyan">Python</span>
+        <span class="tag tag--violet">Power BI</span>
+        <span class="tag tag--amber">Machine Learning</span>
+        <span class="tag tag--cyan">SQL</span>
+        <span class="tag tag--violet">Java</span>
       </div>
     </div>
-
+ 
+    <!-- Status -->
+    <div class="status-chip">
+      <span class="status-dot"></span>
+      Open to opportunities
+    </div>
+ 
+    <!-- QR Card -->
+    <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="qr-card" style="text-decoration:none;cursor:pointer;">
+      <div class="qr-box">
+        <!-- QR for kalyanfinity-portfolio.netlify.app -->
+        <svg viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+          <rect width="37" height="37" fill="#02030d"/>
+          <!-- Finder pattern TL -->
+          <rect x="1" y="1" width="7" height="7" fill="#00d4ff"/>
+          <rect x="2" y="2" width="5" height="5" fill="#02030d"/>
+          <rect x="3" y="3" width="3" height="3" fill="#00d4ff"/>
+          <!-- Finder pattern TR -->
+          <rect x="29" y="1" width="7" height="7" fill="#00d4ff"/>
+          <rect x="30" y="2" width="5" height="5" fill="#02030d"/>
+          <rect x="31" y="3" width="3" height="3" fill="#00d4ff"/>
+          <!-- Finder pattern BL -->
+          <rect x="1" y="29" width="7" height="7" fill="#00d4ff"/>
+          <rect x="2" y="30" width="5" height="5" fill="#02030d"/>
+          <rect x="3" y="31" width="3" height="3" fill="#00d4ff"/>
+          <!-- Data modules (representative pattern for the URL) -->
+          <rect x="9" y="1" width="1" height="1" fill="#00d4ff"/>
+          <rect x="11" y="1" width="1" height="1" fill="#00d4ff"/>
+          <rect x="13" y="1" width="2" height="1" fill="#00d4ff"/>
+          <rect x="17" y="1" width="1" height="1" fill="#00d4ff"/>
+          <rect x="19" y="1" width="1" height="1" fill="#00d4ff"/>
+          <rect x="21" y="1" width="2" height="1" fill="#00d4ff"/>
+          <rect x="25" y="1" width="1" height="1" fill="#00d4ff"/>
+          <rect x="27" y="1" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="2" width="2" height="1" fill="#00d4ff"/>
+          <rect x="13" y="2" width="1" height="1" fill="#00d4ff"/>
+          <rect x="16" y="2" width="2" height="1" fill="#00d4ff"/>
+          <rect x="20" y="2" width="1" height="1" fill="#00d4ff"/>
+          <rect x="23" y="2" width="2" height="1" fill="#00d4ff"/>
+          <rect x="27" y="2" width="1" height="1" fill="#00d4ff"/>
+          <rect x="10" y="3" width="1" height="1" fill="#00d4ff"/>
+          <rect x="12" y="3" width="2" height="1" fill="#00d4ff"/>
+          <rect x="15" y="3" width="1" height="1" fill="#00d4ff"/>
+          <rect x="17" y="3" width="2" height="1" fill="#00d4ff"/>
+          <rect x="21" y="3" width="1" height="1" fill="#00d4ff"/>
+          <rect x="24" y="3" width="2" height="1" fill="#00d4ff"/>
+          <rect x="9" y="4" width="1" height="1" fill="#00d4ff"/>
+          <rect x="11" y="4" width="2" height="1" fill="#00d4ff"/>
+          <rect x="14" y="4" width="1" height="1" fill="#00d4ff"/>
+          <rect x="16" y="4" width="3" height="1" fill="#00d4ff"/>
+          <rect x="20" y="4" width="2" height="1" fill="#00d4ff"/>
+          <rect x="23" y="4" width="1" height="1" fill="#00d4ff"/>
+          <rect x="25" y="4" width="2" height="1" fill="#00d4ff"/>
+          <rect x="10" y="5" width="3" height="1" fill="#00d4ff"/>
+          <rect x="14" y="5" width="2" height="1" fill="#00d4ff"/>
+          <rect x="18" y="5" width="1" height="1" fill="#00d4ff"/>
+          <rect x="21" y="5" width="2" height="1" fill="#00d4ff"/>
+          <rect x="24" y="5" width="1" height="1" fill="#00d4ff"/>
+          <rect x="26" y="5" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="6" width="1" height="1" fill="#00d4ff"/>
+          <rect x="12" y="6" width="1" height="1" fill="#00d4ff"/>
+          <rect x="15" y="6" width="2" height="1" fill="#00d4ff"/>
+          <rect x="19" y="6" width="2" height="1" fill="#00d4ff"/>
+          <rect x="22" y="6" width="1" height="1" fill="#00d4ff"/>
+          <rect x="25" y="6" width="2" height="1" fill="#00d4ff"/>
+          <rect x="1" y="9" width="1" height="1" fill="#00d4ff"/>
+          <rect x="3" y="9" width="2" height="1" fill="#00d4ff"/>
+          <rect x="6" y="9" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="9" width="2" height="1" fill="#00d4ff"/>
+          <rect x="12" y="9" width="1" height="1" fill="#00d4ff"/>
+          <rect x="14" y="9" width="3" height="1" fill="#00d4ff"/>
+          <rect x="18" y="9" width="2" height="1" fill="#00d4ff"/>
+          <rect x="21" y="9" width="1" height="1" fill="#00d4ff"/>
+          <rect x="23" y="9" width="2" height="1" fill="#00d4ff"/>
+          <rect x="26" y="9" width="1" height="1" fill="#00d4ff"/>
+          <rect x="28" y="9" width="1" height="1" fill="#00d4ff"/>
+          <rect x="31" y="9" width="2" height="1" fill="#00d4ff"/>
+          <rect x="35" y="9" width="1" height="1" fill="#00d4ff"/>
+          <rect x="1" y="10" width="2" height="1" fill="#00d4ff"/>
+          <rect x="4" y="10" width="1" height="1" fill="#00d4ff"/>
+          <rect x="7" y="10" width="2" height="1" fill="#00d4ff"/>
+          <rect x="10" y="10" width="1" height="1" fill="#00d4ff"/>
+          <rect x="13" y="10" width="2" height="1" fill="#00d4ff"/>
+          <rect x="17" y="10" width="1" height="1" fill="#00d4ff"/>
+          <rect x="20" y="10" width="2" height="1" fill="#00d4ff"/>
+          <rect x="24" y="10" width="1" height="1" fill="#00d4ff"/>
+          <rect x="27" y="10" width="2" height="1" fill="#00d4ff"/>
+          <rect x="30" y="10" width="1" height="1" fill="#00d4ff"/>
+          <rect x="32" y="10" width="2" height="1" fill="#00d4ff"/>
+          <rect x="36" y="10" width="1" height="1" fill="#00d4ff"/>
+          <!-- More data pattern rows -->
+          <rect x="2" y="11" width="1" height="1" fill="#00d4ff"/>
+          <rect x="5" y="11" width="2" height="1" fill="#00d4ff"/>
+          <rect x="8" y="11" width="1" height="1" fill="#00d4ff"/>
+          <rect x="11" y="11" width="2" height="1" fill="#00d4ff"/>
+          <rect x="15" y="11" width="1" height="1" fill="#00d4ff"/>
+          <rect x="18" y="11" width="2" height="1" fill="#00d4ff"/>
+          <rect x="22" y="11" width="1" height="1" fill="#00d4ff"/>
+          <rect x="25" y="11" width="2" height="1" fill="#00d4ff"/>
+          <rect x="29" y="11" width="1" height="1" fill="#00d4ff"/>
+          <rect x="31" y="11" width="1" height="1" fill="#00d4ff"/>
+          <rect x="33" y="11" width="2" height="1" fill="#00d4ff"/>
+          <rect x="1" y="12" width="3" height="1" fill="#00d4ff"/>
+          <rect x="6" y="12" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="12" width="2" height="1" fill="#00d4ff"/>
+          <rect x="13" y="12" width="1" height="1" fill="#00d4ff"/>
+          <rect x="16" y="12" width="2" height="1" fill="#00d4ff"/>
+          <rect x="20" y="12" width="1" height="1" fill="#00d4ff"/>
+          <rect x="23" y="12" width="2" height="1" fill="#00d4ff"/>
+          <rect x="26" y="12" width="1" height="1" fill="#00d4ff"/>
+          <rect x="28" y="12" width="2" height="1" fill="#00d4ff"/>
+          <rect x="32" y="12" width="1" height="1" fill="#00d4ff"/>
+          <rect x="35" y="12" width="2" height="1" fill="#00d4ff"/>
+          <!-- Center rows data -->
+          <rect x="1" y="13" width="1" height="1" fill="#00d4ff"/>
+          <rect x="4" y="13" width="2" height="1" fill="#00d4ff"/>
+          <rect x="7" y="13" width="1" height="1" fill="#00d4ff"/>
+          <rect x="10" y="13" width="3" height="1" fill="#00d4ff"/>
+          <rect x="14" y="13" width="1" height="1" fill="#00d4ff"/>
+          <rect x="17" y="13" width="2" height="1" fill="#00d4ff"/>
+          <rect x="21" y="13" width="1" height="1" fill="#00d4ff"/>
+          <rect x="24" y="13" width="2" height="1" fill="#00d4ff"/>
+          <rect x="27" y="13" width="1" height="1" fill="#00d4ff"/>
+          <rect x="29" y="13" width="3" height="1" fill="#00d4ff"/>
+          <rect x="33" y="13" width="1" height="1" fill="#00d4ff"/>
+          <rect x="36" y="13" width="1" height="1" fill="#00d4ff"/>
+          <rect x="2" y="14" width="2" height="1" fill="#00d4ff"/>
+          <rect x="5" y="14" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="14" width="2" height="1" fill="#00d4ff"/>
+          <rect x="12" y="14" width="1" height="1" fill="#00d4ff"/>
+          <rect x="15" y="14" width="3" height="1" fill="#00d4ff"/>
+          <rect x="19" y="14" width="1" height="1" fill="#00d4ff"/>
+          <rect x="22" y="14" width="2" height="1" fill="#00d4ff"/>
+          <rect x="25" y="14" width="1" height="1" fill="#00d4ff"/>
+          <rect x="28" y="14" width="2" height="1" fill="#00d4ff"/>
+          <rect x="31" y="14" width="1" height="1" fill="#00d4ff"/>
+          <rect x="34" y="14" width="2" height="1" fill="#00d4ff"/>
+          <rect x="1" y="15" width="1" height="1" fill="#00d4ff"/>
+          <rect x="3" y="15" width="3" height="1" fill="#00d4ff"/>
+          <rect x="7" y="15" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="15" width="2" height="1" fill="#00d4ff"/>
+          <rect x="13" y="15" width="2" height="1" fill="#00d4ff"/>
+          <rect x="16" y="15" width="1" height="1" fill="#00d4ff"/>
+          <rect x="18" y="15" width="2" height="1" fill="#00d4ff"/>
+          <rect x="21" y="15" width="3" height="1" fill="#00d4ff"/>
+          <rect x="26" y="15" width="2" height="1" fill="#00d4ff"/>
+          <rect x="29" y="15" width="1" height="1" fill="#00d4ff"/>
+          <rect x="32" y="15" width="3" height="1" fill="#00d4ff"/>
+          <rect x="36" y="15" width="1" height="1" fill="#00d4ff"/>
+          <!-- Timing pattern -->
+          <rect x="8" y="6" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="10" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="12" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="14" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="16" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="18" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="20" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="22" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="24" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="26" width="1" height="1" fill="#00d4ff"/>
+          <rect x="8" y="28" width="1" height="1" fill="#00d4ff"/>
+          <rect x="6" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="10" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="12" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="14" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="16" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="18" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="20" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="22" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="24" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="26" y="8" width="1" height="1" fill="#00d4ff"/>
+          <rect x="28" y="8" width="1" height="1" fill="#00d4ff"/>
+          <!-- Bottom data rows -->
+          <rect x="1" y="27" width="2" height="1" fill="#00d4ff"/>
+          <rect x="4" y="27" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="27" width="2" height="1" fill="#00d4ff"/>
+          <rect x="13" y="27" width="1" height="1" fill="#00d4ff"/>
+          <rect x="16" y="27" width="2" height="1" fill="#00d4ff"/>
+          <rect x="20" y="27" width="1" height="1" fill="#00d4ff"/>
+          <rect x="23" y="27" width="2" height="1" fill="#00d4ff"/>
+          <rect x="27" y="27" width="1" height="1" fill="#00d4ff"/>
+          <rect x="29" y="27" width="1" height="1" fill="#00d4ff"/>
+          <rect x="31" y="27" width="2" height="1" fill="#00d4ff"/>
+          <rect x="35" y="27" width="1" height="1" fill="#00d4ff"/>
+          <rect x="1" y="28" width="1" height="1" fill="#00d4ff"/>
+          <rect x="3" y="28" width="2" height="1" fill="#00d4ff"/>
+          <rect x="6" y="28" width="1" height="1" fill="#00d4ff"/>
+          <rect x="10" y="28" width="1" height="1" fill="#00d4ff"/>
+          <rect x="14" y="28" width="2" height="1" fill="#00d4ff"/>
+          <rect x="17" y="28" width="1" height="1" fill="#00d4ff"/>
+          <rect x="19" y="28" width="2" height="1" fill="#00d4ff"/>
+          <rect x="22" y="28" width="1" height="1" fill="#00d4ff"/>
+          <rect x="24" y="28" width="2" height="1" fill="#00d4ff"/>
+          <rect x="28" y="28" width="2" height="1" fill="#00d4ff"/>
+          <rect x="32" y="28" width="1" height="1" fill="#00d4ff"/>
+          <rect x="34" y="28" width="2" height="1" fill="#00d4ff"/>
+          <!-- bottom rows near finder BL -->
+          <rect x="9" y="29" width="1" height="1" fill="#00d4ff"/>
+          <rect x="11" y="29" width="2" height="1" fill="#00d4ff"/>
+          <rect x="15" y="29" width="1" height="1" fill="#00d4ff"/>
+          <rect x="18" y="29" width="2" height="1" fill="#00d4ff"/>
+          <rect x="21" y="29" width="1" height="1" fill="#00d4ff"/>
+          <rect x="23" y="29" width="3" height="1" fill="#00d4ff"/>
+          <rect x="27" y="29" width="1" height="1" fill="#00d4ff"/>
+          <rect x="29" y="29" width="2" height="1" fill="#00d4ff"/>
+          <rect x="33" y="29" width="1" height="1" fill="#00d4ff"/>
+          <rect x="36" y="29" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="30" width="2" height="1" fill="#00d4ff"/>
+          <rect x="13" y="30" width="1" height="1" fill="#00d4ff"/>
+          <rect x="16" y="30" width="2" height="1" fill="#00d4ff"/>
+          <rect x="20" y="30" width="1" height="1" fill="#00d4ff"/>
+          <rect x="22" y="30" width="2" height="1" fill="#00d4ff"/>
+          <rect x="26" y="30" width="1" height="1" fill="#00d4ff"/>
+          <rect x="28" y="30" width="3" height="1" fill="#00d4ff"/>
+          <rect x="32" y="30" width="2" height="1" fill="#00d4ff"/>
+          <rect x="35" y="30" width="2" height="1" fill="#00d4ff"/>
+          <rect x="9" y="31" width="1" height="1" fill="#00d4ff"/>
+          <rect x="12" y="31" width="2" height="1" fill="#00d4ff"/>
+          <rect x="15" y="31" width="1" height="1" fill="#00d4ff"/>
+          <rect x="17" y="31" width="3" height="1" fill="#00d4ff"/>
+          <rect x="21" y="31" width="1" height="1" fill="#00d4ff"/>
+          <rect x="24" y="31" width="2" height="1" fill="#00d4ff"/>
+          <rect x="27" y="31" width="1" height="1" fill="#00d4ff"/>
+          <rect x="29" y="31" width="2" height="1" fill="#00d4ff"/>
+          <rect x="33" y="31" width="1" height="1" fill="#00d4ff"/>
+          <rect x="10" y="32" width="2" height="1" fill="#00d4ff"/>
+          <rect x="14" y="32" width="1" height="1" fill="#00d4ff"/>
+          <rect x="16" y="32" width="2" height="1" fill="#00d4ff"/>
+          <rect x="20" y="32" width="2" height="1" fill="#00d4ff"/>
+          <rect x="23" y="32" width="1" height="1" fill="#00d4ff"/>
+          <rect x="25" y="32" width="2" height="1" fill="#00d4ff"/>
+          <rect x="28" y="32" width="1" height="1" fill="#00d4ff"/>
+          <rect x="30" y="32" width="3" height="1" fill="#00d4ff"/>
+          <rect x="34" y="32" width="2" height="1" fill="#00d4ff"/>
+          <rect x="9" y="33" width="1" height="1" fill="#00d4ff"/>
+          <rect x="11" y="33" width="3" height="1" fill="#00d4ff"/>
+          <rect x="15" y="33" width="2" height="1" fill="#00d4ff"/>
+          <rect x="19" y="33" width="1" height="1" fill="#00d4ff"/>
+          <rect x="21" y="33" width="2" height="1" fill="#00d4ff"/>
+          <rect x="24" y="33" width="1" height="1" fill="#00d4ff"/>
+          <rect x="26" y="33" width="3" height="1" fill="#00d4ff"/>
+          <rect x="30" y="33" width="1" height="1" fill="#00d4ff"/>
+          <rect x="33" y="33" width="1" height="1" fill="#00d4ff"/>
+          <rect x="35" y="33" width="2" height="1" fill="#00d4ff"/>
+          <rect x="9" y="34" width="2" height="1" fill="#00d4ff"/>
+          <rect x="13" y="34" width="1" height="1" fill="#00d4ff"/>
+          <rect x="15" y="34" width="1" height="1" fill="#00d4ff"/>
+          <rect x="18" y="34" width="2" height="1" fill="#00d4ff"/>
+          <rect x="22" y="34" width="1" height="1" fill="#00d4ff"/>
+          <rect x="25" y="34" width="2" height="1" fill="#00d4ff"/>
+          <rect x="29" y="34" width="2" height="1" fill="#00d4ff"/>
+          <rect x="32" y="34" width="1" height="1" fill="#00d4ff"/>
+          <rect x="34" y="34" width="1" height="1" fill="#00d4ff"/>
+          <rect x="36" y="34" width="1" height="1" fill="#00d4ff"/>
+          <rect x="10" y="35" width="1" height="1" fill="#00d4ff"/>
+          <rect x="12" y="35" width="2" height="1" fill="#00d4ff"/>
+          <rect x="16" y="35" width="1" height="1" fill="#00d4ff"/>
+          <rect x="19" y="35" width="1" height="1" fill="#00d4ff"/>
+          <rect x="21" y="35" width="2" height="1" fill="#00d4ff"/>
+          <rect x="24" y="35" width="3" height="1" fill="#00d4ff"/>
+          <rect x="28" y="35" width="1" height="1" fill="#00d4ff"/>
+          <rect x="31" y="35" width="2" height="1" fill="#00d4ff"/>
+          <rect x="35" y="35" width="1" height="1" fill="#00d4ff"/>
+          <rect x="9" y="36" width="3" height="1" fill="#00d4ff"/>
+          <rect x="13" y="36" width="2" height="1" fill="#00d4ff"/>
+          <rect x="17" y="36" width="1" height="1" fill="#00d4ff"/>
+          <rect x="20" y="36" width="2" height="1" fill="#00d4ff"/>
+          <rect x="23" y="36" width="1" height="1" fill="#00d4ff"/>
+          <rect x="26" y="36" width="2" height="1" fill="#00d4ff"/>
+          <rect x="29" y="36" width="1" height="1" fill="#00d4ff"/>
+          <rect x="32" y="36" width="1" height="1" fill="#00d4ff"/>
+          <rect x="34" y="36" width="3" height="1" fill="#00d4ff"/>
+        </svg>
+      </div>
+      <div class="qr-info">
+        <div class="qr-label">Scan to visit portfolio</div>
+        <div class="qr-url">kalyanfinity-portfolio<br>.netlify.app</div>
+        <div class="qr-sub">Full projects &amp; resume</div>
+      </div>
+      <div class="qr-card-mobile-label">
+        <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#64748b;letter-spacing:0.08em;text-transform:uppercase;">Portfolio</span>
+        <span style="font-family:'Syne',sans-serif;font-size:0.65rem;font-weight:700;color:#7dd3fc;line-height:1.2;">Tap to visit</span>
+      </div>
+    </a>
+ 
+    <!-- Socials -->
+    <div class="socials">
+      <a href="https://github.com/kalyan-91" target="_blank" class="social-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        GitHub
+      </a>
+      <a href="https://linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" class="social-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        LinkedIn
+      </a>
+      <a href="mailto:daroorpavankalyan@gmail.com" class="social-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        Email
+      </a>
+    </div>
+ 
+  </aside>
+ 
+  <!-- ─── RIGHT PANEL / CHAT ─── -->
+  <main class="right-panel">
+    <div class="chat-border-glow"></div>
+ 
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-avatar">C</div>
+        <div>
+          <div class="chat-header-name">Candy</div>
+          <div class="chat-header-sub">
+            <span class="online-dot"></span>
+            Pavan's AI · Always here
+          </div>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <div id="modePill" class="mode-pill voice" title="Toggle voice/text mode">
+          <svg id="modeIconVoice" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <svg id="modeIconText" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:none">
+            <line x1="17" y1="10" x2="3" y2="10"/>
+            <line x1="21" y1="6" x2="3" y2="6"/>
+            <line x1="21" y1="14" x2="3" y2="14"/>
+            <line x1="17" y1="18" x2="3" y2="18"/>
+          </svg>
+          <span id="modePillLabel">Voice</span>
+        </div>
+        <button id="clearBtn" class="hdr-btn" title="Clear chat">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 .49-3.3"/>
+          </svg>
+        </button>
+        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="hdr-btn" title="Visit portfolio">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+ 
+    <div class="chat-messages" id="messages"></div>
+ 
+    <div class="chat-input-area">
+      <div class="input-row">
+        <button id="micBtn" class="mic-btn" title="Click to speak">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <textarea id="chatInput" class="chat-textarea" placeholder="Ask me about Pavan..." rows="1" maxlength="500"></textarea>
+        <button id="sendBtn" class="send-btn" aria-label="Send">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-hint">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        Press Enter to send &nbsp;·&nbsp; Shift+Enter for new line
+      </div>
+    </div>
   </main>
+ 
 </div>
-
-<div class="toast-wrap" id="toastWrap" aria-live="assertive"></div>
-<script src="script.js"></script>
+ 
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+ 
+<script>
+'use strict';
+ 
+// ── Config ──
+const GROQ_MODEL    = 'llama-3.3-70b-versatile';
+const GROQ_ENDPOINT = 'https://pk-groq-proxy.daroorpavankalyan.workers.dev';
+ 
+const SYSTEM_PROMPT = `You are Candy — a sharp, warm, and genuinely helpful AI assistant living inside Pavan Kalyan's portfolio website. You have a real personality: curious, friendly, professionally confident, and occasionally witty. You are not a boring FAQ bot.
+ 
+Your job is to help visitors learn about Pavan — but do it like a real conversation, not a bullet-point dump. Be natural. Ask follow-up questions when relevant. Show genuine enthusiasm about his work. Vary your response style — sometimes short and direct, sometimes more detailed when the topic deserves it.
+ 
+You can make your own decisions about how to respond. If someone says hi, just say hi back warmly — do not dump his entire resume at them. If someone asks something vague, ask what they mean. If someone seems like a recruiter, be a little more professional. If they seem like a fellow student, be casual and relatable.
+ 
+Never use emojis in your responses. Keep the tone clean, professional, and conversational.
+ 
+== FACTS ABOUT PAVAN ==
+ 
+Personal:
+- Full name: D. Pavan Kalyan
+- Role: MCA Student and Data Analytics Aspirant
+- Location: Kurnool, Andhra Pradesh, India
+- Email: daroorpavankalyan@gmail.com
+- LinkedIn: linkedin.com/in/daroor-pavan-kalyan-370277253/
+- GitHub: github.com/kalyan-91
+- WhatsApp: +91 89199 44203
+- Portfolio: kalyanfinity-portfolio.netlify.app
+- Open to: internships and entry-level roles in Data Analytics and Data Science
+ 
+Education:
+- MCA — JNTUA, Anantapur (2025 to 2027, currently pursuing). Focus: Data Analytics, Database Management, Business Intelligence
+- BSc MSCS (Maths, Stats, Computer Science) — St. Joseph's Degree College, Rayalaseema University, Kurnool (2021 to 2024, completed)
+ 
+Internship:
+- Data Science Intern at Interncall, Kurnool (Jan to Apr 2024)
+- Applied Python for data science tasks including data cleaning, EDA, and building ML models
+- Stack: Python, Pandas, Scikit-learn, Matplotlib, Seaborn
+ 
+Skills: SQL 90%, Excel 88%, Python 85%, Java 70%, Power BI 85%, Pandas 85%, NumPy 80%, Scikit-learn 75%, TensorFlow 70%, HTML 85%, CSS 80%, JavaScript 70%
+ 
+Projects:
+1. SPARMS — Java Swing desktop app for academic result management. Role-based dashboards for Admin, Faculty, and Students. Stack: Java Swing, MySQL, JDBC, Maven, iText, ZXing.
+2. InventoryIQ — Streamlit inventory and analytics dashboard. Live: inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app
+3. Digit Recognizer — CNN app for handwritten digits. Live: hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app
+4. Netflix Dashboard — Power BI dashboard exploring 5000+ titles.
+5. Employee Attrition Analysis — ML classification + Power BI dashboard.
+6. Zomato Analysis — Restaurant rating analysis and prediction models.
+ 
+== RESPONSE RULES ==
+- Never use emojis.
+- Vary your openers. Do not start every message the same way.
+- Keep responses under 5 sentences unless detail is clearly wanted.
+- After 2 to 3 messages, naturally ask for the visitor's name and email so Pavan can follow up.
+- If a visitor seems like a recruiter, mention Pavan is actively looking for internships and entry-level Data Analyst roles.
+- If you do not know something, say so honestly and suggest reaching out directly.`;
+ 
+// ── State ──
+let chatHistory  = [];
+let voiceEnabled = true;
+let isListening  = false;
+let isSpeaking   = false;
+let recognition  = null;
+let currentUtter = null;
+let pendingSpeak = null;
+let voicesLoaded = false;
+ 
+// EmailJS
+const EMAILJS_SID = 'service_7qybkps';
+const EMAILJS_TID = 'template_9n1oham';
+const EMAILJS_KEY = '82Cq0BUQFsL50OZ6V';
+let emailReady = false;
+(function(){
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+  s.onload = () => { emailjs.init(EMAILJS_KEY); emailReady = true; };
+  document.head.appendChild(s);
+})();
+ 
+const visitorSession = {
+  questions: [],
+  startTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+  pageUrl: window.location.href,
+};
+ 
+// ── Voices ──
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.addEventListener('voiceschanged', () => {
+    voicesLoaded = true;
+    if (pendingSpeak) { speak(pendingSpeak); pendingSpeak = null; }
+  });
+}
+ 
+// ── Stars ──
+(function buildStars(){
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left  = Math.random() * 100 + '%';
+    s.style.top   = Math.random() * 100 + '%';
+    s.style.setProperty('--d',     (2 + Math.random() * 4) + 's');
+    s.style.setProperty('--delay', (Math.random() * 4) + 's');
+    c.appendChild(s);
+  }
+})();
+ 
+// ── DOM refs ──
+const messages   = document.getElementById('messages');
+const chatInput  = document.getElementById('chatInput');
+const sendBtn    = document.getElementById('sendBtn');
+const micBtn     = document.getElementById('micBtn');
+const clearBtn   = document.getElementById('clearBtn');
+const modePill   = document.getElementById('modePill');
+ 
+// ── Init ──
+window.addEventListener('DOMContentLoaded', () => {
+  setupRecognition();
+  startBlink();
+  startEyeFollow();
+  appendWelcome();
+ 
+  sendBtn.addEventListener('click', handleSubmit);
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); }
+  });
+  chatInput.addEventListener('input', () => autoResize(chatInput));
+  micBtn.addEventListener('click', () => isListening ? stopListening() : startListening());
+  clearBtn.addEventListener('click', () => {
+    chatHistory = [];
+    messages.innerHTML = '';
+    stopSpeaking();
+    appendWelcome();
+  });
+  modePill.addEventListener('click', () => {
+    voiceEnabled = !voiceEnabled;
+    if (!voiceEnabled) stopSpeaking();
+    updateModeUI();
+    showToast(voiceEnabled ? 'Voice mode on' : 'Text mode on');
+  });
+  messages.addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (chip) { chatInput.value = chip.dataset.q; handleSubmit(); }
+  });
+});
+ 
+// ── Speech recognition ──
+function setupRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-IN';
+  recognition.onstart  = () => { isListening = true;  micBtn.classList.add('listening');    setCandyState('listening'); };
+  recognition.onend    = () => { isListening = false; micBtn.classList.remove('listening'); setCandyState('idle'); };
+  recognition.onerror  = e  => { stopListening(); if (e.error === 'not-allowed') showToast('Microphone access denied'); };
+  recognition.onresult = e  => {
+    const t = Array.from(e.results).map(r => r[0].transcript).join('');
+    chatInput.value = t;
+    autoResize(chatInput);
+    if (e.results[e.results.length - 1].isFinal) {
+      setTimeout(() => handleSubmit(), 400);
+    }
+  };
+}
+function startListening() {
+  if (!recognition) { showToast('Voice input not supported in this browser'); return; }
+  stopSpeaking();
+  try { recognition.start(); } catch(e) {}
+}
+function stopListening() {
+  if (recognition && isListening) recognition.stop();
+  isListening = false;
+  micBtn.classList.remove('listening');
+}
+ 
+// ── Speech synthesis ──
+function speak(text) {
+  if (!voiceEnabled || !window.speechSynthesis) return;
+  const clean = text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  if (!clean) return;
+  const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) { pendingSpeak = text; return; }
+  stopSpeaking();
+  currentUtter = new SpeechSynthesisUtterance(clean);
+  currentUtter.lang = 'en-US'; currentUtter.rate = 1.0; currentUtter.pitch = 1.0;
+  const preferred = voices.find(v => v.name.includes('Google US English'))
+    || voices.find(v => v.lang === 'en-US' && !v.localService)
+    || voices.find(v => v.lang.startsWith('en-'));
+  if (preferred) currentUtter.voice = preferred;
+  currentUtter.onstart = () => { isSpeaking = true;  modePill.classList.add('speaking');    setCandyState('talking'); };
+  currentUtter.onend   = () => { isSpeaking = false; modePill.classList.remove('speaking'); setCandyState('idle'); };
+  currentUtter.onerror = () => { isSpeaking = false; modePill.classList.remove('speaking'); setCandyState('idle'); };
+  setTimeout(() => window.speechSynthesis.speak(currentUtter), 100);
+}
+function stopSpeaking() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  isSpeaking = false;
+  modePill.classList.remove('speaking');
+}
+ 
+// ── Mode UI ──
+function updateModeUI() {
+  const lbl = document.getElementById('modePillLabel');
+  const vi  = document.getElementById('modeIconVoice');
+  const ti  = document.getElementById('modeIconText');
+  if (voiceEnabled) {
+    modePill.classList.add('voice'); modePill.classList.remove('text');
+    if (lbl) lbl.textContent = 'Voice';
+    if (vi) vi.style.display = ''; if (ti) ti.style.display = 'none';
+    micBtn.style.display = 'flex';
+  } else {
+    modePill.classList.remove('voice'); modePill.classList.add('text');
+    if (lbl) lbl.textContent = 'Text';
+    if (vi) vi.style.display = 'none'; if (ti) ti.style.display = '';
+    micBtn.style.display = 'none';
+  }
+}
+ 
+// ── Welcome ──
+function appendWelcome() {
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Hey, night owl';
+  const chips = [
+    { l: 'Projects',   q: 'What projects has Pavan built?' },
+    { l: 'Skills',     q: "What are Pavan's strongest skills?" },
+    { l: 'Experience', q: "Tell me about Pavan's internship" },
+    { l: 'Hire Pavan', q: "I'm interested in hiring Pavan, how do I reach him?" },
+  ];
+  const chipsHTML = `<div class="chips-row">${chips.map(c => `<button class="chip" data-q="${c.q}">${c.l}</button>`).join('')}</div>`;
+  addMessage('ai', `${greet}! I am <strong>Candy</strong>, Pavan's personal AI. What would you like to know?${chipsHTML}`);
+}
+ 
+// ── Main send ──
+async function handleSubmit() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+  chatInput.value = ''; autoResize(chatInput);
+  stopListening();
+  addMessage('user', escHtml(text));
+  chatHistory.push({ role: 'user', content: text });
+  visitorSession.questions.push({ time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }), message: text });
+  if (visitorSession.questions.length % 3 === 0) sendReport();
+ 
+  const tid = addTyping();
+  try {
+    const res = await fetch(GROQ_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...chatHistory],
+        max_tokens: 600, temperature: 0.85, top_p: 0.9, stream: false,
+      }),
+    });
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error?.message || `HTTP ${res.status}`); }
+    const data  = await res.json();
+    const reply = data.choices?.[0]?.message?.content?.trim() || 'I got an empty response. Please try again.';
+    removeTyping(tid);
+    await typeMessage(formatReply(reply));
+    chatHistory.push({ role: 'assistant', content: reply });
+    addSuggestions(reply);
+    speak(reply);
+    if (!voiceEnabled) setCandyState('idle');
+    if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
+  } catch(err) {
+    removeTyping(tid);
+    addMessage('error', `Something went wrong: ${escHtml(err.message)}`);
+  }
+}
+ 
+// ── Message helpers ──
+function addMessage(role, html) {
+  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+  const row = document.createElement('div');
+  row.className = `msg-row msg-row--${role === 'user' ? 'user' : 'ai'}`;
+  if (role === 'user') {
+    row.innerHTML = `<div><div class="bubble bubble--user">${html}</div><div class="msg-time msg-time--user">${time}</div></div>`;
+  } else if (role === 'error') {
+    row.className = 'msg-row';
+    row.innerHTML = `<div class="bubble bubble--error">${html}</div>`;
+  } else {
+    row.innerHTML = `<div class="msg-mini-avatar">C</div><div><div class="bubble bubble--ai">${html}</div><div class="msg-time">${time}</div></div>`;
+  }
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+  return row;
+}
+ 
+function addTyping() {
+  const id = 'typ-' + Date.now();
+  const row = document.createElement('div');
+  row.id = id; row.className = 'msg-row';
+  row.innerHTML = `<div class="msg-mini-avatar">C</div><div class="bubble bubble--ai"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  messages.appendChild(row);
+  messages.scrollTop = messages.scrollHeight;
+  return id;
+}
+function removeTyping(id) { document.getElementById(id)?.remove(); }
+ 
+async function typeMessage(html) {
+  const time = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.innerHTML = `<div class="msg-mini-avatar">C</div><div><div class="bubble bubble--ai" id="tb"></div><div class="msg-time" id="tt"></div></div>`;
+  messages.appendChild(row);
+  const bbl = row.querySelector('#tb'); bbl.removeAttribute('id');
+  const tme = row.querySelector('#tt'); tme.removeAttribute('id'); tme.textContent = time;
+  const words = html.replace(/<[^>]+>/g, '').split(' ');
+  let shown = '';
+  for (let i = 0; i < words.length; i++) {
+    shown += (i === 0 ? '' : ' ') + words[i];
+    bbl.textContent = shown;
+    messages.scrollTop = messages.scrollHeight;
+    await new Promise(r => setTimeout(r, 60));
+  }
+  bbl.innerHTML = html;
+  messages.scrollTop = messages.scrollHeight;
+}
+ 
+function addSuggestions(reply) {
+  const lower = reply.toLowerCase();
+  let s = [];
+  if (lower.includes('project') || lower.includes('sparms') || lower.includes('inventoryiq'))
+    s = ["Which project is most impressive?", "Does Pavan have any live demos?", "What tech stack does Pavan prefer?"];
+  else if (lower.includes('skill') || lower.includes('python') || lower.includes('sql'))
+    s = ["What is Pavan's strongest skill?", "Does Pavan know machine learning?", "What tools does Pavan use daily?"];
+  else if (lower.includes('intern') || lower.includes('experience'))
+    s = ["What did Pavan do in his internship?", "Is Pavan open to new opportunities?", "How do I contact Pavan?"];
+  else if (lower.includes('contact') || lower.includes('hire'))
+    s = ["What roles is Pavan looking for?", "Can I see Pavan's resume?", "What is Pavan's LinkedIn?"];
+  else
+    s = ["Tell me about Pavan's projects", "What are Pavan's skills?", "How do I contact Pavan?"];
+ 
+  const wrap = document.createElement('div');
+  wrap.className = 'suggestions-row';
+  wrap.innerHTML = s.map(q => `<button class="chip" data-q="${q}">${q}</button>`).join('');
+  messages.appendChild(wrap);
+  messages.scrollTop = messages.scrollHeight;
+  const removeOnce = () => { wrap.remove(); };
+  sendBtn.addEventListener('click', removeOnce, { once: true });
+}
+ 
+// ── Email report ──
+async function sendReport() {
+  if (!emailReady || typeof emailjs === 'undefined') return;
+  const qLog = visitorSession.questions.map((q,i) => `${i+1}. [${q.time}] ${q.message}`).join('\n');
+  const conv = chatHistory.map(m => `${m.role === 'user' ? 'Visitor' : 'Candy'}: ${m.content}`).join('\n\n');
+  try {
+    await emailjs.send(EMAILJS_SID, EMAILJS_TID, {
+      time: visitorSession.startTime, page: visitorSession.pageUrl,
+      questions: qLog, conversation: conv.slice(0, 3000),
+      name: 'Portfolio Visitor', message: qLog,
+    });
+  } catch(e) { console.warn('[Candy] Email failed:', e); }
+}
+window.addEventListener('beforeunload', () => { if (visitorSession.questions.length > 0) sendReport(); });
+ 
+// ── Candy character ──
+function setCandyState(state) {
+  const c  = document.getElementById('candyChar');
+  const mH = document.getElementById('mouthHappy');
+  const mT = document.getElementById('mouthTalk');
+  const mL = document.getElementById('mouthListen');
+  if (!c) return;
+  c.classList.remove('talking', 'listening-anim');
+  if (state === 'talking') {
+    c.classList.add('talking');
+    if (mH) mH.style.display = 'none';
+    if (mT) mT.style.display = 'block';
+    if (mL) mL.style.display = 'none';
+  } else if (state === 'listening') {
+    c.classList.add('listening-anim');
+    if (mH) mH.style.display = 'none';
+    if (mT) mT.style.display = 'none';
+    if (mL) mL.style.display = 'block';
+  } else {
+    if (mH) mH.style.display = 'block';
+    if (mT) mT.style.display = 'none';
+    if (mL) mL.style.display = 'none';
+  }
+}
+ 
+function startBlink() {
+  function blink() {
+    const bl = document.getElementById('candyBlink');
+    const ey = document.getElementById('candyEyes');
+    if (!bl || !ey) return;
+    bl.style.display = 'block'; ey.style.display = 'none';
+    setTimeout(() => { bl.style.display = 'none'; ey.style.display = 'block'; }, 120);
+    setTimeout(blink, 3000 + Math.random() * 2500);
+  }
+  setTimeout(blink, 2500);
+}
+ 
+function startEyeFollow() {
+  document.addEventListener('mousemove', e => {
+    const char = document.getElementById('candyChar');
+    const pl   = document.getElementById('pL');
+    const pr   = document.getElementById('pR');
+    if (!char || !pl || !pr) return;
+    const rect = char.getBoundingClientRect();
+    const dx = (e.clientX - (rect.left + rect.width / 2)) / window.innerWidth;
+    const dy = (e.clientY - (rect.top + rect.height / 2)) / window.innerHeight;
+    pl.setAttribute('cx', 37 + dx * 2.5);
+    pl.setAttribute('cy', 41 + dy * 2.5);
+    pr.setAttribute('cx', 55 + dx * 2.5);
+    pr.setAttribute('cy', 41 + dy * 2.5);
+  });
+}
+ 
+// ── Helpers ──
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function formatReply(text) {
+  text = text.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/\n/g,'<br>');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
 </body>
 </html>
