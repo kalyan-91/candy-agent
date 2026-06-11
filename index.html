@@ -50,12 +50,60 @@
 
 html, body {
   height: 100%;
-  background: radial-gradient(ellipse at 20% 10%, #0d0730 0%, #060318 30%, #04040f 55%, #020412 80%, #030818 100%);
+  background:
+    radial-gradient(ellipse at 18% 8%,  rgba(124,107,255,0.30) 0%, transparent 42%),
+    radial-gradient(ellipse at 85% 15%, rgba(45,212,191,0.22) 0%, transparent 45%),
+    radial-gradient(ellipse at 75% 88%, rgba(251,113,133,0.20) 0%, transparent 45%),
+    radial-gradient(ellipse at 12% 90%, rgba(30,80,255,0.24) 0%, transparent 48%),
+    radial-gradient(ellipse at 50% 50%, rgba(167,139,250,0.12) 0%, transparent 60%),
+    linear-gradient(160deg, #0e0a35 0%, #0a0830 25%, #0b1145 50%, #0a1840 72%, #100a30 100%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.5s ease, color 0.5s ease;
 }
+
+/* ─────────── Light "daytime space" theme ─────────── */
+body.light {
+  --text:    #221d52;
+  --muted:   #5b5685;
+  --border:  rgba(124,107,255,0.22);
+  --border2: rgba(124,107,255,0.34);
+  --border3: rgba(124,107,255,0.14);
+  background:
+    radial-gradient(ellipse at 18% 8%,  rgba(124,107,255,0.28) 0%, transparent 44%),
+    radial-gradient(ellipse at 85% 15%, rgba(45,212,191,0.26) 0%, transparent 46%),
+    radial-gradient(ellipse at 75% 88%, rgba(251,113,133,0.24) 0%, transparent 46%),
+    radial-gradient(ellipse at 12% 90%, rgba(96,140,255,0.26) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(167,139,250,0.16) 0%, transparent 62%),
+    linear-gradient(160deg, #eef0ff 0%, #e7ecff 28%, #e9f6ff 52%, #eef0ff 78%, #f3eeff 100%);
+}
+body.light .star--sm { background: rgba(124,107,255,0.55); }
+body.light .star--md { background: rgba(124,107,255,0.7); }
+body.light .star--lg { background: rgba(45,180,170,0.7); }
+body.light .chat-header,
+body.light .chat-input-area { background: rgba(255,255,255,0.62); }
+body.light .input-row {
+  background: linear-gradient(160deg, rgba(255,255,255,0.85), rgba(124,107,255,0.06));
+  border-color: rgba(124,107,255,0.2);
+}
+body.light .chat-textarea { color: var(--text); }
+body.light .chat-textarea::placeholder { color: rgba(60,55,110,0.55); }
+body.light .bubble--ai {
+  background: linear-gradient(160deg, rgba(255,255,255,0.82), rgba(124,107,255,0.05));
+  border-color: rgba(124,107,255,0.18); color: #2c2860;
+  box-shadow: 0 8px 26px rgba(124,107,255,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+body.light .bubble--user { color: #221d52; }
+body.light .mic-btn, body.light .hdr-btn { background: rgba(124,107,255,0.06); }
+body.light .chip { color: #4b3fb0; }
+body.light .primary3,
+body.light .chat-header-name { color: #2c2860; }
+body.light .left-panel { color: #2c2860; }
+body.light .left-panel p,
+body.light .left-panel span:not(.online-dot):not([class*="cap-"]):not([class*="status"]) { color: #3a3470; }
 
 /* ─── Deep space starfield ─── */
 .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
@@ -77,7 +125,7 @@ html, body {
   position: fixed; pointer-events: none; z-index: 0;
   width: 700px; height: 600px;
   top: -180px; left: -120px;
-  background: radial-gradient(ellipse, rgba(124,107,255,0.22) 0%, rgba(167,139,250,0.12) 35%, rgba(45,50,180,0.06) 60%, transparent 75%);
+  background: radial-gradient(ellipse, rgba(124,107,255,0.40) 0%, rgba(167,139,250,0.22) 35%, rgba(45,50,180,0.12) 60%, transparent 75%);
   filter: blur(70px);
   animation: drift1 20s ease-in-out infinite;
 }
@@ -85,15 +133,15 @@ html, body {
   position: fixed; pointer-events: none; z-index: 0;
   width: 600px; height: 600px;
   bottom: -120px; right: -100px;
-  background: radial-gradient(ellipse, rgba(20,180,180,0.18) 0%, rgba(45,212,191,0.1) 35%, rgba(0,100,160,0.07) 60%, transparent 75%);
+  background: radial-gradient(ellipse, rgba(20,200,200,0.34) 0%, rgba(45,212,191,0.2) 35%, rgba(0,120,180,0.12) 60%, transparent 75%);
   filter: blur(70px);
   animation: drift2 25s ease-in-out infinite;
 }
 .nebula-3 {
   position: fixed; pointer-events: none; z-index: 0;
-  width: 400px; height: 400px;
+  width: 460px; height: 460px;
   top: 35%; left: 38%;
-  background: radial-gradient(circle, rgba(220,80,120,0.12) 0%, rgba(180,60,200,0.08) 40%, transparent 65%);
+  background: radial-gradient(circle, rgba(251,113,133,0.26) 0%, rgba(200,70,210,0.16) 40%, transparent 65%);
   filter: blur(65px);
   animation: drift3 30s ease-in-out infinite;
 }
@@ -102,7 +150,7 @@ html, body {
   position: fixed; pointer-events: none; z-index: 0;
   width: 500px; height: 400px;
   bottom: 10%; left: -60px;
-  background: radial-gradient(ellipse, rgba(30,60,220,0.14) 0%, rgba(60,80,255,0.07) 45%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(40,90,255,0.30) 0%, rgba(80,110,255,0.16) 45%, transparent 70%);
   filter: blur(80px);
   animation: drift1 28s ease-in-out infinite reverse;
 }
@@ -220,10 +268,13 @@ html, body {
 .orb-core {
   position: relative; z-index: 2;
   width: 52px; height: 52px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, rgba(124,107,255,0.25) 0%, rgba(45,212,191,0.12) 100%);
-  border: 1px solid rgba(124,107,255,0.4);
+  background:
+    radial-gradient(circle at 32% 28%, rgba(196,181,253,0.55) 0%, transparent 45%),
+    radial-gradient(circle at 70% 75%, rgba(45,212,191,0.4) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(124,107,255,0.4) 0%, rgba(45,212,191,0.22) 100%);
+  border: 1px solid rgba(196,181,253,0.5);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 24px rgba(124,107,255,0.2), inset 0 0 20px rgba(124,107,255,0.08);
+  box-shadow: 0 0 30px rgba(124,107,255,0.35), inset 0 0 22px rgba(124,107,255,0.12);
 }
 .orb-core-letter {
   font-family: 'Syne', sans-serif;
@@ -402,7 +453,7 @@ html, body {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 20px;
   border-bottom: 1px solid var(--border);
-  background: rgba(4,4,15,0.88);
+  background: rgba(10,8,42,0.78);
   backdrop-filter: blur(16px);
   flex-shrink: 0;
 }
@@ -484,9 +535,9 @@ html, body {
   transform: translate(-50%, -50%);
   width: 700px; height: 500px;
   background: radial-gradient(ellipse,
-    rgba(90,70,220,0.11) 0%,
-    rgba(45,212,191,0.06) 40%,
-    rgba(180,60,180,0.04) 65%,
+    rgba(120,95,255,0.20) 0%,
+    rgba(45,212,191,0.12) 40%,
+    rgba(220,80,200,0.09) 65%,
     transparent 80%);
   filter: blur(70px);
   pointer-events: none;
@@ -517,18 +568,22 @@ html, body {
 }
 
 .bubble {
-  max-width: 76%; padding: 11px 15px; border-radius: 18px;
+  max-width: 76%; padding: 12px 16px; border-radius: 18px;
   font-size: 0.875rem; line-height: 1.68;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 .bubble--user {
-  background: linear-gradient(135deg, rgba(124,107,255,0.15), rgba(45,212,191,0.08));
-  border: 1px solid rgba(124,107,255,0.25); color: var(--text);
+  background: linear-gradient(135deg, rgba(124,107,255,0.22), rgba(45,212,191,0.12));
+  border: 1px solid rgba(124,107,255,0.32); color: var(--text);
   border-bottom-right-radius: 4px;
+  box-shadow: 0 8px 26px rgba(124,107,255,0.18), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 .bubble--ai {
-  background: rgba(255,255,255,0.025);
-  border: 1px solid rgba(255,255,255,0.06); color: #cbd5e1;
+  background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(124,107,255,0.03));
+  border: 1px solid rgba(255,255,255,0.09); color: #d6deec;
   border-bottom-left-radius: 4px; position: relative; overflow: hidden;
+  box-shadow: 0 8px 26px rgba(4,4,20,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 .bubble--ai::before {
   content: '';
@@ -565,30 +620,73 @@ html, body {
 
 .chips-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
 .chip {
-  padding: 5px 13px;
-  background: rgba(124,107,255,0.07); border: 1px solid rgba(124,107,255,0.22);
+  padding: 6px 14px;
+  background: linear-gradient(135deg, rgba(124,107,255,0.1), rgba(45,212,191,0.05));
+  border: 1px solid rgba(124,107,255,0.25);
   border-radius: 100px; font-family: 'Syne', sans-serif;
   font-size: 0.7rem; font-weight: 600; color: var(--primary3);
-  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  cursor: pointer; transition: all 0.22s; white-space: nowrap;
 }
 .chip:hover {
-  background: rgba(124,107,255,0.15); border-color: rgba(124,107,255,0.45);
-  transform: translateY(-2px); box-shadow: 0 4px 16px rgba(124,107,255,0.18);
+  background: linear-gradient(135deg, rgba(124,107,255,0.22), rgba(45,212,191,0.12));
+  border-color: rgba(124,107,255,0.5);
+  color: var(--teal2);
+  transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,107,255,0.25);
 }
 
 
 
 .suggestions-row { display: flex; flex-wrap: wrap; gap: 6px; animation: msgIn 0.2s ease both; position: relative; z-index: 1; }
 
+/* ── Portfolio link button (in welcome message) ── */
+.portfolio-link-row { margin-top: 12px; }
+.portfolio-link-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 11px;
+  background: linear-gradient(135deg, rgba(124,107,255,0.2), rgba(45,212,191,0.14));
+  border: 1px solid rgba(124,107,255,0.4);
+  color: var(--primary3);
+  font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 600;
+  letter-spacing: 0.02em; text-decoration: none;
+  transition: all 0.25s; position: relative; overflow: hidden;
+  box-shadow: 0 4px 18px rgba(124,107,255,0.18);
+}
+.portfolio-link-btn::after {
+  content: '';
+  position: absolute; top: 0; left: -120%;
+  width: 60%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: skewX(-20deg);
+  animation: shine 3.4s ease-in-out infinite;
+}
+@keyframes shine { 0%,100% { left: -120%; } 55%,75% { left: 130%; } }
+.portfolio-link-btn:hover {
+  background: linear-gradient(135deg, rgba(124,107,255,0.3), rgba(45,212,191,0.2));
+  border-color: rgba(124,107,255,0.6);
+  color: var(--teal2); transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(124,107,255,0.32);
+}
+
 /* ── Input area ── */
 .chat-input-area {
-  padding: 12px 20px 14px;
+  padding: 14px 20px 16px;
   border-top: 1px solid var(--border);
-  background: rgba(4,4,15,0.75);
+  background: rgba(10,8,42,0.6);
   backdrop-filter: blur(16px);
   flex-shrink: 0;
 }
-.input-row { display: flex; align-items: flex-end; gap: 9px; }
+.input-row {
+  display: flex; align-items: flex-end; gap: 9px;
+  padding: 6px; border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(124,107,255,0.025));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(4,4,20,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.input-row:focus-within {
+  border-color: rgba(124,107,255,0.4);
+  box-shadow: 0 12px 36px rgba(124,107,255,0.22), inset 0 1px 0 rgba(255,255,255,0.07);
+}
 .mic-btn {
   width: 40px; height: 40px; border-radius: 11px;
   border: 1px solid rgba(255,255,255,0.07);
@@ -608,20 +706,19 @@ html, body {
 }
 .chat-textarea {
   flex: 1; min-width: 0;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
-  padding: 10px 14px; color: var(--text);
+  background: transparent;
+  border: none; border-radius: 12px;
+  padding: 10px 8px; color: var(--text);
   font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
   resize: none; outline: none;
   min-height: 42px; max-height: 120px; line-height: 1.55;
-  transition: border-color 0.22s, box-shadow 0.22s;
   width: 100%;
 }
 .chat-textarea:focus {
-  border-color: rgba(124,107,255,0.35);
-  box-shadow: 0 0 0 3px rgba(124,107,255,0.07);
+  border-color: transparent;
+  box-shadow: none;
 }
-.chat-textarea::placeholder { color: #2a2a4a; }
+.chat-textarea::placeholder { color: rgba(255,255,255,0.6); }
 .send-btn {
   width: 42px; height: 42px; border-radius: 12px; border: none;
   background: linear-gradient(135deg, var(--primary), #5b4de8);
@@ -629,7 +726,7 @@ html, body {
   cursor: pointer; flex-shrink: 0; transition: all 0.22s;
   box-shadow: 0 4px 16px rgba(124,107,255,0.3);
 }
-.send-btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(124,107,255,0.5); }
+.send-btn:hover { transform: scale(1.08) rotate(8deg); box-shadow: 0 6px 24px rgba(124,107,255,0.55); }
 .send-btn:active { transform: scale(0.94); }
 .input-hint {
   display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -662,7 +759,7 @@ html, body {
     align-items: center; justify-content: flex-start;
     gap: 12px; padding: 10px 14px;
     border-right: none; border-bottom: 1px solid var(--border);
-    background: rgba(8,4,28,0.97);
+    background: rgba(14,10,52,0.92);
     overflow-x: auto; overflow-y: hidden;
     flex-shrink: 0; height: auto; min-height: 64px;
   }
@@ -725,8 +822,7 @@ html, body {
   .send-btn { flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px; }
   .input-hint { font-size: 0.55rem; }
 
-  .welcome-qr-card { margin-top: 10px; padding: 9px 11px; }
-  .welcome-qr-box { width: 52px; height: 52px; }
+  .portfolio-link-btn { font-size: 0.7rem; padding: 7px 11px; }
 }
 </style>
 </head>
@@ -888,6 +984,18 @@ html, body {
           </svg>
           <span id="modePillLabel">Voice</span>
         </div>
+        <button id="themeBtn" class="hdr-btn" title="Toggle light / dark mode">
+          <svg id="themeIconMoon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg id="themeIconSun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
         <button id="clearBtn" class="hdr-btn" title="Clear chat">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.3"/>
@@ -1026,18 +1134,8 @@ if (window.speechSynthesis) {
 // Starfield
 (function buildStars(){
   const c = document.getElementById('stars');
-  // Twinkling background stars
-  for (let i = 0; i < 160; i++) {
-    const s = document.createElement('div');
-    const r = Math.random();
-    s.className = 'star ' + (r < 0.7 ? 'star--sm' : r < 0.9 ? 'star--md' : 'star--lg');
-    s.style.left  = Math.random() * 100 + '%';
-    s.style.top   = Math.random() * 100 + '%';
-    s.style.setProperty('--d',     (2 + Math.random() * 5) + 's');
-    s.style.setProperty('--delay', (Math.random() * 6) + 's');
-    c.appendChild(s);
-  }
-  // Falling stars — increased to 18 for a denser meteor shower effect
+  // Twinkling background stars removed — falling stars are enough.
+  // Falling stars — denser meteor shower effect
   const colors = [
     'rgba(196,181,253,0.9)',  // violet
     'rgba(45,212,191,0.85)',  // teal
@@ -1073,10 +1171,27 @@ const sendBtn   = document.getElementById('sendBtn');
 const micBtn    = document.getElementById('micBtn');
 const clearBtn  = document.getElementById('clearBtn');
 const modePill  = document.getElementById('modePill');
+const themeBtn  = document.getElementById('themeBtn');
+
+function applyTheme(theme) {
+  const isLight = theme === 'light';
+  document.body.classList.toggle('light', isLight);
+  document.getElementById('themeIconMoon').style.display = isLight ? 'none' : '';
+  document.getElementById('themeIconSun').style.display  = isLight ? '' : 'none';
+  try { localStorage.setItem('candy-theme', theme); } catch (e) {}
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   setupRecognition();
   appendWelcome();
+  let savedTheme = 'dark';
+  try { savedTheme = localStorage.getItem('candy-theme') || 'dark'; } catch (e) {}
+  applyTheme(savedTheme);
+  themeBtn.addEventListener('click', () => {
+    const next = document.body.classList.contains('light') ? 'dark' : 'light';
+    applyTheme(next);
+    showToast(next === 'light' ? 'Light mode on' : 'Dark mode on');
+  });
   sendBtn.addEventListener('click', handleSubmit);
   chatInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); }
@@ -1177,7 +1292,7 @@ function appendWelcome() {
     { l: 'Hire Pavan', q: "I'm interested in hiring Pavan, how do I reach him?" },
   ];
   const chipsHTML = `<div class="chips-row">${chips.map(c=>`<button class="chip" data-q="${c.q}">${c.l}</button>`).join('')}</div>`;
-  const linkHTML = `<div class="portfolio-link-row"><a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="portfolio-link-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>kalyanfinity-portfolio.netlify.app</a></div>`;
+  const linkHTML = `<div class="portfolio-link-row"><a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="portfolio-link-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Visit Portfolio</a></div>`;
   addMessage('ai', `${greet}! I am <strong>Candy</strong>, Pavan's personal AI. What would you like to know?${chipsHTML}${linkHTML}`);
 }
 
