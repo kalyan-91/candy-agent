@@ -1,27 +1,19 @@
-'use strict';
-
 /* ═══════════════════════════════════════════════════
-   CANDY v2 — script.js
-   Chat + Voice + QR + Stars + Sidebar + Suggestions
+   CANDY AI v2 — script.js
+   Pavan Kalyan · Deep Space Portfolio Agent
 ═══════════════════════════════════════════════════ */
 
-/* ─── CONFIG ─── */
-const CONFIG = {
-  GROQ_API_URL:  'https://pk-groq-proxy.daroorpavankalyan.workers.dev',
-  GROQ_API_KEY:  '',           // leave blank — proxy handles auth
-  MODEL:         'llama-3.3-70b-versatile',
-  MAX_TOKENS:    1024,
-  TEMPERATURE:   0.75,
-  PORTFOLIO_URL: 'https://kalyanfinity-portfolio.netlify.app',
-};
+'use strict';
 
-const SYSTEM_PROMPT = `You are Candy — a sharp, warm, and genuinely helpful AI assistant living inside Pavan Kalyan's portfolio website. You have a real personality: curious, friendly, professionally confident, and occasionally witty. You are not a boring FAQ bot.
+/* ── Config ── */
+const GROQ_ENDPOINT = 'https://pk-groq-proxy.daroorpavankalyan.workers.dev';
+const GROQ_MODEL    = 'llama-3.3-70b-versatile';
 
-Your job is to help visitors learn about Pavan — but do it like a real conversation, not a bullet-point dump. Be natural. Ask follow-up questions when relevant. Show genuine enthusiasm about his work. Vary your response style — sometimes short and direct, sometimes more detailed when the topic deserves it.
+const SYSTEM_PROMPT = `You are Candy — a sharp, warm, and genuinely helpful AI assistant representing Pavan Kalyan's portfolio. You have a real personality: curious, friendly, professionally confident, and occasionally witty.
 
-You can make your own decisions about how to respond. If someone says hi, just say hi back warmly — do not dump his entire resume at them. If someone asks something vague, ask what they mean. If someone seems like a recruiter, be a little more professional. If they seem like a fellow student, be casual and relatable.
+Your job is to help visitors learn about Pavan — but do it like a real conversation, not a bullet-point dump. Be natural. Ask follow-up questions when relevant. Show genuine enthusiasm about his work.
 
-Never use emojis in your responses. Keep the tone clean, professional, and conversational.
+Never use emojis. Keep the tone clean, professional, and conversational. Keep responses under 5 sentences unless the person clearly wants detail.
 
 == FACTS ABOUT PAVAN ==
 
@@ -38,107 +30,13 @@ Personal:
 
 Education:
 - MCA — JNTUA, Anantapur (2025 to 2027, currently pursuing). Focus: Data Analytics, Database Management, Business Intelligence
-- BSc MSCS (Maths, Stats, Computer Science) — St. Joseph's Degree College, Rayalaseema University, Kurnool (2021 to 2024, completed)
-
-Personality:
-- Friendly and approachable.
-- Curious about technology and innovation.
-- Growth-oriented and always learning.
-- Patient when solving problems.
-- Enjoys helping others learn technical concepts.
-- Values continuous improvement and practical knowledge.
-
-Additional Information About Pavan:
-
-- Birthday: November 24 2002.
-- Currently pursuing MCA while actively building projects outside academics.
-- Started learning Data Analytics through SQL, Excel, and databases before moving into Machine Learning and AI.
-- Strong believer in project-based learning.
-- Frequently participates in self-learning challenges to learn new technologies quickly.
-- Enjoys experimenting with AI tools and building AI-powered applications.
-- Recently started building AI agents and is interested in creating intelligent assistants for different industries.
-- Likes combining Data Analytics, AI, and software development into practical products.
-- Usually learns new skills by creating projects instead of only watching courses.
-- Interested in startup ideas, SaaS products, automation, and AI business solutions.
-- Has experience working with Oracle Database, MySQL, Python, Power BI, Excel, Java, and Machine Learning tools.
-- Enjoys transforming raw data into dashboards, reports, and actionable insights.
-- Constantly updates projects and portfolio with new features and improvements.
-- Goal: Become a skilled Data Analyst and eventually work on advanced AI-driven solutions.
-- Open to collaborating on interesting projects, internships, and innovative ideas.
-- Favorite type of projects: Analytics dashboards, AI applications, automation tools, and data-driven products.
-- Motto: Learn by building.
-
-Work Habits:
-
-Usually learns by breaking large problems into smaller tasks.
-Prefers practical implementation over theory alone.
-Frequently researches new tools and technologies.
-Enjoys exploring multiple solutions before choosing one.
-
-Future Vision:
-
-Wants to become a highly skilled Data Analyst.
-Interested in building AI-powered products that people use daily.
-Plans to continue learning advanced AI and Machine Learning technologies.
-Wants to create products that combine analytics, automation, and artificial intelligence.
-
-Career Interests:
-
-Data Analytics
-Business Intelligence
-Data Science
-Artificial Intelligence
-Machine Learning
-AI Agents
-Software Development
-Automation
-
-Personal Side of Pavan
-* Pavan is highly self-driven and spends a significant amount of time learning independently.
-* He prefers building things rather than just talking about ideas.
-* He gets excited when learning new technologies and immediately looks for ways to apply them.
-* He enjoys challenging himself with increasingly difficult projects.
-* He is ambitious and constantly looks for ways to improve his skills.
-* He likes creating real products instead of simple academic assignments.
-* He is persistent when working through technical problems.
-* He values practical knowledge over memorization.
-* He enjoys experimenting with AI tools and discovering new possibilities.
-* He is goal-oriented and often thinks about long-term career growth.
-* He likes receiving direct, actionable answers rather than lengthy theory.
-* He prefers simple explanations and real-world examples.
-* He is continuously looking for opportunities to learn, build, and grow.
-* He takes pride in completing projects and making them publicly available.
-* He enjoys seeing measurable progress in his skills.
-* He is curious about emerging technologies and future trends.
-* He tends to learn quickly when working on something that interests him.
-* He enjoys transforming ideas into working applications.
-* He is motivated by improvement and achievement.
-* He rarely stays satisfied for long after finishing a project and quickly starts thinking about the next one.
-* He enjoys discussing technology, AI, analytics, startups, and project ideas.
-* He sees technology as both a career path and a creative outlet.
-* He likes having visible proof of his progress through projects and portfolio work.
-* He believes learning is most effective when combined with hands-on practice.
-* He is actively working toward building a strong professional future through consistent effort.
-
-Personal Background
-
-* Pavan is the first person in his family to pursue higher education and build a professional career in technology.
-* His journey reflects determination, self-learning, and a strong commitment to personal growth.
-* Coming from a non-technical background, he built his skills through continuous learning, practical projects, and hands-on experience.
-* He values education as a way to create opportunities and make a positive impact on his future.
-* His progress has been driven by curiosity, consistency, and a willingness to learn new things independently.
-* He is highly self-reliant and enjoys figuring things out on his own.
-* When faced with unfamiliar technologies, he actively learns through experimentation, documentation, AI tools, and hands-on practice.
-* Rather than waiting for guidance, he takes initiative to find solutions and continuously expand his knowledge.
-* He believes that with enough curiosity and persistence, anyone can learn almost anything.
-* Many of his skills were developed through self-learning, online resources, AI assistants, and real-world project building.
-
+- BSc MSCS — St. Joseph Degree College, Rayalaseema University, Kurnool (2021 to 2024)
 
 Internship:
 - Data Science Intern at Interncall, Kurnool (Jan to Apr 2024)
-- Applied Python for data science tasks including data cleaning, EDA, and building ML models
-- Worked with Matplotlib and Seaborn to present insights to stakeholders
-- Gained end-to-end experience across the full data science project lifecycle
+- Applied Python for data cleaning, EDA, and building ML models to solve real-world problems
+- Worked with Matplotlib and Seaborn to present insights effectively to stakeholders
+- Gained hands-on experience across the end-to-end data science project lifecycle
 - Stack: Python, Pandas, Scikit-learn, Matplotlib, Seaborn
 
 Skills:
@@ -149,694 +47,696 @@ Skills:
 - Tools: Streamlit, OpenCV, JDBC, Maven, iText PDF, ZXing, GitHub
 
 Projects:
-1. SPARMS — Java Swing desktop app for academic result management. Role-based dashboards for Admin, Faculty, and Students. Features OMR scanning, automated grade computation, MySQL with JDBC, and PDF export. Stack: Java Swing, MySQL, JDBC, Maven, iText, ZXing. GitHub: github.com/kalyan-91/portfolio-website/blob/main/Demo/project-demo_T1Hirmbw.mp4
+1. SPARMS — Java Swing desktop app for academic result management. Role-based dashboards (Admin, Faculty, Student), OMR scanning, automated grade computation, MySQL with JDBC, PDF export. Stack: Java Swing, MySQL, JDBC, Maven, iText, ZXing.
+2. InventoryIQ — Streamlit inventory analytics dashboard. Secure login, product management, audit logs, CSV export. Live: inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app. GitHub: github.com/kalyan-91/InventoryIQ-E-commerce-Inventory-Analytics-System
+3. Digit Recognizer — CNN app recognizing handwritten digits 0-9 on interactive canvas. Live: hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app. GitHub: github.com/kalyan-91/Hand-Written-Digit-Recognition
+4. Netflix Dashboard — Power BI dashboard exploring 5000+ titles, genres, durations, countries. GitHub: github.com/kalyan-91/Netflix-PowerBI-Dashboard
+5. Employee Attrition Analysis — ML classification models plus Power BI dashboard for HR analytics. GitHub: github.com/kalyan-91/EmployeeAttritionAndEngagementAnalysis
+6. Zomato Analysis — Restaurant rating pattern analysis and predictive classification. GitHub: github.com/kalyan-91/Zomato_Restaurant_Analysis_And_Predictive_Analysis
 
-2. InventoryIQ — Streamlit inventory and analytics dashboard. Secure login, product management, audit logs, CSV export.
-   Live: inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app
-   GitHub: github.com/kalyan-91/InventoryIQ-E-commerce-Inventory-Analytics-System
-   Stack: Python, Streamlit, Pandas, Plotly
-
-3. Digit Recognizer — CNN app that recognizes handwritten digits 0 through 9 on an interactive canvas.
-   Live: hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app
-   GitHub: github.com/kalyan-91/Hand-Written-Digit-Recognition
-   Stack: Python, TensorFlow, Streamlit, OpenCV
-
-4. Netflix Dashboard — Power BI dashboard exploring over 5000 titles, genres, durations, and countries.
-   GitHub: github.com/kalyan-91/Netflix-PowerBI-Dashboard
-   Stack: Power BI, DAX, Power Query
-
-5. Employee Attrition Analysis — ML classification models plus a Power BI dashboard for HR analytics.
-   GitHub: github.com/kalyan-91/EmployeeAttritionAndEngagementAnalysis
-   Stack: Python, Scikit-learn, Power BI, Pandas
-
-6. Zomato Analysis — Restaurant rating pattern analysis and predictive classification models.
-   GitHub: github.com/kalyan-91/Zomato_Restaurant_Analysis_And_Predictive_Analysis
-   Stack: Python, Pandas, Scikit-learn, Excel
-
-Coming Soon on Portfolio:
-- Before/After Data Cleaning Slider — will show raw messy data transforming into clean structured data
-- Scroll Driven Data Story — full data analysis story animated step by step as visitor scrolls
-
-== PORTFOLIO FEATURES ==
-The portfolio has the following features visitors can interact with:
-- Project filter buttons — filter projects by All, Java, Analytics, Machine Learning, Visualization
-- Announcement bar at top — scrolling text with quick access to chat
-- Tech stack scrolling wall — animated horizontally scrolling technology icons in Skills section
-- Resume download — updated June 2025, available as PDF
-- Contact form — visitors can send messages directly to Pavan
-- Social links — GitHub, LinkedIn, WhatsApp, Email all available
+Portfolio features:
+- Project filter buttons (All, Java, Analytics, ML, Visualization)
+- Announcement bar with scrolling text
+- Horizontally scrolling tech stack wall in Skills section
+- Before/After Data Cleaning Slider — Coming Soon
+- Scroll Driven Data Story — Coming Soon
+- Resume updated June 2025 available for download
 
 == RESPONSE RULES ==
-- Never use emojis anywhere in your replies.
-- Never start every message the same way. Vary your openers.
-- Do not always list everything. Pick what is most relevant to the question.
+- Never use emojis.
+- Vary openers — never start every message the same way.
 - If asked about a project with a live link, always share it.
-- For contact questions, share email and LinkedIn.
-- Keep responses under 5 sentences unless the person clearly wants detail.
-- Never say "As an AI language model". Just answer naturally.
-- After 2 to 3 messages from the visitor, naturally ask for their name and email so Pavan can follow up. Do it conversationally, not like a form. For example: "By the way, I would love to let Pavan know you stopped by. What is your name? And if you want him to reach out, share your email too." Then acknowledge when they share it warmly.
-- If you do not know something about Pavan that is not covered above, say so honestly and suggest reaching out directly.
-- If a visitor seems like a recruiter, mention that Pavan is actively looking for internships and entry-level Data Analyst roles and encourage them to reach out.
-- If asked about the portfolio itself, you can explain its features like the project filter, tech stack wall, announcement bar, and coming soon data showcase section.
-- If asked what is coming soon, explain the Before/After Data Cleaning Slider and Scroll Driven Data Story features.
-- When appropriate, mention that Pavan is the first person in his family to pursue higher education and build a professional career in technology.
-- When discussing Pavan's journey, highlight his self-learning mindset, determination, and continuous growth.
-- When talking about skills or projects, explain that many of them were developed through self-learning, practical projects, online resources, documentation, and AI tools.
-- When visitors ask how Pavan learned something, explain that he prefers learning by building real projects rather than only studying theory.
-- When discussing Pavan's personality, mention his curiosity, persistence, self-reliance, and willingness to learn new technologies independently.
-- When relevant, explain that Pavan enjoys turning ideas into real products and practical solutions.
-- When discussing future goals, mention his interest in AI, Data Analytics, Machine Learning, Automation, and intelligent products.
-- When visitors ask about challenges, highlight how Pavan learns unfamiliar technologies through experimentation, research, AI tools, and hands-on practice.
-- When discussing achievements, focus on growth, learning, and real-world project experience rather than only technical skills.
-- Present Pavan as a builder, learner, problem solver, and self-driven individual rather than only as a student.
-- When appropriate, mention that Pavan believes anyone can learn almost anything with curiosity, persistence, and the right resources.
-- Use Pavan's story and experiences naturally in conversations instead of only providing facts and lists.
-- Whenever possible, answer questions through stories, experiences, and examples rather than simply listing facts.
-- Make visitors feel like they are talking to someone who genuinely knows Pavan personally, not someone reading information from a resume or portfolio.`;
+- For contact questions share email and LinkedIn.
+- After 2 to 3 messages naturally ask visitor name and email for Pavan to follow up.
+- If visitor seems like a recruiter, mention Pavan is actively looking for internships and entry-level Data Analyst roles.
+- Never say "As an AI language model".
+- If asked about coming soon features, explain the Before/After slider and Scroll Driven Data Story.`;
 
+/* ── State ── */
+let chatHistory   = [];
+let isListening   = false;
+let isSpeaking    = false;
+let voiceEnabled  = true;
+let recognition   = null;
+let currentUtter  = null;
+let inactivityTimer = null;
 
-/* ─── SUGGESTION CHIPS ─── */
-const SUGGESTIONS = [
-  'What projects has Pavan built?',
-  "What's Pavan's tech stack?",
-  'Is Pavan open to work?',
-  'Tell me about SPARMS',
-  'How do I contact Pavan?',
-  'What did Pavan do in his internship?',
-];
-
-const WELCOME_CHIPS = [
-  'Projects 🚀',
-  'Skills 🧠',
-  'Experience 💼',
-  'Contact 📬',
-];
-
-/* ─── STATE ─── */
-let conversationHistory = [];
-let voiceEnabled = true;
-let isGenerating = false;
-let recognition = null;
-let synth = window.speechSynthesis;
-let currentUtterance = null;
-
-/* ─── DOM REFS ─── */
+/* ── DOM refs ── */
 const $ = id => document.getElementById(id);
-const messagesEl   = $('messages');
-const inputField   = $('inputField');
-const sendBtn      = $('sendBtn');
-const micBtn       = $('micBtn');
-const clearBtn     = $('clearBtn');
-const voiceToggle  = $('voiceToggle');
-const voiceStatus  = $('voiceStatus');
-const charCount    = $('charCount');
-const suggestStrip = $('suggestStrip');
-const sidebar      = $('sidebar');
-const backdrop     = $('backdrop');
-const menuBtn      = $('menuBtn');
-const sidebarClose = $('sidebarClose');
-const toastWrap    = $('toastWrap');
-const quickAskList = $('quickAskList');
 
-/* ══════════════════════════════════════════════════
-   STARS
-   ══════════════════════════════════════════════════ */
+/* ════════════════════════════════
+   INIT
+════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  initStars();
+  initParticles();
+  initQR();
+  initChat();
+  initSidebar();
+  initVoice();
+  appendWelcome();
+  resetInactivityTimer();
+});
+
+/* ════════════════════════════════
+   STARS CANVAS
+════════════════════════════════ */
 function initStars() {
   const canvas = $('stars');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W, H, stars = [];
+  let W, H;
 
   function resize() {
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
   }
+  resize();
+  window.addEventListener('resize', resize);
 
-  function createStars(n) {
-    stars = [];
-    for (let i = 0; i < n; i++) {
-      stars.push({
-        x:    Math.random() * W,
-        y:    Math.random() * H,
-        r:    Math.random() * 1.4 + 0.2,
-        a:    Math.random(),
-        speed: Math.random() * 0.004 + 0.001,
-        twinkleOffset: Math.random() * Math.PI * 2,
+  const COUNT = Math.min(180, Math.floor(window.innerWidth * window.innerHeight / 5000));
+  const stars = Array.from({ length: COUNT }, () => ({
+    x: Math.random(), y: Math.random(),
+    r: Math.random() * 1.3 + 0.2,
+    alpha: Math.random() * 0.65 + 0.15,
+    hue: [220,240,260,195,42][Math.floor(Math.random()*5)],
+    sat: Math.random() > 0.4 ? 80 : 15,
+    tw: Math.random() * Math.PI * 2,
+    twS: Math.random() * 0.022 + 0.004,
+    vx: (Math.random() - 0.5) * 0.08,
+    vy: (Math.random() - 0.5) * 0.08,
+  }));
+
+  const shooters = [];
+  setInterval(() => {
+    if (Math.random() < 0.5) {
+      shooters.push({
+        x: Math.random() * W * 0.7, y: Math.random() * H * 0.3,
+        len: Math.random() * 100 + 50,
+        speed: Math.random() * 7 + 4,
+        angle: Math.PI/4 + (Math.random()-0.5)*0.5,
+        life: 1,
       });
     }
-  }
+  }, 4000);
 
-  let frame = 0;
-  function draw() {
+  let mx = W/2, my = H/2;
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  function tick() {
     ctx.clearRect(0, 0, W, H);
-    frame++;
-    for (const s of stars) {
-      const opacity = 0.25 + 0.55 * (0.5 + 0.5 * Math.sin(frame * s.speed + s.twinkleOffset));
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(200,220,255,${opacity})`;
-      ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
+    stars.forEach(s => {
+      s.tw += s.twS;
+      const a = s.alpha * (0.6 + 0.4 * Math.sin(s.tw));
+      const px = s.x * W + (mx - W/2) * s.r * 0.002;
+      const py = s.y * H + (my - H/2) * s.r * 0.002;
 
-  resize();
-  createStars(200);
-  draw();
-  window.addEventListener('resize', () => { resize(); createStars(200); });
+      if (s.r > 0.9) {
+        const g = ctx.createRadialGradient(px,py,0,px,py,s.r*4);
+        g.addColorStop(0, `hsla(${s.hue},${s.sat}%,80%,${a*0.25})`);
+        g.addColorStop(1, 'transparent');
+        ctx.beginPath(); ctx.arc(px,py,s.r*4,0,Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(px,py,s.r,0,Math.PI*2);
+      ctx.fillStyle = `hsla(${s.hue},${s.sat}%,85%,${a})`;
+      ctx.fill();
+
+      s.x += s.vx/W; s.y += s.vy/H;
+      if (s.x<0) s.x=1; if (s.x>1) s.x=0;
+      if (s.y<0) s.y=1; if (s.y>1) s.y=0;
+    });
+
+    for (let i = shooters.length-1; i >= 0; i--) {
+      const sh = shooters[i];
+      sh.x += Math.cos(sh.angle)*sh.speed;
+      sh.y += Math.sin(sh.angle)*sh.speed;
+      sh.life -= 0.02;
+      if (sh.life <= 0) { shooters.splice(i,1); continue; }
+      const tx = sh.x - Math.cos(sh.angle)*sh.len;
+      const ty = sh.y - Math.sin(sh.angle)*sh.len;
+      const g = ctx.createLinearGradient(tx,ty,sh.x,sh.y);
+      g.addColorStop(0,'transparent');
+      g.addColorStop(0.7,`rgba(167,139,250,${sh.life*0.4})`);
+      g.addColorStop(1,`rgba(255,255,255,${sh.life*0.9})`);
+      ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(sh.x,sh.y);
+      ctx.strokeStyle=g; ctx.lineWidth=sh.life*1.8; ctx.stroke();
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
 }
 
-/* ══════════════════════════════════════════════════
-   PARTICLES
-   ══════════════════════════════════════════════════ */
+/* ════════════════════════════════
+   FLOATING PARTICLES
+════════════════════════════════ */
 function initParticles() {
-  const container = $('particles');
-  if (!container) return;
-  const COUNT = 18;
-  for (let i = 0; i < COUNT; i++) {
+  const wrap = $('particles');
+  if (!wrap) return;
+  const colors = ['#00d4ff','#a78bfa','#fbbf24','#7dd3fc'];
+
+  for (let i = 0; i < 18; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
-    const hue = Math.random() > 0.5 ? '195' : '260';
     p.style.cssText = `
-      left: ${Math.random() * 100}%;
-      width: ${Math.random() * 3 + 1.5}px;
-      height: ${Math.random() * 3 + 1.5}px;
-      background: hsl(${hue}, 100%, 70%);
-      animation-duration: ${Math.random() * 20 + 15}s;
-      animation-delay: ${Math.random() * 20}s;
+      left: ${Math.random()*100}%;
+      width: ${Math.random()*3+1}px;
+      height: ${Math.random()*3+1}px;
+      background: ${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration: ${Math.random()*20+15}s;
+      animation-delay: ${Math.random()*15}s;
       opacity: 0;
     `;
-    container.appendChild(p);
+    wrap.appendChild(p);
   }
 }
 
-/* ══════════════════════════════════════════════════
+/* ════════════════════════════════
    QR CODE
-   ══════════════════════════════════════════════════ */
+════════════════════════════════ */
 function initQR() {
   const el = $('qrCode');
-  if (!el) return;
-  try {
-    new QRCode(el, {
-      text: CONFIG.PORTFOLIO_URL,
-      width: 110,
-      height: 110,
-      colorDark: '#03040f',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-  } catch (e) {
-    el.style.display = 'none';
+  if (!el || typeof QRCode === 'undefined') return;
+  new QRCode(el, {
+    text: 'https://kalyanfinity-portfolio.netlify.app',
+    width: 100, height: 100,
+    colorDark: '#0369A1',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+}
+
+/* ════════════════════════════════
+   SIDEBAR (mobile)
+════════════════════════════════ */
+function initSidebar() {
+  const sidebar  = $('sidebar');
+  const menuBtn  = $('menuBtn');
+  const closeBtn = $('sidebarClose');
+  const backdrop = $('backdrop');
+
+  function open() {
+    sidebar.classList.add('open');
+    backdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  backdrop?.addEventListener('click', close);
+
+  // Quick ask buttons
+  $('quickAskList')?.addEventListener('click', e => {
+    const btn = e.target.closest('.quick-ask');
+    if (btn) {
+      $('inputField').value = btn.dataset.q;
+      if (window.innerWidth <= 820) close();
+      submitMessage();
+    }
+  });
+}
+
+/* ════════════════════════════════
+   VOICE TOGGLE
+════════════════════════════════ */
+function initVoice() {
+  const btn    = $('voiceToggle');
+  const status = $('voiceStatus');
+  if (!btn) return;
+
+  updateVoiceUI();
+  btn.addEventListener('click', () => {
+    voiceEnabled = !voiceEnabled;
+    if (!voiceEnabled) stopSpeaking();
+    updateVoiceUI();
+    showToast(voiceEnabled ? 'Voice on' : 'Voice off');
+  });
+
+  function updateVoiceUI() {
+    btn.classList.toggle('active', voiceEnabled);
+    btn.innerHTML = voiceEnabled
+      ? '<i class="fas fa-volume-up"></i>'
+      : '<i class="fas fa-volume-xmark"></i>';
+    if (status) {
+      status.textContent = voiceEnabled ? 'Voice on' : 'Voice off';
+      status.className = 'voice-status' + (voiceEnabled ? ' active' : '');
+    }
   }
 }
 
-/* ══════════════════════════════════════════════════
+/* ════════════════════════════════
+   CHAT INIT
+════════════════════════════════ */
+function initChat() {
+  const input    = $('inputField');
+  const sendBtn  = $('sendBtn');
+  const clearBtn = $('clearBtn');
+  const micBtn   = $('micBtn');
+
+  sendBtn?.addEventListener('click', submitMessage);
+
+  clearBtn?.addEventListener('click', () => {
+    chatHistory = [];
+    $('messages').innerHTML = '';
+    $('suggestStrip').innerHTML = '';
+    appendWelcome();
+    showToast('New chat started');
+  });
+
+  input?.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitMessage();
+    }
+  });
+
+  input?.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    const left = 500 - input.value.length;
+    const cc = $('charCount');
+    if (cc) {
+      cc.textContent = left;
+      cc.className = 'char-count' + (left < 50 ? ' danger' : left < 150 ? ' warn' : '');
+    }
+    resetInactivityTimer();
+  });
+
+  // Message area chip clicks
+  $('messages')?.addEventListener('click', e => {
+    const chip = e.target.closest('.welcome-chip, .sugg-chip');
+    if (chip) { input.value = chip.dataset.q || chip.textContent; submitMessage(); }
+  });
+
+  // Suggestions strip chip clicks
+  $('suggestStrip')?.addEventListener('click', e => {
+    const chip = e.target.closest('.sugg-chip');
+    if (chip) { input.value = chip.dataset.q; submitMessage(); }
+  });
+
+  // Mic
+  setupRecognition();
+  micBtn?.addEventListener('click', () => {
+    if (isListening) stopListening();
+    else startListening();
+  });
+}
+
+/* ════════════════════════════════
+   WELCOME MESSAGE
+════════════════════════════════ */
+function appendWelcome() {
+  const hour = new Date().getHours();
+  const greeting =
+    hour >= 5  && hour < 12 ? 'Good morning' :
+    hour >= 12 && hour < 17 ? 'Good afternoon' :
+    hour >= 17 && hour < 21 ? 'Good evening' :
+    'Hey, night owl';
+
+  const chips = [
+    { label: 'Projects',   q: "What projects has Pavan built?" },
+    { label: 'Skills',     q: "What are Pavan's strongest skills?" },
+    { label: 'Experience', q: "Tell me about Pavan's internship" },
+    { label: 'Hire Pavan', q: "I am interested in hiring Pavan" },
+  ];
+  const chipsHTML = `<div class="welcome-chips">${
+    chips.map(c => `<button class="welcome-chip" data-q="${c.q}">${c.label}</button>`).join('')
+  }</div>`;
+
+  appendMessage('assistant',
+    `${greeting}! I am <strong>Candy</strong>, Pavan's personal AI. Ask me anything about his projects, skills, or experience.${chipsHTML}`
+  );
+}
+
+/* ════════════════════════════════
+   SUBMIT MESSAGE
+════════════════════════════════ */
+async function submitMessage() {
+  const input = $('inputField');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  // Clear input
+  input.value = '';
+  input.style.height = 'auto';
+  const cc = $('charCount');
+  if (cc) cc.textContent = '500';
+
+  // Clear suggestions
+  const strip = $('suggestStrip');
+  if (strip) strip.innerHTML = '';
+
+  stopListening();
+  appendMessage('user', escapeHTML(text));
+  chatHistory.push({ role: 'user', content: text });
+
+  const typingId = appendTyping();
+  const sendBtn  = $('sendBtn');
+  if (sendBtn) sendBtn.disabled = true;
+
+  try {
+    const res = await fetch(GROQ_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...chatHistory,
+        ],
+        max_tokens: 600,
+        temperature: 0.85,
+        top_p: 0.9,
+        stream: false,
+      }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data  = await res.json();
+    const reply = data.choices?.[0]?.message?.content?.trim()
+      || 'I got an empty response. Please try again.';
+
+    removeTyping(typingId);
+    await typeMessage(formatReply(reply));
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    speak(reply);
+    addSmartSuggestions(reply);
+    autoScrollToSection(text);
+    resetInactivityTimer();
+
+    if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
+
+  } catch (err) {
+    removeTyping(typingId);
+    appendMessage('error', `Connection error: ${escapeHTML(err.message)}`);
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+/* ════════════════════════════════
+   TYPING EFFECT
+════════════════════════════════ */
+async function typeMessage(html) {
+  const msgs = $('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg--assistant';
+  wrap.innerHTML = `
+    <div class="msg-avatar">C</div>
+    <div class="msg-content">
+      <div class="bubble bubble--assistant" id="tbNew"></div>
+      <div class="msg-meta">
+        <span class="msg-time">${getTime()}</span>
+      </div>
+    </div>`;
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  const bubble = wrap.querySelector('#tbNew');
+  bubble.removeAttribute('id');
+
+  const plain = html.replace(/<[^>]+>/g, '');
+  const words = plain.split(' ');
+  let out = '';
+  for (let i = 0; i < words.length; i++) {
+    out += (i === 0 ? '' : ' ') + words[i];
+    bubble.textContent = out;
+    msgs.scrollTop = msgs.scrollHeight;
+    await sleep(55);
+  }
+  bubble.innerHTML = html;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+/* ════════════════════════════════
+   SMART SUGGESTIONS
+════════════════════════════════ */
+function addSmartSuggestions(reply) {
+  const strip = $('suggestStrip');
+  if (!strip) return;
+  const lower = reply.toLowerCase();
+  let suggs = [];
+
+  if (lower.includes('project') || lower.includes('sparms') || lower.includes('inventoryiq') || lower.includes('digit')) {
+    suggs = ['Which project is most impressive?', 'Does Pavan have live projects?', 'What tech stack does Pavan use?'];
+  } else if (lower.includes('skill') || lower.includes('python') || lower.includes('sql') || lower.includes('power bi')) {
+    suggs = ["What is Pavan's strongest skill?", 'Does Pavan know machine learning?', 'What tools does Pavan use daily?'];
+  } else if (lower.includes('intern') || lower.includes('experience') || lower.includes('interncall')) {
+    suggs = ['What did Pavan do in his internship?', 'Is Pavan open to opportunities?', 'How do I contact Pavan?'];
+  } else if (lower.includes('contact') || lower.includes('hire') || lower.includes('email') || lower.includes('reach')) {
+    suggs = ['What roles is Pavan looking for?', "Can I see Pavan's resume?", "Visit Pavan's portfolio"];
+  } else if (lower.includes('education') || lower.includes('mca') || lower.includes('degree')) {
+    suggs = ['What is Pavan studying?', 'When does Pavan graduate?', "What projects has Pavan built?"];
+  } else {
+    suggs = ["Tell me about Pavan's projects", "What are Pavan's skills?", 'How do I contact Pavan?'];
+  }
+
+  strip.innerHTML = suggs.map(s =>
+    `<button class="sugg-chip" data-q="${s}">${s}</button>`
+  ).join('');
+}
+
+/* ════════════════════════════════
+   AUTO SCROLL TO SECTION
+════════════════════════════════ */
+function autoScrollToSection(text) {
+  const lower = text.toLowerCase();
+  const map = {
+    projects:    ['project','sparms','inventoryiq','digit','netflix','zomato','attrition'],
+    skills:      ['skill','python','sql','power bi','tech stack','pandas'],
+    education:   ['education','mca','degree','university','study'],
+    experience:  ['experience','intern','interncall','work'],
+    contact:     ['contact','email','hire','reach','whatsapp','linkedin'],
+  };
+
+  for (const [id, keys] of Object.entries(map)) {
+    if (keys.some(k => lower.includes(k))) {
+      const section = document.getElementById(id) ||
+                      document.querySelector(`[data-section="${id}"]`);
+      if (section) {
+        setTimeout(() => {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 900);
+      }
+      break;
+    }
+  }
+}
+
+/* ════════════════════════════════
+   INACTIVITY MESSAGE
+════════════════════════════════ */
+const INACTIVITY_MSGS = [
+  "Still there? Feel free to ask me anything about Pavan!",
+  "Not sure what to ask? Try \"What projects has Pavan built?\" or \"How do I contact him?\"",
+  "I am here whenever you need. Ask about Pavan's skills, projects, or experience!",
+];
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  const chat = document.querySelector('.chat');
+  if (!chat) return;
+  inactivityTimer = setTimeout(() => {
+    const msg = INACTIVITY_MSGS[Math.floor(Math.random() * INACTIVITY_MSGS.length)];
+    appendMessage('assistant', msg);
+    addSmartSuggestions(msg);
+  }, 120000);
+}
+
+document.addEventListener('mousemove', resetInactivityTimer, { passive: true });
+document.addEventListener('keydown',   resetInactivityTimer, { passive: true });
+
+/* ════════════════════════════════
+   DOM HELPERS
+════════════════════════════════ */
+function appendMessage(role, html) {
+  const msgs = $('messages');
+  const wrap = document.createElement('div');
+  wrap.className = `msg msg--${role}`;
+  const time = getTime();
+
+  if (role === 'user') {
+    wrap.innerHTML = `
+      <div class="msg-content" style="align-items:flex-end">
+        <div class="bubble bubble--user">${html}</div>
+        <div class="msg-meta" style="justify-content:flex-end">
+          <span class="msg-time">${time}</span>
+        </div>
+      </div>`;
+  } else if (role === 'error') {
+    wrap.innerHTML = `<div class="bubble bubble--error">${html}</div>`;
+  } else {
+    wrap.innerHTML = `
+      <div class="msg-avatar">C</div>
+      <div class="msg-content">
+        <div class="bubble bubble--assistant">${html}</div>
+        <div class="msg-meta">
+          <span class="msg-time">${time}</span>
+        </div>
+      </div>`;
+  }
+
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  return wrap;
+}
+
+function appendTyping() {
+  const id   = 'typing-' + Date.now();
+  const msgs = $('messages');
+  const wrap = document.createElement('div');
+  wrap.id = id;
+  wrap.className = 'msg msg--assistant';
+  wrap.innerHTML = `
+    <div class="msg-avatar">C</div>
+    <div class="msg-content">
+      <div class="bubble bubble--assistant">
+        <div class="typing-wrap">
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+          <span class="typing-label">thinking</span>
+        </div>
+      </div>
+    </div>`;
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) { $(id)?.remove(); }
+
+function getTime() {
+  return new Date().toLocaleTimeString('en-IN', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
+  });
+}
+
+function escapeHTML(str) {
+  return str
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+
+function formatReply(text) {
+  text = text.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/\n/g,'<br>');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ════════════════════════════════
    TOAST
-   ══════════════════════════════════════════════════ */
-function showToast(msg, duration = 2600) {
+════════════════════════════════ */
+function showToast(msg, duration = 2500) {
+  const wrap = $('toastWrap');
+  if (!wrap) return;
   const t = document.createElement('div');
   t.className = 'toast';
   t.textContent = msg;
-  toastWrap.appendChild(t);
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => t.classList.add('show'));
-  });
+  wrap.appendChild(t);
   setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.remove(), 400);
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(6px)';
+    t.style.transition = 'all 0.3s ease';
+    setTimeout(() => t.remove(), 350);
   }, duration);
 }
 
-/* ══════════════════════════════════════════════════
-   SIDEBAR
-   ══════════════════════════════════════════════════ */
-function openSidebar() {
-  sidebar.classList.add('open');
-  backdrop.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-function closeSidebar() {
-  sidebar.classList.remove('open');
-  backdrop.classList.remove('active');
-  document.body.style.overflow = '';
-}
-menuBtn.addEventListener('click', openSidebar);
-sidebarClose.addEventListener('click', closeSidebar);
-backdrop.addEventListener('click', closeSidebar);
+/* ════════════════════════════════
+   SPEECH RECOGNITION
+════════════════════════════════ */
+function setupRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
 
-/* ─── Quick asks ─── */
-quickAskList.addEventListener('click', e => {
-  const btn = e.target.closest('.quick-ask');
-  if (!btn) return;
-  const q = btn.dataset.q;
-  closeSidebar();
-  setTimeout(() => sendMessage(q), 220);
-});
-
-/* ══════════════════════════════════════════════════
-   VOICE SYNTHESIS
-   ══════════════════════════════════════════════════ */
-function speak(text) {
-  if (!voiceEnabled || !synth) return;
-  synth.cancel();
-  const clean = text.replace(/[*_`#>\[\]()!]/g, '').replace(/\n+/g, ' ').trim();
-  if (!clean) return;
-  const utt = new SpeechSynthesisUtterance(clean);
-  utt.rate  = 1.05;
-  utt.pitch = 1.0;
-  utt.volume = 0.9;
-  const voices = synth.getVoices();
-  const preferred = voices.find(v =>
-    /Google|Natural|Enhanced/i.test(v.name) && /en/i.test(v.lang)
-  ) || voices.find(v => /en/i.test(v.lang));
-  if (preferred) utt.voice = preferred;
-  currentUtterance = utt;
-  synth.speak(utt);
-}
-
-function toggleVoice() {
-  voiceEnabled = !voiceEnabled;
-  voiceToggle.classList.toggle('active', voiceEnabled);
-  voiceStatus.textContent = voiceEnabled ? '🔊 Voice on' : '🔇 Voice off';
-  if (!voiceEnabled && synth) synth.cancel();
-  showToast(voiceEnabled ? '🔊 Voice enabled' : '🔇 Voice disabled');
-}
-
-voiceToggle.addEventListener('click', toggleVoice);
-voiceStatus.addEventListener('click', toggleVoice);
-
-/* ══════════════════════════════════════════════════
-   VOICE INPUT (Web Speech API)
-   ══════════════════════════════════════════════════ */
-function initSpeechRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    micBtn.style.display = 'none';
-    return;
-  }
-  recognition = new SpeechRecognition();
-  recognition.lang = 'en-US';
+  recognition = new SR();
+  recognition.continuous    = false;
   recognition.interimResults = true;
-  recognition.maxAlternatives = 1;
+  recognition.lang          = 'en-IN';
 
-  recognition.onstart = () => {
-    micBtn.classList.add('listening');
-    micBtn.innerHTML = '<i class="fas fa-stop"></i>';
-    showToast('🎙 Listening…');
+  recognition.onstart  = () => { isListening = true;  updateMicUI(true); };
+  recognition.onend    = () => { isListening = false; updateMicUI(false); };
+  recognition.onerror  = e  => {
+    stopListening();
+    if (e.error === 'not-allowed') showToast('Microphone access denied');
   };
   recognition.onresult = e => {
-    let interim = '', final = '';
-    for (const r of e.results) {
-      if (r.isFinal) final += r[0].transcript;
-      else interim += r[0].transcript;
+    const t = Array.from(e.results).map(r => r[0].transcript).join('');
+    $('inputField').value = t;
+    if (e.results[e.results.length - 1].isFinal) {
+      setTimeout(submitMessage, 400);
     }
-    inputField.value = final || interim;
-    autoResize();
-    updateCharCount();
-  };
-  recognition.onend = () => {
-    micBtn.classList.remove('listening');
-    micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-    if (inputField.value.trim()) sendMessage();
-  };
-  recognition.onerror = e => {
-    micBtn.classList.remove('listening');
-    micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
-    if (e.error !== 'no-speech') showToast('⚠ Mic error: ' + e.error);
   };
 }
 
-micBtn.addEventListener('click', () => {
-  if (!recognition) { showToast('⚠ Voice not supported in this browser'); return; }
-  if (micBtn.classList.contains('listening')) {
-    recognition.stop();
-  } else {
-    if (synth) synth.cancel();
-    recognition.start();
-  }
-});
-
-/* ══════════════════════════════════════════════════
-   INPUT HANDLING
-   ══════════════════════════════════════════════════ */
-function autoResize() {
-  inputField.style.height = 'auto';
-  inputField.style.height = Math.min(inputField.scrollHeight, 120) + 'px';
-}
-function updateCharCount() {
-  const rem = 500 - inputField.value.length;
-  charCount.textContent = rem;
-  charCount.classList.toggle('warn', rem < 60);
+function startListening() {
+  if (!recognition) { showToast('Voice input not supported in this browser'); return; }
+  stopSpeaking();
+  try { recognition.start(); } catch(e) {}
 }
 
-inputField.addEventListener('input', () => { autoResize(); updateCharCount(); });
-inputField.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-  }
-});
-sendBtn.addEventListener('click', () => sendMessage());
-clearBtn.addEventListener('click', () => {
-  if (isGenerating) return;
-  clearChat();
-  showToast('✨ New chat started');
-});
-
-/* ══════════════════════════════════════════════════
-   SUGGESTIONS STRIP
-   ══════════════════════════════════════════════════ */
-function renderSuggestions(items) {
-  suggestStrip.innerHTML = '';
-  items.forEach((s, i) => {
-    const c = document.createElement('button');
-    c.className = 'strip-chip';
-    c.textContent = s;
-    c.style.animationDelay = `${i * 0.05}s`;
-    c.addEventListener('click', () => {
-      sendMessage(s);
-      suggestStrip.innerHTML = '';
-    });
-    suggestStrip.appendChild(c);
-  });
+function stopListening() {
+  if (recognition && isListening) recognition.stop();
+  isListening = false;
+  updateMicUI(false);
 }
 
-/* ══════════════════════════════════════════════════
-   MESSAGE RENDERING
-   ══════════════════════════════════════════════════ */
-function getTime() {
-  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+function updateMicUI(active) {
+  const btn = $('micBtn');
+  if (!btn) return;
+  btn.classList.toggle('listening', active);
+  btn.title = active ? 'Listening — click to stop' : 'Speak';
 }
 
-function formatMarkdown(text) {
-  return text
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/\[(.+?)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-    .replace(/\n{2,}/g, '</p><p>')
-    .replace(/\n/g, '<br>');
+/* ════════════════════════════════
+   SPEECH SYNTHESIS
+════════════════════════════════ */
+if (window.speechSynthesis) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.addEventListener('voiceschanged', () => {});
 }
 
-function createMsgEl(role, content, chips = []) {
-  const isUser = role === 'user';
-  const isError = role === 'error';
+function speak(text) {
+  if (!voiceEnabled || !window.speechSynthesis) return;
+  const clean = text.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+  if (!clean) return;
 
-  const wrap = document.createElement('div');
-  wrap.className = `msg msg--${isUser ? 'user' : 'assistant'}`;
+  stopSpeaking();
+  currentUtter         = new SpeechSynthesisUtterance(clean);
+  currentUtter.lang    = 'en-US';
+  currentUtter.rate    = 1.0;
+  currentUtter.pitch   = 1.0;
+  currentUtter.volume  = 1.0;
 
-  if (!isUser) {
-    const av = document.createElement('div');
-    av.className = 'msg-avatar';
-    av.innerHTML = '<i class="fas fa-robot"></i>';
-    wrap.appendChild(av);
-  }
+  const voices = window.speechSynthesis.getVoices();
+  const v =
+    voices.find(v => v.name.includes('Google US English')) ||
+    voices.find(v => v.lang === 'en-US' && !v.localService) ||
+    voices.find(v => v.lang.startsWith('en-'));
+  if (v) currentUtter.voice = v;
 
-  const contentWrap = document.createElement('div');
-  contentWrap.className = 'msg-content';
+  const status = $('voiceStatus');
+  currentUtter.onstart = () => { isSpeaking = true;  if (status) { status.textContent='Speaking…'; status.className='voice-status speaking'; } };
+  currentUtter.onend   = () => { isSpeaking = false; if (status) { status.textContent='Voice on';  status.className='voice-status active'; } };
+  currentUtter.onerror = () => { isSpeaking = false; };
 
-  const bubble = document.createElement('div');
-  bubble.className = `bubble bubble--${isError ? 'error' : isUser ? 'user' : 'assistant'}`;
-
-  if (isUser) {
-    bubble.textContent = content;
-  } else {
-    bubble.innerHTML = `<p>${formatMarkdown(content)}</p>`;
-  }
-  contentWrap.appendChild(bubble);
-
-  if (chips.length) {
-    const row = document.createElement('div');
-    row.className = 'chips-row';
-    chips.forEach(c => {
-      const btn = document.createElement('button');
-      btn.className = 'chip';
-      btn.textContent = c;
-      btn.addEventListener('click', () => {
-        sendMessage(c);
-        row.remove();
-      });
-      row.appendChild(btn);
-    });
-    contentWrap.appendChild(row);
-  }
-
-  const time = document.createElement('div');
-  time.className = 'msg-time';
-  time.textContent = getTime();
-  contentWrap.appendChild(time);
-
-  wrap.appendChild(contentWrap);
-  return wrap;
+  setTimeout(() => window.speechSynthesis.speak(currentUtter), 100);
 }
 
-function addMessage(role, content, chips = []) {
-  const el = createMsgEl(role, content, chips);
-  messagesEl.appendChild(el);
-  scrollToBottom();
-  return el;
+function stopSpeaking() {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  isSpeaking = false;
 }
-
-function showTyping() {
-  const wrap = document.createElement('div');
-  wrap.className = 'msg msg--assistant';
-  wrap.id = 'typingIndicator';
-
-  const av = document.createElement('div');
-  av.className = 'msg-avatar';
-  av.innerHTML = '<i class="fas fa-robot"></i>';
-  wrap.appendChild(av);
-
-  const contentWrap = document.createElement('div');
-  contentWrap.className = 'msg-content';
-
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble bubble--assistant';
-  bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
-  contentWrap.appendChild(bubble);
-  wrap.appendChild(contentWrap);
-
-  messagesEl.appendChild(wrap);
-  scrollToBottom();
-  return wrap;
-}
-
-function removeTyping() {
-  const el = $('typingIndicator');
-  if (el) el.remove();
-}
-
-function scrollToBottom(smooth = true) {
-  messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
-}
-
-/* ══════════════════════════════════════════════════
-   WELCOME SCREEN
-   ══════════════════════════════════════════════════ */
-function showWelcome() {
-  const card = document.createElement('div');
-  card.className = 'welcome-card';
-  card.id = 'welcomeCard';
-  card.innerHTML = `
-    <div class="welcome-card__title">
-      Hey there! 👋 I'm <strong>Candy</strong>
-    </div>
-    <div class="welcome-card__sub">
-      Pavan Kalyan's personal AI assistant. Ask me anything about his projects, skills, experience, or how to get in touch!
-    </div>
-    <div class="chips-row" id="welcomeChips"></div>
-  `;
-
-  const chipsContainer = card.querySelector('#welcomeChips');
-  WELCOME_CHIPS.forEach(label => {
-    const btn = document.createElement('button');
-    btn.className = 'chip';
-    btn.textContent = label;
-    const queryMap = {
-      'Projects 🚀': 'What projects has Pavan built?',
-      'Skills 🧠':   "What are Pavan's strongest skills?",
-      'Experience 💼': 'Tell me about his internship experience',
-      'Contact 📬':  'How do I contact Pavan?',
-    };
-    btn.addEventListener('click', () => {
-      card.remove();
-      sendMessage(queryMap[label] || label);
-    });
-    chipsContainer.appendChild(btn);
-  });
-
-  const msgWrap = document.createElement('div');
-  msgWrap.className = 'msg msg--assistant';
-  msgWrap.id = 'welcomeMsg';
-
-  const av = document.createElement('div');
-  av.className = 'msg-avatar';
-  av.innerHTML = '<i class="fas fa-robot"></i>';
-  msgWrap.appendChild(av);
-
-  const content = document.createElement('div');
-  content.className = 'msg-content';
-  content.appendChild(card);
-  msgWrap.appendChild(content);
-
-  messagesEl.appendChild(msgWrap);
-}
-
-function clearChat() {
-  conversationHistory = [];
-  if (synth) synth.cancel();
-  messagesEl.innerHTML = '';
-  suggestStrip.innerHTML = '';
-  showWelcome();
-}
-
-/* ══════════════════════════════════════════════════
-   GROQ API
-   ══════════════════════════════════════════════════ */
-async function callGroq(messages) {
-  const response = await fetch(CONFIG.GROQ_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${CONFIG.GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: CONFIG.MODEL,
-      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
-      max_tokens: CONFIG.MAX_TOKENS,
-      temperature: CONFIG.TEMPERATURE,
-      stream: false,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `API error ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() || 'I had trouble responding. Please try again.';
-}
-
-/* ══════════════════════════════════════════════════
-   SEND MESSAGE
-   ══════════════════════════════════════════════════ */
-async function sendMessage(text) {
-  const msg = (text || inputField.value).trim();
-  if (!msg || isGenerating) return;
-
-  const welcomeMsg = $('welcomeMsg');
-  if (welcomeMsg) welcomeMsg.remove();
-
-  inputField.value = '';
-  autoResize();
-  updateCharCount();
-  suggestStrip.innerHTML = '';
-
-  addMessage('user', msg);
-  conversationHistory.push({ role: 'user', content: msg });
-
-  isGenerating = true;
-  sendBtn.disabled = true;
-  showTyping();
-
-  try {
-    const reply = await callGroq(conversationHistory);
-    removeTyping();
-    addMessage('assistant', reply);
-    conversationHistory.push({ role: 'assistant', content: reply });
-    if (conversationHistory.length > 14) conversationHistory.splice(0, 2);
-    speak(reply);
-    const followUps = getFollowUps(msg);
-    if (followUps.length) renderSuggestions(followUps);
-  } catch (err) {
-    removeTyping();
-    console.error('Groq error:', err);
-    addMessage('error', `⚠ ${err.message || 'Something went wrong. Check your connection or try again.'}`);
-  } finally {
-    isGenerating = false;
-    sendBtn.disabled = false;
-    inputField.focus();
-  }
-}
-
-/* ══════════════════════════════════════════════════
-   CONTEXTUAL FOLLOW-UP SUGGESTIONS
-   ══════════════════════════════════════════════════ */
-function getFollowUps(lastMsg) {
-  const msg = lastMsg.toLowerCase();
-  if (msg.includes('project') || msg.includes('build') || msg.includes('sparms'))
-    return ['What tech did Pavan use?', 'Tell me about InventoryIQ', 'Is code available on GitHub?'];
-  if (msg.includes('skill') || msg.includes('tech') || msg.includes('stack'))
-    return ['Which ML tools does Pavan know?', 'Tell me about his Java projects', 'What is he learning now?'];
-  if (msg.includes('intern') || msg.includes('experience') || msg.includes('work'))
-    return ['What projects did Pavan build?', 'Is he available for hire?', 'How do I contact Pavan?'];
-  if (msg.includes('contact') || msg.includes('hire') || msg.includes('email'))
-    return ['View portfolio', 'What projects has Pavan built?', "What's his LinkedIn?"];
-  if (msg.includes('educat') || msg.includes('study') || msg.includes('mca'))
-    return ['What are his strongest skills?', 'What projects has he built?'];
-  const pool = [...SUGGESTIONS];
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool.slice(0, 3);
-}
-
-/* ══════════════════════════════════════════════════
-   INIT
-   ══════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  // Force sidebar closed on load — belt AND suspenders
-  sidebar.classList.remove('open');
-  sidebar.style.transform = 'translateX(-110%)';
-  backdrop.classList.remove('active');
-  backdrop.style.opacity = '0';
-  backdrop.style.pointerEvents = 'none';
-  document.body.style.overflow = '';
-  // Remove inline styles after first frame so CSS transitions take over
-  requestAnimationFrame(() => {
-    sidebar.style.transform = '';
-    backdrop.style.opacity = '';
-    backdrop.style.pointerEvents = '';
-  });
-
-  initStars();
-  initParticles();
-  initQR();
-  initSpeechRecognition();
-
-  if (synth && synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = () => synth.getVoices();
-  }
-
-  showWelcome();
-  renderSuggestions(SUGGESTIONS.slice(0, 4));
-
-  if (window.innerWidth > 768) {
-    setTimeout(() => inputField.focus(), 400);
-  }
-
-  // Swipe gestures — single unified handler
-  let touchStartX = 0;
-  let touchStartY = 0;
-  document.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  }, { passive: true });
-
-  document.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
-    if (dy > 40) return; // ignore vertical swipes
-
-    // Swipe left to close
-    if (dx < -60 && sidebar.classList.contains('open')) {
-      closeSidebar();
-    }
-    // Swipe right from left edge to open
-    if (dx > 70 && touchStartX < 24 && !sidebar.classList.contains('open')) {
-      openSidebar();
-    }
-  }, { passive: true });
-});
