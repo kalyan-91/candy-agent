@@ -5,8 +5,15 @@
    Chat + Voice + QR + Stars + Sidebar + Suggestions
 ═══════════════════════════════════════════════════ */
 
-const GROQ_MODEL    = 'llama-3.3-70b-versatile';
-const GROQ_ENDPOINT = 'https://pk-groq-proxy.daroorpavankalyan.workers.dev';
+/* ─── CONFIG ─── */
+const CONFIG = {
+  GROQ_API_URL:  'https://pk-groq-proxy.daroorpavankalyan.workers.dev',
+  GROQ_API_KEY:  '',           // leave blank — proxy handles auth
+  MODEL:         'llama-3.3-70b-versatile',
+  MAX_TOKENS:    1024,
+  TEMPERATURE:   0.75,
+  PORTFOLIO_URL: 'https://kalyanfinity-portfolio.netlify.app',
+};
 
 const SYSTEM_PROMPT = `You are Candy — a sharp, warm, and genuinely helpful AI assistant living inside Pavan Kalyan's portfolio website. You have a real personality: curious, friendly, professionally confident, and occasionally witty. You are not a boring FAQ bot.
 
@@ -208,8 +215,7 @@ The portfolio has the following features visitors can interact with:
 - Make visitors feel like they are talking to someone who genuinely knows Pavan personally, not someone reading information from a resume or portfolio.`;
 
 
-// ── State ──
- /* ─── SUGGESTION CHIPS ─── */
+/* ─── SUGGESTION CHIPS ─── */
 const SUGGESTIONS = [
   'What projects has Pavan built?',
   "What's Pavan's tech stack?",
@@ -218,14 +224,14 @@ const SUGGESTIONS = [
   'How do I contact Pavan?',
   'What did Pavan do in his internship?',
 ];
- 
+
 const WELCOME_CHIPS = [
   'Projects 🚀',
   'Skills 🧠',
   'Experience 💼',
   'Contact 📬',
 ];
- 
+
 /* ─── STATE ─── */
 let conversationHistory = [];
 let voiceEnabled = true;
@@ -233,7 +239,7 @@ let isGenerating = false;
 let recognition = null;
 let synth = window.speechSynthesis;
 let currentUtterance = null;
- 
+
 /* ─── DOM REFS ─── */
 const $ = id => document.getElementById(id);
 const messagesEl   = $('messages');
@@ -251,20 +257,21 @@ const menuBtn      = $('menuBtn');
 const sidebarClose = $('sidebarClose');
 const toastWrap    = $('toastWrap');
 const quickAskList = $('quickAskList');
- 
+
 /* ══════════════════════════════════════════════════
    STARS
    ══════════════════════════════════════════════════ */
 function initStars() {
   const canvas = $('stars');
-  const ctx    = canvas.getContext('2d');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
   let W, H, stars = [];
- 
+
   function resize() {
     W = canvas.width  = window.innerWidth;
     H = canvas.height = window.innerHeight;
   }
- 
+
   function createStars(n) {
     stars = [];
     for (let i = 0; i < n; i++) {
@@ -278,7 +285,7 @@ function initStars() {
       });
     }
   }
- 
+
   let frame = 0;
   function draw() {
     ctx.clearRect(0, 0, W, H);
@@ -292,18 +299,19 @@ function initStars() {
     }
     requestAnimationFrame(draw);
   }
- 
+
   resize();
   createStars(200);
   draw();
   window.addEventListener('resize', () => { resize(); createStars(200); });
 }
- 
+
 /* ══════════════════════════════════════════════════
    PARTICLES
    ══════════════════════════════════════════════════ */
 function initParticles() {
   const container = $('particles');
+  if (!container) return;
   const COUNT = 18;
   for (let i = 0; i < COUNT; i++) {
     const p = document.createElement('div');
@@ -321,13 +329,15 @@ function initParticles() {
     container.appendChild(p);
   }
 }
- 
+
 /* ══════════════════════════════════════════════════
    QR CODE
    ══════════════════════════════════════════════════ */
 function initQR() {
+  const el = $('qrCode');
+  if (!el) return;
   try {
-    new QRCode($('qrCode'), {
+    new QRCode(el, {
       text: CONFIG.PORTFOLIO_URL,
       width: 110,
       height: 110,
@@ -336,10 +346,10 @@ function initQR() {
       correctLevel: QRCode.CorrectLevel.M,
     });
   } catch (e) {
-    $('qrCode').style.display = 'none';
+    el.style.display = 'none';
   }
 }
- 
+
 /* ══════════════════════════════════════════════════
    TOAST
    ══════════════════════════════════════════════════ */
@@ -356,7 +366,7 @@ function showToast(msg, duration = 2600) {
     setTimeout(() => t.remove(), 400);
   }, duration);
 }
- 
+
 /* ══════════════════════════════════════════════════
    SIDEBAR
    ══════════════════════════════════════════════════ */
@@ -373,7 +383,7 @@ function closeSidebar() {
 menuBtn.addEventListener('click', openSidebar);
 sidebarClose.addEventListener('click', closeSidebar);
 backdrop.addEventListener('click', closeSidebar);
- 
+
 /* ─── Quick asks ─── */
 quickAskList.addEventListener('click', e => {
   const btn = e.target.closest('.quick-ask');
@@ -382,7 +392,7 @@ quickAskList.addEventListener('click', e => {
   closeSidebar();
   setTimeout(() => sendMessage(q), 220);
 });
- 
+
 /* ══════════════════════════════════════════════════
    VOICE SYNTHESIS
    ══════════════════════════════════════════════════ */
@@ -403,7 +413,7 @@ function speak(text) {
   currentUtterance = utt;
   synth.speak(utt);
 }
- 
+
 function toggleVoice() {
   voiceEnabled = !voiceEnabled;
   voiceToggle.classList.toggle('active', voiceEnabled);
@@ -411,10 +421,10 @@ function toggleVoice() {
   if (!voiceEnabled && synth) synth.cancel();
   showToast(voiceEnabled ? '🔊 Voice enabled' : '🔇 Voice disabled');
 }
- 
+
 voiceToggle.addEventListener('click', toggleVoice);
 voiceStatus.addEventListener('click', toggleVoice);
- 
+
 /* ══════════════════════════════════════════════════
    VOICE INPUT (Web Speech API)
    ══════════════════════════════════════════════════ */
@@ -428,7 +438,7 @@ function initSpeechRecognition() {
   recognition.lang = 'en-US';
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
- 
+
   recognition.onstart = () => {
     micBtn.classList.add('listening');
     micBtn.innerHTML = '<i class="fas fa-stop"></i>';
@@ -455,7 +465,7 @@ function initSpeechRecognition() {
     if (e.error !== 'no-speech') showToast('⚠ Mic error: ' + e.error);
   };
 }
- 
+
 micBtn.addEventListener('click', () => {
   if (!recognition) { showToast('⚠ Voice not supported in this browser'); return; }
   if (micBtn.classList.contains('listening')) {
@@ -465,7 +475,7 @@ micBtn.addEventListener('click', () => {
     recognition.start();
   }
 });
- 
+
 /* ══════════════════════════════════════════════════
    INPUT HANDLING
    ══════════════════════════════════════════════════ */
@@ -478,7 +488,7 @@ function updateCharCount() {
   charCount.textContent = rem;
   charCount.classList.toggle('warn', rem < 60);
 }
- 
+
 inputField.addEventListener('input', () => { autoResize(); updateCharCount(); });
 inputField.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -492,7 +502,7 @@ clearBtn.addEventListener('click', () => {
   clearChat();
   showToast('✨ New chat started');
 });
- 
+
 /* ══════════════════════════════════════════════════
    SUGGESTIONS STRIP
    ══════════════════════════════════════════════════ */
@@ -510,51 +520,51 @@ function renderSuggestions(items) {
     suggestStrip.appendChild(c);
   });
 }
- 
+
 /* ══════════════════════════════════════════════════
    MESSAGE RENDERING
    ══════════════════════════════════════════════════ */
 function getTime() {
   return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 }
- 
+
 function formatMarkdown(text) {
   return text
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/\[(.+?)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\[(.+?)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/\n{2,}/g, '</p><p>')
     .replace(/\n/g, '<br>');
 }
- 
+
 function createMsgEl(role, content, chips = []) {
   const isUser = role === 'user';
   const isError = role === 'error';
- 
+
   const wrap = document.createElement('div');
   wrap.className = `msg msg--${isUser ? 'user' : 'assistant'}`;
- 
+
   if (!isUser) {
     const av = document.createElement('div');
     av.className = 'msg-avatar';
     av.innerHTML = '<i class="fas fa-robot"></i>';
     wrap.appendChild(av);
   }
- 
+
   const contentWrap = document.createElement('div');
   contentWrap.className = 'msg-content';
- 
+
   const bubble = document.createElement('div');
   bubble.className = `bubble bubble--${isError ? 'error' : isUser ? 'user' : 'assistant'}`;
- 
+
   if (isUser) {
     bubble.textContent = content;
   } else {
     bubble.innerHTML = `<p>${formatMarkdown(content)}</p>`;
   }
   contentWrap.appendChild(bubble);
- 
+
   if (chips.length) {
     const row = document.createElement('div');
     row.className = 'chips-row';
@@ -570,56 +580,56 @@ function createMsgEl(role, content, chips = []) {
     });
     contentWrap.appendChild(row);
   }
- 
+
   const time = document.createElement('div');
   time.className = 'msg-time';
   time.textContent = getTime();
   contentWrap.appendChild(time);
- 
+
   wrap.appendChild(contentWrap);
   return wrap;
 }
- 
+
 function addMessage(role, content, chips = []) {
   const el = createMsgEl(role, content, chips);
   messagesEl.appendChild(el);
   scrollToBottom();
   return el;
 }
- 
+
 function showTyping() {
   const wrap = document.createElement('div');
   wrap.className = 'msg msg--assistant';
   wrap.id = 'typingIndicator';
- 
+
   const av = document.createElement('div');
   av.className = 'msg-avatar';
   av.innerHTML = '<i class="fas fa-robot"></i>';
   wrap.appendChild(av);
- 
+
   const contentWrap = document.createElement('div');
   contentWrap.className = 'msg-content';
- 
+
   const bubble = document.createElement('div');
   bubble.className = 'bubble bubble--assistant';
   bubble.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
   contentWrap.appendChild(bubble);
   wrap.appendChild(contentWrap);
- 
+
   messagesEl.appendChild(wrap);
   scrollToBottom();
   return wrap;
 }
- 
+
 function removeTyping() {
   const el = $('typingIndicator');
   if (el) el.remove();
 }
- 
+
 function scrollToBottom(smooth = true) {
   messagesEl.scrollTo({ top: messagesEl.scrollHeight, behavior: smooth ? 'smooth' : 'instant' });
 }
- 
+
 /* ══════════════════════════════════════════════════
    WELCOME SCREEN
    ══════════════════════════════════════════════════ */
@@ -636,7 +646,7 @@ function showWelcome() {
     </div>
     <div class="chips-row" id="welcomeChips"></div>
   `;
- 
+
   const chipsContainer = card.querySelector('#welcomeChips');
   WELCOME_CHIPS.forEach(label => {
     const btn = document.createElement('button');
@@ -654,24 +664,24 @@ function showWelcome() {
     });
     chipsContainer.appendChild(btn);
   });
- 
+
   const msgWrap = document.createElement('div');
   msgWrap.className = 'msg msg--assistant';
   msgWrap.id = 'welcomeMsg';
- 
+
   const av = document.createElement('div');
   av.className = 'msg-avatar';
   av.innerHTML = '<i class="fas fa-robot"></i>';
   msgWrap.appendChild(av);
- 
+
   const content = document.createElement('div');
   content.className = 'msg-content';
   content.appendChild(card);
   msgWrap.appendChild(content);
- 
+
   messagesEl.appendChild(msgWrap);
 }
- 
+
 function clearChat() {
   conversationHistory = [];
   if (synth) synth.cancel();
@@ -679,7 +689,7 @@ function clearChat() {
   suggestStrip.innerHTML = '';
   showWelcome();
 }
- 
+
 /* ══════════════════════════════════════════════════
    GROQ API
    ══════════════════════════════════════════════════ */
@@ -698,79 +708,65 @@ async function callGroq(messages) {
       stream: false,
     }),
   });
- 
+
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     throw new Error(err?.error?.message || `API error ${response.status}`);
   }
- 
+
   const data = await response.json();
   return data.choices?.[0]?.message?.content?.trim() || 'I had trouble responding. Please try again.';
 }
- 
+
 /* ══════════════════════════════════════════════════
    SEND MESSAGE
    ══════════════════════════════════════════════════ */
 async function sendMessage(text) {
   const msg = (text || inputField.value).trim();
   if (!msg || isGenerating) return;
- 
-  // Remove welcome card if present
+
   const welcomeMsg = $('welcomeMsg');
   if (welcomeMsg) welcomeMsg.remove();
- 
-  // Clear input
+
   inputField.value = '';
   autoResize();
   updateCharCount();
   suggestStrip.innerHTML = '';
- 
-  // Add user message
+
   addMessage('user', msg);
- 
-  // Add to history
   conversationHistory.push({ role: 'user', content: msg });
- 
-  // Show typing
+
   isGenerating = true;
   sendBtn.disabled = true;
-  const typingEl = showTyping();
- 
+  showTyping();
+
   try {
     const reply = await callGroq(conversationHistory);
- 
     removeTyping();
     addMessage('assistant', reply);
- 
-    // Add to history (keep last 14 turns to stay within token limits)
     conversationHistory.push({ role: 'assistant', content: reply });
     if (conversationHistory.length > 14) conversationHistory.splice(0, 2);
- 
-    // Voice
     speak(reply);
- 
-    // Show follow-up suggestions
     const followUps = getFollowUps(msg);
     if (followUps.length) renderSuggestions(followUps);
- 
   } catch (err) {
     removeTyping();
     console.error('Groq error:', err);
-    addMessage('error', `⚠ ${err.message || 'Something went wrong. Check your API key or try again.'}`);
+    addMessage('error', `⚠ ${err.message || 'Something went wrong. Check your connection or try again.'}`);
   } finally {
     isGenerating = false;
     sendBtn.disabled = false;
     inputField.focus();
   }
 }
- 
+
 /* ══════════════════════════════════════════════════
    CONTEXTUAL FOLLOW-UP SUGGESTIONS
    ══════════════════════════════════════════════════ */
 function getFollowUps(lastMsg) {
   const msg = lastMsg.toLowerCase();
   if (msg.includes('project') || msg.includes('build') || msg.includes('sparms'))
-    return ['What tech did Pavan use?', "Tell me about LYRA AI", 'Is code available on GitHub?'];
+    return ['What tech did Pavan use?', 'Tell me about InventoryIQ', 'Is code available on GitHub?'];
   if (msg.includes('skill') || msg.includes('tech') || msg.includes('stack'))
     return ['Which ML tools does Pavan know?', 'Tell me about his Java projects', 'What is he learning now?'];
   if (msg.includes('intern') || msg.includes('experience') || msg.includes('work'))
@@ -779,7 +775,6 @@ function getFollowUps(lastMsg) {
     return ['View portfolio', 'What projects has Pavan built?', "What's his LinkedIn?"];
   if (msg.includes('educat') || msg.includes('study') || msg.includes('mca'))
     return ['What are his strongest skills?', 'What projects has he built?'];
-  // default rotation
   const pool = [...SUGGESTIONS];
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -787,7 +782,7 @@ function getFollowUps(lastMsg) {
   }
   return pool.slice(0, 3);
 }
- 
+
 /* ══════════════════════════════════════════════════
    INIT
    ══════════════════════════════════════════════════ */
@@ -796,32 +791,25 @@ document.addEventListener('DOMContentLoaded', () => {
   initParticles();
   initQR();
   initSpeechRecognition();
- 
-  // Load voices async (Chrome loads them asynchronously)
+
   if (synth && synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = () => synth.getVoices();
   }
- 
-  // Show welcome
+
   showWelcome();
- 
-  // Initial suggestions strip
   renderSuggestions(SUGGESTIONS.slice(0, 4));
- 
-  // Focus input on desktop
+
   if (window.innerWidth > 768) {
     setTimeout(() => inputField.focus(), 400);
   }
- 
-  // Close sidebar on swipe left (mobile)
+
   let touchStartX = 0;
   document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
   document.addEventListener('touchend', e => {
     const dx = touchStartX - e.changedTouches[0].clientX;
     if (dx > 60 && sidebar.classList.contains('open')) closeSidebar();
   }, { passive: true });
- 
-  // Swipe right from left edge to open sidebar
+
   document.addEventListener('touchstart', e => {
     if (e.touches[0].clientX < 24) touchStartX = e.touches[0].clientX;
   }, { passive: true });
@@ -830,4 +818,3 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dx > 70 && touchStartX < 24 && !sidebar.classList.contains('open')) openSidebar();
   }, { passive: true });
 });
- 
