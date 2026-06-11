@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>Candy — Pavan's AI Assistant</title>
   <meta name="description" content="Chat with Candy, Pavan Kalyan's personal AI assistant."/>
+  <meta property="og:title" content="Candy — Pavan's AI Assistant"/>
+  <meta property="og:description" content="Ask Candy anything about Pavan Kalyan — Data Analyst, MCA Student."/>
+  <meta property="og:url" content="https://candy-agent.netlify.app"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -31,114 +34,11 @@
 
 <div class="app" id="app">
 
-  <!-- ════════ SIDEBAR ════════ -->
-  <aside class="sidebar" id="sidebar">
-    <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
-      <i class="fas fa-times"></i>
-    </button>
-
-    <!-- Brand -->
-    <div class="brand">
-      <div class="brand-orb">
-        <svg class="brand-orb__ring" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="1.5" stroke-dasharray="6 4"/>
-          <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(139,92,246,0.2)" stroke-width="1" stroke-dasharray="3 6"/>
-        </svg>
-        <div class="brand-orb__inner">C</div>
-        <div class="brand-orb__pulse"></div>
-      </div>
-      <div class="brand-text">
-        <div class="brand-name">Candy <span class="brand-version">v2</span></div>
-        <div class="brand-tag"><span class="status-dot"></span>Pavan's AI · Online</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Candy info card -->
-    <div class="candy-card">
-      <div class="candy-card__glow"></div>
-      <div class="candy-card__header">
-        <div class="candy-card__orb">
-          <i class="fas fa-robot"></i>
-        </div>
-        <div>
-          <div class="candy-card__name">Candy AI</div>
-          <div class="candy-card__sub">Pavan's Personal Assistant</div>
-        </div>
-      </div>
-      <p class="candy-card__desc">I know everything about Pavan — his projects, skills, experience and story. Ask me anything.</p>
-      <div class="candy-card__caps">
-        <div class="cap-item"><i class="fas fa-brain"></i> Groq AI Powered</div>
-        <div class="cap-item"><i class="fas fa-bolt"></i> Instant Answers</div>
-        <div class="cap-item"><i class="fas fa-microphone"></i> Voice Input</div>
-        <div class="cap-item"><i class="fas fa-comments"></i> Natural Chat</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- QR + Portfolio links -->
-    <div class="qr-section">
-      <div class="section-label"><i class="fas fa-link"></i> Connect</div>
-      <div class="qr-card">
-        <div class="qr-card__code" id="qrCode"></div>
-        <p class="qr-card__hint">Scan to open portfolio</p>
-        <div class="qr-card__actions">
-          <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" rel="noopener noreferrer" class="pill-btn pill-btn--primary">
-            <i class="fas fa-external-link-alt"></i> Portfolio
-          </a>
-          <a href="mailto:daroorpavankalyan@gmail.com" class="pill-btn pill-btn--ghost">
-            <i class="fas fa-envelope"></i> Email
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Quick asks -->
-    <div class="quick-asks">
-      <div class="section-label"><i class="fas fa-bolt"></i> Quick asks</div>
-      <div class="quick-asks__list" id="quickAskList">
-        <button class="quick-ask" data-q="What projects has Pavan built?"><i class="fas fa-code"></i>Projects</button>
-        <button class="quick-ask" data-q="What are Pavan's strongest skills?"><i class="fas fa-star"></i>Skills</button>
-        <button class="quick-ask" data-q="Tell me about Pavan's internship"><i class="fas fa-briefcase"></i>Experience</button>
-        <button class="quick-ask" data-q="Is Pavan available for hire?"><i class="fas fa-handshake"></i>Hire</button>
-        <button class="quick-ask" data-q="How do I contact Pavan?"><i class="fas fa-paper-plane"></i>Contact</button>
-        <button class="quick-ask" data-q="What is Pavan studying?"><i class="fas fa-graduation-cap"></i>Education</button>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Social links -->
-    <div class="social-row">
-      <a href="https://github.com/kalyan-91" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub">
-        <i class="fab fa-github"></i>
-      </a>
-      <a href="https://linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn">
-        <i class="fab fa-linkedin-in"></i>
-      </a>
-      <a href="mailto:daroorpavankalyan@gmail.com" class="social-btn" title="Email">
-        <i class="fas fa-envelope"></i>
-      </a>
-      <a href="https://wa.me/918919944203" target="_blank" rel="noopener noreferrer" class="social-btn social-btn--green" title="WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-      </a>
-    </div>
-
-  </aside>
-
   <!-- ════════ CHAT ════════ -->
   <main class="chat">
 
     <!-- Header -->
     <header class="chat-header">
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu">
-        <i class="fas fa-bars"></i>
-      </button>
-
       <div class="chat-header__info">
         <div class="chat-header__avatar">
           <i class="fas fa-robot"></i>
@@ -185,15 +85,12 @@
       </div>
       <div class="input-footer">
         <span class="input-hint">↩ send · shift+↩ newline</span>
-        <span id="voiceStatus" class="voice-status">🔊 Voice on</span>
+        <span id="voiceStatus" class="voice-status">Voice on</span>
       </div>
     </div>
 
   </main>
 </div>
-
-<!-- Sidebar backdrop -->
-<div class="backdrop" id="backdrop" aria-hidden="true"></div>
 
 <!-- Toast container -->
 <div class="toast-wrap" id="toastWrap" aria-live="assertive"></div>
