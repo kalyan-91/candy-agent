@@ -10,33 +10,34 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
-  <!-- Mobile sidebar always hidden on load -->
-  <style>
-    @media (max-width: 768px) {
-      .sidebar { transform: translateX(-110%) !important; }
-      .sidebar.open { transform: translateX(0) !important; }
-    }
-  </style>
 </head>
 <body>
 
+<!-- Ambient background -->
 <div class="ambient">
   <div class="ambient__blob ambient__blob--1"></div>
   <div class="ambient__blob ambient__blob--2"></div>
   <div class="ambient__blob ambient__blob--3"></div>
 </div>
+
+<!-- Starfield canvas -->
 <canvas id="stars"></canvas>
+
+<!-- Grid overlay -->
 <div class="grid-overlay"></div>
+
+<!-- Floating particles -->
 <div class="particles" id="particles"></div>
 
 <div class="app" id="app">
 
-  <!-- SIDEBAR -->
+  <!-- ════════ SIDEBAR ════════ -->
   <aside class="sidebar" id="sidebar">
     <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
       <i class="fas fa-times"></i>
     </button>
 
+    <!-- Brand -->
     <div class="brand">
       <div class="brand-orb">
         <svg class="brand-orb__ring" viewBox="0 0 80 80">
@@ -54,10 +55,13 @@
 
     <div class="divider"></div>
 
+    <!-- Candy info card -->
     <div class="candy-card">
       <div class="candy-card__glow"></div>
       <div class="candy-card__header">
-        <div class="candy-card__orb"><i class="fas fa-robot"></i></div>
+        <div class="candy-card__orb">
+          <i class="fas fa-robot"></i>
+        </div>
         <div>
           <div class="candy-card__name">Candy AI</div>
           <div class="candy-card__sub">Pavan's Personal Assistant</div>
@@ -74,6 +78,7 @@
 
     <div class="divider"></div>
 
+    <!-- QR + Portfolio links -->
     <div class="qr-section">
       <div class="section-label"><i class="fas fa-link"></i> Connect</div>
       <div class="qr-card">
@@ -92,6 +97,7 @@
 
     <div class="divider"></div>
 
+    <!-- Quick asks -->
     <div class="quick-asks">
       <div class="section-label"><i class="fas fa-bolt"></i> Quick asks</div>
       <div class="quick-asks__list" id="quickAskList">
@@ -106,20 +112,33 @@
 
     <div class="divider"></div>
 
+    <!-- Social links -->
     <div class="social-row">
-      <a href="https://github.com/kalyan-91" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
-      <a href="https://linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-      <a href="mailto:daroorpavankalyan@gmail.com" class="social-btn" title="Email"><i class="fas fa-envelope"></i></a>
-      <a href="https://wa.me/918919944203" target="_blank" rel="noopener noreferrer" class="social-btn social-btn--green" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      <a href="https://github.com/kalyan-91" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub">
+        <i class="fab fa-github"></i>
+      </a>
+      <a href="https://linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn">
+        <i class="fab fa-linkedin-in"></i>
+      </a>
+      <a href="mailto:daroorpavankalyan@gmail.com" class="social-btn" title="Email">
+        <i class="fas fa-envelope"></i>
+      </a>
+      <a href="https://wa.me/918919944203" target="_blank" rel="noopener noreferrer" class="social-btn social-btn--green" title="WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+      </a>
     </div>
+
   </aside>
 
-  <!-- CHAT -->
+  <!-- ════════ CHAT ════════ -->
   <main class="chat">
+
+    <!-- Header -->
     <header class="chat-header">
       <button class="menu-btn" id="menuBtn" aria-label="Open menu">
         <i class="fas fa-bars"></i>
       </button>
+
       <div class="chat-header__info">
         <div class="chat-header__avatar">
           <i class="fas fa-robot"></i>
@@ -130,23 +149,38 @@
           <div class="chat-header__status"><span class="status-dot"></span>Pavan's assistant · always on</div>
         </div>
       </div>
+
       <div class="chat-header__actions">
-        <button class="hdr-btn" id="voiceToggle" title="Toggle voice"><i class="fas fa-volume-up"></i></button>
-        <button class="hdr-btn" id="clearBtn" title="New chat"><i class="fas fa-pen-to-square"></i></button>
-        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" rel="noopener noreferrer" class="hdr-btn" title="Portfolio"><i class="fas fa-external-link-alt"></i></a>
+        <button class="hdr-btn" id="voiceToggle" title="Toggle voice" aria-label="Toggle voice">
+          <i class="fas fa-volume-up"></i>
+        </button>
+        <button class="hdr-btn" id="clearBtn" title="New chat" aria-label="New chat">
+          <i class="fas fa-pen-to-square"></i>
+        </button>
+        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" rel="noopener noreferrer" class="hdr-btn hdr-btn--link" title="Visit Portfolio" aria-label="Visit Portfolio">
+          <i class="fas fa-external-link-alt"></i>
+        </a>
       </div>
     </header>
 
+    <!-- Messages -->
     <div class="messages" id="messages" role="log" aria-live="polite"></div>
 
+    <!-- Input -->
     <div class="input-wrap">
       <div class="suggestions-strip" id="suggestStrip"></div>
+
       <div class="input-box" id="inputBox">
-        <button class="mic-btn" id="micBtn" title="Speak"><i class="fas fa-microphone"></i></button>
-        <textarea class="input-field" id="inputField" placeholder="Ask anything about Pavan…" rows="1" maxlength="500" aria-label="Message input"></textarea>
+        <button class="mic-btn" id="micBtn" title="Speak" aria-label="Voice input">
+          <i class="fas fa-microphone"></i>
+        </button>
+        <textarea class="input-field" id="inputField"
+          placeholder="Ask anything about Pavan…" rows="1" maxlength="500" aria-label="Message input"></textarea>
         <div class="input-right">
           <span class="char-count" id="charCount">500</span>
-          <button class="send-btn" id="sendBtn" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+          <button class="send-btn" id="sendBtn" aria-label="Send message">
+            <i class="fas fa-paper-plane"></i>
+          </button>
         </div>
       </div>
       <div class="input-footer">
@@ -154,12 +188,17 @@
         <span id="voiceStatus" class="voice-status">🔊 Voice on</span>
       </div>
     </div>
+
   </main>
 </div>
 
-<div class="backdrop" id="backdrop"></div>
-<div class="toast-wrap" id="toastWrap"></div>
+<!-- Sidebar backdrop -->
+<div class="backdrop" id="backdrop" aria-hidden="true"></div>
 
+<!-- Toast container -->
+<div class="toast-wrap" id="toastWrap" aria-live="assertive"></div>
+
+<!-- QRCode lib -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="script.js"></script>
 </body>
