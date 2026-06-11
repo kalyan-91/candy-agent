@@ -15,126 +15,38 @@
 <canvas id="stars"></canvas>
 <div class="grid-overlay"></div>
 
+<!-- Ambient orbs -->
+<div class="chat-ambient">
+  <div class="ca-orb ca-orb--1"></div>
+  <div class="ca-orb ca-orb--2"></div>
+  <div class="ca-orb ca-orb--3"></div>
+</div>
+
 <div class="app" id="app">
 
-  <!-- ════════ SIDEBAR ════════ -->
-  <aside class="sidebar" id="sidebar">
-    <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
-      <i class="fas fa-times"></i>
-    </button>
-
-    <!-- Brand -->
-    <div class="brand">
-      <div class="brand-orb">
-        <svg class="brand-orb__ring" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(0,212,255,0.35)" stroke-width="1.5" stroke-dasharray="6 4"/>
-          <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(139,92,246,0.25)" stroke-width="1" stroke-dasharray="3 6"/>
-        </svg>
-        <div class="brand-orb__inner">C</div>
-        <div class="brand-orb__pulse"></div>
-      </div>
-      <div class="brand-text">
-        <div class="brand-name">Candy <span class="brand-version">v2</span></div>
-        <div class="brand-tag"><span class="status-dot"></span>Pavan's AI · Online</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Profile card -->
-    <div class="profile-card">
-      <div class="profile-card__bg"></div>
-      <div class="profile-card__avatar">
-        <i class="fas fa-user"></i>
-      </div>
-      <div class="profile-card__name">Pavan Kalyan</div>
-      <div class="profile-card__title">MCA Student · Data Scientist</div>
-      <div class="profile-card__tags">
-        <span class="ptag">Python</span>
-        <span class="ptag">ML</span>
-        <span class="ptag">React</span>
-        <span class="ptag">SQL</span>
-      </div>
-      <div class="profile-card__links">
-        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="plink plink--primary">
-          <i class="fas fa-globe"></i> Portfolio
-        </a>
-        <a href="https://github.com/kalyan-91" target="_blank" class="plink plink--ghost">
-          <i class="fab fa-github"></i> GitHub
-        </a>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Quick asks -->
-    <div class="section-label"><i class="fas fa-bolt"></i> Quick asks</div>
-    <div class="quick-asks__list" id="quickAskList">
-      <button class="quick-ask" data-q="What projects has Pavan built?"><i class="fas fa-code"></i>Projects</button>
-      <button class="quick-ask" data-q="What are Pavan's strongest skills?"><i class="fas fa-star"></i>Skills</button>
-      <button class="quick-ask" data-q="Tell me about Pavan's internship"><i class="fas fa-briefcase"></i>Experience</button>
-      <button class="quick-ask" data-q="Is Pavan available for hire?"><i class="fas fa-handshake"></i>Hire</button>
-      <button class="quick-ask" data-q="How do I contact Pavan?"><i class="fas fa-paper-plane"></i>Contact</button>
-      <button class="quick-ask" data-q="What is Pavan studying?"><i class="fas fa-graduation-cap"></i>Education</button>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Stats row -->
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="stat-box__val">10+</div>
-        <div class="stat-box__label">Projects</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-box__val">2+</div>
-        <div class="stat-box__label">Years exp</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-box__val">MCA</div>
-        <div class="stat-box__label">Degree</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Social row -->
-    <div class="social-row">
-      <a href="https://github.com/kalyan-91" target="_blank" rel="noopener noreferrer" class="social-btn" title="GitHub"><i class="fab fa-github"></i></a>
-      <a href="https://linkedin.com/in/daroor-pavan-kalyan-370277253/" target="_blank" rel="noopener noreferrer" class="social-btn" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-      <a href="mailto:daroorpavankalyan@gmail.com" class="social-btn" title="Email"><i class="fas fa-envelope"></i></a>
-      <a href="https://wa.me/918919944203" target="_blank" rel="noopener noreferrer" class="social-btn social-btn--green" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-    </div>
-
-  </aside>
-
-  <!-- ════════ CHAT ════════ -->
+  <!-- ════════ FULL-SCREEN CHAT ════════ -->
   <main class="chat">
-
-    <!-- Ambient orbs inside chat -->
-    <div class="chat-ambient">
-      <div class="ca-orb ca-orb--1"></div>
-      <div class="ca-orb ca-orb--2"></div>
-      <div class="ca-orb ca-orb--3"></div>
-    </div>
 
     <!-- Header -->
     <header class="chat-header">
-      <button class="menu-btn" id="menuBtn" aria-label="Open menu">
-        <i class="fas fa-bars"></i>
-      </button>
 
-      <div class="chat-header__info">
-        <div class="chat-header__avatar">
-          <i class="fas fa-robot"></i>
-          <span class="chat-header__ping"></span>
+      <!-- Candy branding -->
+      <div class="chat-header__brand">
+        <div class="brand-orb">
+          <svg class="brand-orb__ring" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(0,212,255,0.35)" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(139,92,246,0.25)" stroke-width="1" stroke-dasharray="3 6"/>
+          </svg>
+          <div class="brand-orb__inner">C</div>
+          <div class="brand-orb__pulse"></div>
         </div>
-        <div>
-          <div class="chat-header__name">Candy <span class="chat-header__ai-tag">AI</span></div>
-          <div class="chat-header__status"><span class="status-dot"></span>Pavan's assistant · always on</div>
+        <div class="brand-info">
+          <div class="brand-name">Candy <span class="brand-version">v2</span></div>
+          <div class="brand-sub"><span class="status-dot"></span>Pavan's AI assistant · always on</div>
         </div>
       </div>
 
+      <!-- Actions -->
       <div class="chat-header__actions">
         <button class="hdr-btn" id="voiceToggle" title="Toggle voice" aria-label="Toggle voice">
           <i class="fas fa-volume-up"></i>
@@ -142,7 +54,7 @@
         <button class="hdr-btn" id="clearBtn" title="New chat" aria-label="New chat">
           <i class="fas fa-pen-to-square"></i>
         </button>
-        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" rel="noopener noreferrer" class="hdr-btn hdr-btn--link" title="Visit Portfolio">
+        <a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" rel="noopener noreferrer" class="hdr-btn" title="Visit Portfolio">
           <i class="fas fa-external-link-alt"></i>
         </a>
       </div>
@@ -177,10 +89,7 @@
   </main>
 </div>
 
-<div class="backdrop" id="backdrop" aria-hidden="true"></div>
 <div class="toast-wrap" id="toastWrap" aria-live="assertive"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
