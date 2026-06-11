@@ -1,404 +1,287 @@
-/* ═══════════════════════════════════════════════════
-   CANDY AI v2 — script.js
-   Pavan Kalyan · Deep Space Portfolio Agent
-═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   CANDY AI — Pavan's Personal Assistant
+   ═══════════════════════════════════════════════ */
 
-'use strict';
-
-/* ── Config ── */
 const GROQ_ENDPOINT = 'https://pk-groq-proxy.daroorpavankalyan.workers.dev';
 const GROQ_MODEL    = 'llama-3.3-70b-versatile';
 
-const SYSTEM_PROMPT = `You are Candy — a sharp, warm, and genuinely helpful AI assistant representing Pavan Kalyan's portfolio. You have a real personality: curious, friendly, professionally confident, and occasionally witty.
+// ── Pavan's knowledge base (system prompt) ──
+const SYSTEM_PROMPT = `You are Candy, the personal AI assistant for Pavan Kalyan Daroor — a passionate MCA student and aspiring data scientist at JNTUA, Anantapur, Andhra Pradesh.
 
-Your job is to help visitors learn about Pavan — but do it like a real conversation, not a bullet-point dump. Be natural. Ask follow-up questions when relevant. Show genuine enthusiasm about his work.
+You know everything about Pavan. Be warm, enthusiastic, concise, and professional.
 
-Never use emojis. Keep the tone clean, professional, and conversational. Keep responses under 5 sentences unless the person clearly wants detail.
+ABOUT PAVAN:
+- Full name: Daroor Pavan Kalyan
+- MCA student at JNTUA, Anantapur (2023–2025)
+- Bachelor's in Computer Science
+- Data Science Intern at Interncall (internship experience)
+- Location: Kurnool / Anantapur, Andhra Pradesh, India
 
-== FACTS ABOUT PAVAN ==
+SKILLS:
+- Programming: Python, JavaScript, Java, SQL
+- Data Science & ML: Pandas, NumPy, Scikit-learn, TensorFlow, Matplotlib, Seaborn
+- Web Dev: React, Vite, HTML5, CSS3, Node.js, Express
+- Tools: Git, GitHub, MySQL, PostgreSQL, Jupyter Notebook
+- AI/LLM: Anthropic Claude API, Groq API, Web Speech API
+- Other: Framer Motion, Tailwind CSS, REST APIs
 
-Personal:
-- Full name: D. Pavan Kalyan
-- Role: MCA Student and Data Analytics Aspirant
-- Location: Kurnool, Andhra Pradesh, India
+PROJECTS:
+1. Portfolio Website — Full-stack React + Vite portfolio with dark theme, glassmorphism, Framer Motion animations, 3D flip project cards, scroll-spy navbar, Formspree contact form. Live: https://kalyanfinity-portfolio.netlify.app
+2. AURA AI Companion — Single-file personal productivity + AI companion web app. Features: Claude API-powered chat, live YouTube/Spotify embeds, Web Speech API voice commands, health/goal/task tracking with localStorage persistence, study timer.
+3. CLONEBOT Reminder System — Full-stack AI-powered reminder app with OpenAI/Claude API-generated messages, Twilio SMS/call delivery, browser voice synthesis, personality modes, smart escalation, per-user email-based login with localStorage-isolated data.
+4. Candy AI — This very assistant! A beautifully designed AI chatbot built with Groq AI, featuring voice input, quick asks, suggestions, and full chat history.
+5. SPARMS — Student Performance Analysis and Result Management System (Java Swing desktop app) for MCA Department with data analytics features.
+
+EXPERIENCE:
+- Data Science Intern at Interncall — worked on data analysis, ML model building, Python data pipelines, and visualization projects.
+
+CONTACT:
 - Email: daroorpavankalyan@gmail.com
-- LinkedIn: linkedin.com/in/daroor-pavan-kalyan-370277253/
-- GitHub: github.com/kalyan-91
-- WhatsApp: +91 89199 44203
-- Portfolio: kalyanfinity-portfolio.netlify.app
-- Open to: internships and entry-level roles in Data Analytics and Data Science
+- GitHub: https://github.com/kalyan-91
+- LinkedIn: https://linkedin.com/in/daroor-pavan-kalyan-370277253/
+- WhatsApp: +91 8919944203
+- Portfolio: https://kalyanfinity-portfolio.netlify.app
 
-Education:
-- MCA — JNTUA, Anantapur (2025 to 2027, currently pursuing). Focus: Data Analytics, Database Management, Business Intelligence
-- BSc MSCS — St. Joseph Degree College, Rayalaseema University, Kurnool (2021 to 2024)
+AVAILABILITY:
+Pavan is actively seeking full-time roles and freelance opportunities in Data Science, Machine Learning, and Full-Stack Web Development. He's open to remote or hybrid positions.
 
-Internship:
-- Data Science Intern at Interncall, Kurnool (Jan to Apr 2024)
-- Applied Python for data cleaning, EDA, and building ML models to solve real-world problems
-- Worked with Matplotlib and Seaborn to present insights effectively to stakeholders
-- Gained hands-on experience across the end-to-end data science project lifecycle
-- Stack: Python, Pandas, Scikit-learn, Matplotlib, Seaborn
+PERSONALITY NOTES:
+- Ambitious and hands-on builder who creates polished, feature-rich apps
+- Strong interest in AI/ML and creative web applications
+- Fast learner, team player, passionate about UI/UX
 
-Skills:
-- SQL 90%, Excel 88%, Python 85%, Java 70%
-- Power BI 85%, Matplotlib 80%, Seaborn 80%, Plotly 75%
-- Pandas 85%, NumPy 80%, Scikit-learn 75%, TensorFlow 70%
-- HTML 85%, CSS 80%, JavaScript 70%
-- Tools: Streamlit, OpenCV, JDBC, Maven, iText PDF, ZXing, GitHub
+When responding:
+- Be concise and friendly, use bullet points for lists
+- Format project names in bold
+- Always mention the portfolio link when relevant
+- Use markdown: **bold** for emphasis, bullet points for lists`;
 
-Projects:
-1. SPARMS — Java Swing desktop app for academic result management. Role-based dashboards (Admin, Faculty, Student), OMR scanning, automated grade computation, MySQL with JDBC, PDF export. Stack: Java Swing, MySQL, JDBC, Maven, iText, ZXing.
-2. InventoryIQ — Streamlit inventory analytics dashboard. Secure login, product management, audit logs, CSV export. Live: inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app. GitHub: github.com/kalyan-91/InventoryIQ-E-commerce-Inventory-Analytics-System
-3. Digit Recognizer — CNN app recognizing handwritten digits 0-9 on interactive canvas. Live: hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app. GitHub: github.com/kalyan-91/Hand-Written-Digit-Recognition
-4. Netflix Dashboard — Power BI dashboard exploring 5000+ titles, genres, durations, countries. GitHub: github.com/kalyan-91/Netflix-PowerBI-Dashboard
-5. Employee Attrition Analysis — ML classification models plus Power BI dashboard for HR analytics. GitHub: github.com/kalyan-91/EmployeeAttritionAndEngagementAnalysis
-6. Zomato Analysis — Restaurant rating pattern analysis and predictive classification. GitHub: github.com/kalyan-91/Zomato_Restaurant_Analysis_And_Predictive_Analysis
+// ── Chat history ──
+let messages = [];
+let voiceEnabled = true;
+let speechSynth = window.speechSynthesis;
+let isSpeaking = false;
+let recognition = null;
+let isListening = false;
 
-Portfolio features:
-- Project filter buttons (All, Java, Analytics, ML, Visualization)
-- Announcement bar with scrolling text
-- Horizontally scrolling tech stack wall in Skills section
-- Before/After Data Cleaning Slider — Coming Soon
-- Scroll Driven Data Story — Coming Soon
-- Resume updated June 2025 available for download
+// ── DOM refs ──
+const msgList = document.getElementById('messages');
+const inputField = document.getElementById('inputField');
+const sendBtn = document.getElementById('sendBtn');
+const micBtn = document.getElementById('micBtn');
+const clearBtn = document.getElementById('clearBtn');
+const voiceToggle = document.getElementById('voiceToggle');
+const charCount = document.getElementById('charCount');
+const suggestStrip = document.getElementById('suggestStrip');
+const voiceStatus = document.getElementById('voiceStatus');
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const sidebarClose = document.getElementById('sidebarClose');
+const backdrop = document.getElementById('backdrop');
+const toastWrap = document.getElementById('toastWrap');
 
-== RESPONSE RULES ==
-- Never use emojis.
-- Vary openers — never start every message the same way.
-- If asked about a project with a live link, always share it.
-- For contact questions share email and LinkedIn.
-- After 2 to 3 messages naturally ask visitor name and email for Pavan to follow up.
-- If visitor seems like a recruiter, mention Pavan is actively looking for internships and entry-level Data Analyst roles.
-- Never say "As an AI language model".
-- If asked about coming soon features, explain the Before/After slider and Scroll Driven Data Story.`;
-
-/* ── State ── */
-let chatHistory   = [];
-let isListening   = false;
-let isSpeaking    = false;
-let voiceEnabled  = true;
-let recognition   = null;
-let currentUtter  = null;
-let inactivityTimer = null;
-
-/* ── DOM refs ── */
-const $ = id => document.getElementById(id);
-
-/* ════════════════════════════════
-   INIT
-════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  initStars();
-  initParticles();
-  initQR();
-  initChat();
-  initSidebar();
-  initVoice();
-  appendWelcome();
-  resetInactivityTimer();
-});
-
-/* ════════════════════════════════
-   STARS CANVAS
-════════════════════════════════ */
-function initStars() {
-  const canvas = $('stars');
+// ── Stars canvas ──
+(function initStars() {
+  const canvas = document.getElementById('stars');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W, H;
+  let W, H, stars = [];
 
   function resize() {
-    W = canvas.width  = window.innerWidth;
+    W = canvas.width = window.innerWidth;
     H = canvas.height = window.innerHeight;
   }
-  resize();
-  window.addEventListener('resize', resize);
 
-  const COUNT = Math.min(180, Math.floor(window.innerWidth * window.innerHeight / 5000));
-  const stars = Array.from({ length: COUNT }, () => ({
-    x: Math.random(), y: Math.random(),
-    r: Math.random() * 1.3 + 0.2,
-    alpha: Math.random() * 0.65 + 0.15,
-    hue: [220,240,260,195,42][Math.floor(Math.random()*5)],
-    sat: Math.random() > 0.4 ? 80 : 15,
-    tw: Math.random() * Math.PI * 2,
-    twS: Math.random() * 0.022 + 0.004,
-    vx: (Math.random() - 0.5) * 0.08,
-    vy: (Math.random() - 0.5) * 0.08,
-  }));
-
-  const shooters = [];
-  setInterval(() => {
-    if (Math.random() < 0.5) {
-      shooters.push({
-        x: Math.random() * W * 0.7, y: Math.random() * H * 0.3,
-        len: Math.random() * 100 + 50,
-        speed: Math.random() * 7 + 4,
-        angle: Math.PI/4 + (Math.random()-0.5)*0.5,
-        life: 1,
+  function createStars() {
+    stars = [];
+    const count = Math.floor((W * H) / 5000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.5 + 0.3,
+        a: Math.random(),
+        da: (Math.random() - 0.5) * 0.005,
+        speed: Math.random() * 0.15 + 0.05,
       });
     }
-  }, 4000);
+  }
 
-  let mx = W/2, my = H/2;
-  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-
-  function tick() {
+  function draw() {
     ctx.clearRect(0, 0, W, H);
     stars.forEach(s => {
-      s.tw += s.twS;
-      const a = s.alpha * (0.6 + 0.4 * Math.sin(s.tw));
-      const px = s.x * W + (mx - W/2) * s.r * 0.002;
-      const py = s.y * H + (my - H/2) * s.r * 0.002;
-
-      if (s.r > 0.9) {
-        const g = ctx.createRadialGradient(px,py,0,px,py,s.r*4);
-        g.addColorStop(0, `hsla(${s.hue},${s.sat}%,80%,${a*0.25})`);
-        g.addColorStop(1, 'transparent');
-        ctx.beginPath(); ctx.arc(px,py,s.r*4,0,Math.PI*2);
-        ctx.fillStyle = g; ctx.fill();
-      }
-      ctx.beginPath(); ctx.arc(px,py,s.r,0,Math.PI*2);
-      ctx.fillStyle = `hsla(${s.hue},${s.sat}%,85%,${a})`;
+      s.a += s.da;
+      if (s.a <= 0 || s.a >= 1) s.da *= -1;
+      s.y -= s.speed;
+      if (s.y < -5) { s.y = H + 5; s.x = Math.random() * W; }
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(180, 220, 255, ${s.a * 0.75})`;
       ctx.fill();
-
-      s.x += s.vx/W; s.y += s.vy/H;
-      if (s.x<0) s.x=1; if (s.x>1) s.x=0;
-      if (s.y<0) s.y=1; if (s.y>1) s.y=0;
     });
-
-    for (let i = shooters.length-1; i >= 0; i--) {
-      const sh = shooters[i];
-      sh.x += Math.cos(sh.angle)*sh.speed;
-      sh.y += Math.sin(sh.angle)*sh.speed;
-      sh.life -= 0.02;
-      if (sh.life <= 0) { shooters.splice(i,1); continue; }
-      const tx = sh.x - Math.cos(sh.angle)*sh.len;
-      const ty = sh.y - Math.sin(sh.angle)*sh.len;
-      const g = ctx.createLinearGradient(tx,ty,sh.x,sh.y);
-      g.addColorStop(0,'transparent');
-      g.addColorStop(0.7,`rgba(167,139,250,${sh.life*0.4})`);
-      g.addColorStop(1,`rgba(255,255,255,${sh.life*0.9})`);
-      ctx.beginPath(); ctx.moveTo(tx,ty); ctx.lineTo(sh.x,sh.y);
-      ctx.strokeStyle=g; ctx.lineWidth=sh.life*1.8; ctx.stroke();
-    }
-    requestAnimationFrame(tick);
-  }
-  tick();
-}
-
-/* ════════════════════════════════
-   FLOATING PARTICLES
-════════════════════════════════ */
-function initParticles() {
-  const wrap = $('particles');
-  if (!wrap) return;
-  const colors = ['#00d4ff','#a78bfa','#fbbf24','#7dd3fc'];
-
-  for (let i = 0; i < 18; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.cssText = `
-      left: ${Math.random()*100}%;
-      width: ${Math.random()*3+1}px;
-      height: ${Math.random()*3+1}px;
-      background: ${colors[Math.floor(Math.random()*colors.length)]};
-      animation-duration: ${Math.random()*20+15}s;
-      animation-delay: ${Math.random()*15}s;
-      opacity: 0;
-    `;
-    wrap.appendChild(p);
-  }
-}
-
-/* ════════════════════════════════
-   QR CODE
-════════════════════════════════ */
-function initQR() {
-  const el = $('qrCode');
-  if (!el || typeof QRCode === 'undefined') return;
-  new QRCode(el, {
-    text: 'https://kalyanfinity-portfolio.netlify.app',
-    width: 100, height: 100,
-    colorDark: '#0369A1',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H,
-  });
-}
-
-/* ════════════════════════════════
-   SIDEBAR (mobile)
-════════════════════════════════ */
-function initSidebar() {
-  const sidebar  = $('sidebar');
-  const menuBtn  = $('menuBtn');
-  const closeBtn = $('sidebarClose');
-  const backdrop = $('backdrop');
-
-  function open() {
-    sidebar.classList.add('open');
-    backdrop.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
-  function close() {
-    sidebar.classList.remove('open');
-    backdrop.classList.remove('show');
-    document.body.style.overflow = '';
+    requestAnimationFrame(draw);
   }
 
-  menuBtn?.addEventListener('click', open);
-  closeBtn?.addEventListener('click', close);
-  backdrop?.addEventListener('click', close);
+  resize(); createStars(); draw();
+  window.addEventListener('resize', () => { resize(); createStars(); });
+})();
 
-  // Quick ask buttons
-  $('quickAskList')?.addEventListener('click', e => {
-    const btn = e.target.closest('.quick-ask');
-    if (btn) {
-      $('inputField').value = btn.dataset.q;
-      if (window.innerWidth <= 820) close();
-      submitMessage();
-    }
+// ── Greeting ──
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+// ── Suggestion sets ──
+const SUGGESTIONS = {
+  default: ['Projects', 'Skills', 'Experience', 'Hire Pavan', 'Contact info', 'Education'],
+  follow: ['Tell me more', 'Show projects', 'What skills?', 'How to contact?'],
+};
+
+// ── Render suggestions strip ──
+function renderSuggestions(set = 'default') {
+  suggestStrip.innerHTML = '';
+  const items = SUGGESTIONS[set] || SUGGESTIONS.default;
+  items.forEach((label, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'strip-chip';
+    btn.textContent = label;
+    btn.style.animationDelay = `${i * 0.05}s`;
+    btn.addEventListener('click', () => {
+      inputField.value = label.endsWith('?') ? label : `Tell me about Pavan's ${label.toLowerCase().replace('hire pavan', 'availability for hire').replace('contact info', 'contact information')}`;
+      if (label === 'Hire Pavan') inputField.value = 'Is Pavan available for hire?';
+      if (label === 'Contact info') inputField.value = 'How do I contact Pavan?';
+      if (label === 'Projects') inputField.value = 'What projects has Pavan built?';
+      if (label === 'Skills') inputField.value = "What are Pavan's strongest skills?";
+      if (label === 'Experience') inputField.value = "Tell me about Pavan's internship experience";
+      if (label === 'Education') inputField.value = "What is Pavan studying?";
+      if (label === 'Tell me more') inputField.value = 'Can you tell me more about that?';
+      if (label === 'Show projects') inputField.value = 'Show me all of Pavan\'s projects in detail';
+      if (label === 'What skills?') inputField.value = 'List all of Pavan\'s technical skills';
+      if (label === 'How to contact?') inputField.value = 'How can I reach Pavan?';
+      sendMessage();
+    });
+    suggestStrip.appendChild(btn);
   });
 }
 
-/* ════════════════════════════════
-   VOICE TOGGLE
-════════════════════════════════ */
-function initVoice() {
-  const btn    = $('voiceToggle');
-  const status = $('voiceStatus');
-  if (!btn) return;
-
-  updateVoiceUI();
-  btn.addEventListener('click', () => {
-    voiceEnabled = !voiceEnabled;
-    if (!voiceEnabled) stopSpeaking();
-    updateVoiceUI();
-    showToast(voiceEnabled ? 'Voice on' : 'Voice off');
-  });
-
-  function updateVoiceUI() {
-    btn.classList.toggle('active', voiceEnabled);
-    btn.innerHTML = voiceEnabled
-      ? '<i class="fas fa-volume-up"></i>'
-      : '<i class="fas fa-volume-xmark"></i>';
-    if (status) {
-      status.textContent = voiceEnabled ? 'Voice on' : 'Voice off';
-      status.className = 'voice-status' + (voiceEnabled ? ' active' : '');
-    }
-  }
+// ── Welcome card ──
+function showWelcome() {
+  const d = document.createElement('div');
+  d.className = 'msg msg--assistant';
+  d.innerHTML = `
+    <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+    <div class="msg-content">
+      <div class="bubble bubble--assistant">
+        <div class="welcome-card">
+          <div class="welcome-card__title">${getGreeting()}! I'm <strong>Candy</strong> ✦</div>
+          <div class="welcome-card__sub">
+            Pavan's personal AI assistant. I know everything about him — his projects, skills, internship experience, and more.<br><br>
+            Ask me anything or tap a quick question below!
+          </div>
+          <div class="chips-row">
+            <button class="chip" onclick="quickSend('What projects has Pavan built?')">📦 Projects</button>
+            <button class="chip" onclick="quickSend('What are Pavan\\'s strongest skills?')">⚡ Skills</button>
+            <button class="chip" onclick="quickSend('Is Pavan available for hire?')">🤝 Hire</button>
+            <button class="chip" onclick="quickSend('How do I contact Pavan?')">✉️ Contact</button>
+          </div>
+        </div>
+      </div>
+      <div class="msg-time">${getTime()}</div>
+    </div>
+  `;
+  msgList.appendChild(d);
+  scrollBottom();
 }
 
-/* ════════════════════════════════
-   CHAT INIT
-════════════════════════════════ */
-function initChat() {
-  const input    = $('inputField');
-  const sendBtn  = $('sendBtn');
-  const clearBtn = $('clearBtn');
-  const micBtn   = $('micBtn');
+// ── Quick send helper ──
+window.quickSend = function(text) {
+  inputField.value = text;
+  sendMessage();
+};
 
-  sendBtn?.addEventListener('click', submitMessage);
+// ── Add message to DOM ──
+function addMessage(role, text, animate = true) {
+  const isUser = role === 'user';
+  const wrap = document.createElement('div');
+  wrap.className = `msg msg--${isUser ? 'user' : 'assistant'}`;
+  if (!animate) wrap.style.animation = 'none';
 
-  clearBtn?.addEventListener('click', () => {
-    chatHistory = [];
-    $('messages').innerHTML = '';
-    $('suggestStrip').innerHTML = '';
-    appendWelcome();
-    showToast('New chat started');
-  });
+  const formattedText = isUser ? escHtml(text) : formatMarkdown(text);
 
-  input?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      submitMessage();
-    }
-  });
+  wrap.innerHTML = `
+    ${!isUser ? `<div class="msg-avatar"><i class="fas fa-robot"></i></div>` : ''}
+    <div class="msg-content">
+      <div class="bubble bubble--${isUser ? 'user' : 'assistant'}">${formattedText}</div>
+      <div class="msg-time">${getTime()}</div>
+    </div>
+    ${isUser ? `<div class="msg-avatar" style="background:linear-gradient(135deg,#7c3aed,#00d4ff)"><i class="fas fa-user"></i></div>` : ''}
+  `;
 
-  input?.addEventListener('input', () => {
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-    const left = 500 - input.value.length;
-    const cc = $('charCount');
-    if (cc) {
-      cc.textContent = left;
-      cc.className = 'char-count' + (left < 50 ? ' danger' : left < 150 ? ' warn' : '');
-    }
-    resetInactivityTimer();
-  });
+  msgList.appendChild(wrap);
+  scrollBottom();
+  return wrap;
+}
 
-  // Message area chip clicks
-  $('messages')?.addEventListener('click', e => {
-    const chip = e.target.closest('.welcome-chip, .sugg-chip');
-    if (chip) { input.value = chip.dataset.q || chip.textContent; submitMessage(); }
-  });
+// ── Typing indicator ──
+function showTyping() {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg--assistant';
+  wrap.id = 'typingIndicator';
+  wrap.innerHTML = `
+    <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+    <div class="msg-content">
+      <div class="bubble bubble--assistant">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  `;
+  msgList.appendChild(wrap);
+  scrollBottom();
+}
 
-  // Suggestions strip chip clicks
-  $('suggestStrip')?.addEventListener('click', e => {
-    const chip = e.target.closest('.sugg-chip');
-    if (chip) { input.value = chip.dataset.q; submitMessage(); }
-  });
+function hideTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
 
-  // Mic
-  setupRecognition();
-  micBtn?.addEventListener('click', () => {
-    if (isListening) stopListening();
-    else startListening();
+// ── Format markdown ──
+function formatMarkdown(text) {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/\[(.+?)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/^### (.+)$/gm, '<strong style="color:var(--cyan)">$1</strong>')
+    .replace(/^## (.+)$/gm, '<strong style="color:var(--cyan);font-size:1rem">$1</strong>')
+    .replace(/^- (.+)$/gm, '• $1')
+    .replace(/\n/g, '<br>');
+}
+
+function escHtml(t) {
+  return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── Scroll ──
+function scrollBottom() {
+  requestAnimationFrame(() => {
+    msgList.scrollTo({ top: msgList.scrollHeight, behavior: 'smooth' });
   });
 }
 
-/* ════════════════════════════════
-   WELCOME MESSAGE
-════════════════════════════════ */
-function appendWelcome() {
-  const hour = new Date().getHours();
-  const greeting =
-    hour >= 5  && hour < 12 ? 'Good morning' :
-    hour >= 12 && hour < 17 ? 'Good afternoon' :
-    hour >= 17 && hour < 21 ? 'Good evening' :
-    'Hey, night owl';
-
-  const chips = [
-    { label: 'Projects',   q: "What projects has Pavan built?" },
-    { label: 'Skills',     q: "What are Pavan's strongest skills?" },
-    { label: 'Experience', q: "Tell me about Pavan's internship" },
-    { label: 'Hire Pavan', q: "I am interested in hiring Pavan" },
-  ];
-  const chipsHTML = `<div class="welcome-chips">${
-    chips.map(c => `<button class="welcome-chip" data-q="${c.q}">${c.label}</button>`).join('')
-  }</div>`;
-
-  appendMessage('assistant',
-    `${greeting}! I am <strong>Candy</strong>, Pavan's personal AI. Ask me anything about his projects, skills, or experience.${chipsHTML}`
-  );
+// ── Time ──
+function getTime() {
+  return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-/* ════════════════════════════════
-   SUBMIT MESSAGE
-════════════════════════════════ */
-async function submitMessage() {
-  const input = $('inputField');
-  const text  = input.value.trim();
-  if (!text) return;
+// ── API call (Groq/Anthropic) ──
+async function callAPI(userMessage) {
+  messages.push({ role: 'user', content: userMessage });
 
-  // Clear input
-  input.value = '';
-  input.style.height = 'auto';
-  const cc = $('charCount');
-  if (cc) cc.textContent = '500';
-
-  // Clear suggestions
-  const strip = $('suggestStrip');
-  if (strip) strip.innerHTML = '';
-
-  stopListening();
-  appendMessage('user', escapeHTML(text));
-  chatHistory.push({ role: 'user', content: text });
-
-  const typingId = appendTyping();
-  const sendBtn  = $('sendBtn');
-  if (sendBtn) sendBtn.disabled = true;
-
+  // Call via Cloudflare Worker proxy (no key needed client-side)
   try {
     const res = await fetch(GROQ_ENDPOINT, {
       method: 'POST',
@@ -407,336 +290,250 @@ async function submitMessage() {
         model: GROQ_MODEL,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          ...chatHistory,
+          ...messages
         ],
-        max_tokens: 600,
-        temperature: 0.85,
-        top_p: 0.9,
-        stream: false,
-      }),
+        temperature: 0.72,
+        max_tokens: 700,
+      })
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data  = await res.json();
-    const reply = data.choices?.[0]?.message?.content?.trim()
-      || 'I got an empty response. Please try again.';
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || "I'm having trouble connecting right now. Please try again!";
+    messages.push({ role: 'assistant', content: reply });
+    return reply;
+  } catch (e) {
+    // Fallback: smart offline responses
+    return getSmartFallback(userMessage);
+  }
+}
 
-    removeTyping(typingId);
-    await typeMessage(formatReply(reply));
-    chatHistory.push({ role: 'assistant', content: reply });
+// ── Smart offline fallback ──
+function getSmartFallback(q) {
+  const ql = q.toLowerCase();
 
-    speak(reply);
-    addSmartSuggestions(reply);
-    autoScrollToSection(text);
-    resetInactivityTimer();
+  if (ql.includes('project') || ql.includes('built') || ql.includes('app')) {
+    return `Pavan has built some really impressive projects! Here's a quick rundown:\n\n**📦 Portfolio Website** — React + Vite, dark theme, glassmorphism, Framer Motion animations. [Live here](https://kalyanfinity-portfolio.netlify.app)\n\n**🤖 AURA AI Companion** — Single-file personal AI companion with Claude API, YouTube/Spotify embeds, voice commands, and productivity tracking.\n\n**⏰ CLONEBOT Reminder System** — Full-stack AI reminder app with Twilio SMS/calls, personality modes, and smart escalation.\n\n**💬 Candy AI** — This very assistant! Powered by Groq AI with voice input, beautiful UI, and deep knowledge of Pavan.\n\n**🎓 SPARMS** — Student Performance Analysis system (Java Swing) for MCA Department data analytics.`;
+  }
 
-    if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
+  if (ql.includes('skill') || ql.includes('tech') || ql.includes('know')) {
+    return `Pavan's technical stack is quite broad!\n\n**Languages:** Python · JavaScript · Java · SQL\n\n**Data Science & ML:** Pandas · NumPy · Scikit-learn · TensorFlow · Matplotlib · Seaborn\n\n**Web Dev:** React · Vite · Node.js · Express · Tailwind · Framer Motion\n\n**AI/APIs:** Anthropic Claude API · Groq API · Web Speech API · Twilio\n\n**Tools:** Git · GitHub · MySQL · PostgreSQL · Jupyter Notebook`;
+  }
+
+  if (ql.includes('contact') || ql.includes('reach') || ql.includes('email') || ql.includes('hire')) {
+    return `You can reach Pavan through multiple channels:\n\n📧 **Email:** daroorpavankalyan@gmail.com\n💼 **LinkedIn:** [daroor-pavan-kalyan-370277253](https://linkedin.com/in/daroor-pavan-kalyan-370277253/)\n🐙 **GitHub:** [kalyan-91](https://github.com/kalyan-91)\n📱 **WhatsApp:** +91 8919944203\n🌐 **Portfolio:** [kalyanfinity-portfolio.netlify.app](https://kalyanfinity-portfolio.netlify.app)\n\nHe's actively open to Data Science, ML, and Full-Stack Web Development roles!`;
+  }
+
+  if (ql.includes('intern') || ql.includes('experience') || ql.includes('work')) {
+    return `Pavan completed a **Data Science Internship at Interncall**, where he worked on:\n\n• Building Python data pipelines and analysis scripts\n• Training and evaluating ML models\n• Creating data visualizations and reports\n• Applying real-world data science workflows\n\nThis, combined with his hands-on project building, gives him strong practical experience beyond academics!`;
+  }
+
+  if (ql.includes('study') || ql.includes('education') || ql.includes('degree') || ql.includes('college')) {
+    return `Pavan is currently pursuing his **MCA (Master of Computer Applications)** at **JNTUA, Anantapur**, Andhra Pradesh (2023–2025). He completed his Bachelor's in Computer Science prior to this.\n\nHis academic focus is on data science, machine learning, and software engineering — areas he actively applies in his personal projects!`;
+  }
+
+  if (ql.includes('available') || ql.includes('freelance') || ql.includes('job') || ql.includes('opportunit')) {
+    return `Yes! Pavan is **actively seeking opportunities** in:\n\n🔬 Data Science & Machine Learning\n💻 Full-Stack Web Development\n🤖 AI/LLM Integration\n\nHe's open to full-time roles, internships, and freelance projects. Remote or hybrid positions are welcome!\n\nBest way to reach him: **daroorpavankalyan@gmail.com** or his [portfolio](https://kalyanfinity-portfolio.netlify.app).`;
+  }
+
+  if (ql.includes('aura') || ql.includes('candy') || ql.includes('clonebot')) {
+    return `Those are some of Pavan's most impressive AI projects!\n\n**🌟 AURA AI** — A personal companion app featuring Claude API chat, YouTube/Spotify live embeds, Web Speech API voice recognition, health/goal/task tracking, and a study timer — all in a single HTML file.\n\n**🍬 Candy AI** — That's me! A beautifully designed chatbot built to represent Pavan's portfolio and answer questions about him.\n\n**🤖 CLONEBOT** — An AI-powered reminder system with Twilio SMS/calls, voice synthesis, personality modes, and per-user data isolation.`;
+  }
+
+  return `Great question! I'm Candy — Pavan's AI assistant. I know all about his projects, skills, experience, and how to reach him.\n\nTry asking me about his **projects**, **skills**, **internship experience**, or **contact info**! 😊`;
+}
+
+// ── Send message ──
+async function sendMessage() {
+  const text = inputField.value.trim();
+  if (!text) return;
+
+  inputField.value = '';
+  updateCharCount();
+  autoResize();
+  suggestStrip.innerHTML = '';
+
+  addMessage('user', text);
+  showTyping();
+
+  try {
+    const reply = await callAPI(text);
+    hideTyping();
+    addMessage('assistant', reply);
+
+    if (voiceEnabled && reply) {
+      speak(reply.replace(/[*_`#\[\]]/g, '').replace(/<[^>]+>/g, '').slice(0, 200));
+    }
+
+    // Show follow-up suggestions
+    setTimeout(() => renderSuggestions('follow'), 400);
 
   } catch (err) {
-    removeTyping(typingId);
-    appendMessage('error', `Connection error: ${escapeHTML(err.message)}`);
-  } finally {
-    if (sendBtn) sendBtn.disabled = false;
-    input.focus();
+    hideTyping();
+    const errEl = document.createElement('div');
+    errEl.className = 'msg msg--assistant';
+    errEl.innerHTML = `<div class="msg-avatar"><i class="fas fa-robot"></i></div><div class="msg-content"><div class="bubble bubble--error">⚠️ Oops! Something went wrong. Please try again.</div></div>`;
+    msgList.appendChild(errEl);
+    scrollBottom();
   }
 }
 
-/* ════════════════════════════════
-   TYPING EFFECT
-════════════════════════════════ */
-async function typeMessage(html) {
-  const msgs = $('messages');
-  const wrap = document.createElement('div');
-  wrap.className = 'msg msg--assistant';
-  wrap.innerHTML = `
-    <div class="msg-avatar">C</div>
-    <div class="msg-content">
-      <div class="bubble bubble--assistant" id="tbNew"></div>
-      <div class="msg-meta">
-        <span class="msg-time">${getTime()}</span>
-      </div>
-    </div>`;
-  msgs.appendChild(wrap);
-  msgs.scrollTop = msgs.scrollHeight;
+// ── Voice TTS ──
+function speak(text) {
+  if (!speechSynth || !voiceEnabled) return;
+  speechSynth.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1.05; utter.pitch = 1.0; utter.volume = 0.9;
 
-  const bubble = wrap.querySelector('#tbNew');
-  bubble.removeAttribute('id');
+  // Pick a nice voice
+  const voices = speechSynth.getVoices();
+  const preferred = voices.find(v =>
+    v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel')
+  ) || voices[0];
+  if (preferred) utter.voice = preferred;
 
-  const plain = html.replace(/<[^>]+>/g, '');
-  const words = plain.split(' ');
-  let out = '';
-  for (let i = 0; i < words.length; i++) {
-    out += (i === 0 ? '' : ' ') + words[i];
-    bubble.textContent = out;
-    msgs.scrollTop = msgs.scrollHeight;
-    await sleep(55);
-  }
-  bubble.innerHTML = html;
-  msgs.scrollTop = msgs.scrollHeight;
+  utter.onstart = () => isSpeaking = true;
+  utter.onend = () => isSpeaking = false;
+  speechSynth.speak(utter);
 }
 
-/* ════════════════════════════════
-   SMART SUGGESTIONS
-════════════════════════════════ */
-function addSmartSuggestions(reply) {
-  const strip = $('suggestStrip');
-  if (!strip) return;
-  const lower = reply.toLowerCase();
-  let suggs = [];
+// ── Voice input (STT) ──
+function initSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { micBtn.style.opacity = '0.3'; micBtn.disabled = true; return; }
 
-  if (lower.includes('project') || lower.includes('sparms') || lower.includes('inventoryiq') || lower.includes('digit')) {
-    suggs = ['Which project is most impressive?', 'Does Pavan have live projects?', 'What tech stack does Pavan use?'];
-  } else if (lower.includes('skill') || lower.includes('python') || lower.includes('sql') || lower.includes('power bi')) {
-    suggs = ["What is Pavan's strongest skill?", 'Does Pavan know machine learning?', 'What tools does Pavan use daily?'];
-  } else if (lower.includes('intern') || lower.includes('experience') || lower.includes('interncall')) {
-    suggs = ['What did Pavan do in his internship?', 'Is Pavan open to opportunities?', 'How do I contact Pavan?'];
-  } else if (lower.includes('contact') || lower.includes('hire') || lower.includes('email') || lower.includes('reach')) {
-    suggs = ['What roles is Pavan looking for?', "Can I see Pavan's resume?", "Visit Pavan's portfolio"];
-  } else if (lower.includes('education') || lower.includes('mca') || lower.includes('degree')) {
-    suggs = ['What is Pavan studying?', 'When does Pavan graduate?', "What projects has Pavan built?"];
-  } else {
-    suggs = ["Tell me about Pavan's projects", "What are Pavan's skills?", 'How do I contact Pavan?'];
-  }
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
 
-  strip.innerHTML = suggs.map(s =>
-    `<button class="sugg-chip" data-q="${s}">${s}</button>`
-  ).join('');
-}
-
-/* ════════════════════════════════
-   AUTO SCROLL TO SECTION
-════════════════════════════════ */
-function autoScrollToSection(text) {
-  const lower = text.toLowerCase();
-  const map = {
-    projects:    ['project','sparms','inventoryiq','digit','netflix','zomato','attrition'],
-    skills:      ['skill','python','sql','power bi','tech stack','pandas'],
-    education:   ['education','mca','degree','university','study'],
-    experience:  ['experience','intern','interncall','work'],
-    contact:     ['contact','email','hire','reach','whatsapp','linkedin'],
-  };
-
-  for (const [id, keys] of Object.entries(map)) {
-    if (keys.some(k => lower.includes(k))) {
-      const section = document.getElementById(id) ||
-                      document.querySelector(`[data-section="${id}"]`);
-      if (section) {
-        setTimeout(() => {
-          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 900);
-      }
-      break;
+  recognition.onresult = e => {
+    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+    inputField.value = transcript;
+    updateCharCount(); autoResize();
+    if (e.results[e.results.length - 1].isFinal) {
+      isListening = false;
+      micBtn.classList.remove('listening');
     }
+  };
+  recognition.onerror = () => { isListening = false; micBtn.classList.remove('listening'); };
+  recognition.onend = () => { isListening = false; micBtn.classList.remove('listening'); };
+}
+
+micBtn.addEventListener('click', () => {
+  if (!recognition) return;
+  if (isListening) { recognition.stop(); return; }
+  recognition.start();
+  isListening = true;
+  micBtn.classList.add('listening');
+  showToast('🎤 Listening…');
+  if (isSpeaking) speechSynth.cancel();
+});
+
+// ── Voice toggle ──
+voiceToggle.addEventListener('click', () => {
+  voiceEnabled = !voiceEnabled;
+  if (!voiceEnabled && isSpeaking) speechSynth.cancel();
+  voiceToggle.classList.toggle('active', voiceEnabled);
+  voiceStatus.textContent = voiceEnabled ? '🔊 Voice on' : '🔇 Voice off';
+  showToast(voiceEnabled ? '🔊 Voice enabled' : '🔇 Voice disabled');
+});
+
+// ── Voice status click ──
+voiceStatus.addEventListener('click', () => voiceToggle.click());
+
+// ── Clear chat ──
+clearBtn.addEventListener('click', () => {
+  messages = [];
+  msgList.innerHTML = '';
+  showWelcome();
+  renderSuggestions('default');
+  showToast('✨ New chat started');
+});
+
+// ── Char count & auto-resize ──
+function updateCharCount() {
+  const remaining = 500 - inputField.value.length;
+  charCount.textContent = remaining;
+  charCount.classList.toggle('warn', remaining < 50);
+}
+
+function autoResize() {
+  inputField.style.height = 'auto';
+  inputField.style.height = Math.min(inputField.scrollHeight, 120) + 'px';
+}
+
+inputField.addEventListener('input', () => { updateCharCount(); autoResize(); });
+
+// ── Send on enter ──
+inputField.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
   }
-}
+});
 
-/* ════════════════════════════════
-   INACTIVITY MESSAGE
-════════════════════════════════ */
-const INACTIVITY_MSGS = [
-  "Still there? Feel free to ask me anything about Pavan!",
-  "Not sure what to ask? Try \"What projects has Pavan built?\" or \"How do I contact him?\"",
-  "I am here whenever you need. Ask about Pavan's skills, projects, or experience!",
-];
+sendBtn.addEventListener('click', sendMessage);
 
-function resetInactivityTimer() {
-  clearTimeout(inactivityTimer);
-  const chat = document.querySelector('.chat');
-  if (!chat) return;
-  inactivityTimer = setTimeout(() => {
-    const msg = INACTIVITY_MSGS[Math.floor(Math.random() * INACTIVITY_MSGS.length)];
-    appendMessage('assistant', msg);
-    addSmartSuggestions(msg);
-  }, 120000);
-}
-
-document.addEventListener('mousemove', resetInactivityTimer, { passive: true });
-document.addEventListener('keydown',   resetInactivityTimer, { passive: true });
-
-/* ════════════════════════════════
-   DOM HELPERS
-════════════════════════════════ */
-function appendMessage(role, html) {
-  const msgs = $('messages');
-  const wrap = document.createElement('div');
-  wrap.className = `msg msg--${role}`;
-  const time = getTime();
-
-  if (role === 'user') {
-    wrap.innerHTML = `
-      <div class="msg-content" style="align-items:flex-end">
-        <div class="bubble bubble--user">${html}</div>
-        <div class="msg-meta" style="justify-content:flex-end">
-          <span class="msg-time">${time}</span>
-        </div>
-      </div>`;
-  } else if (role === 'error') {
-    wrap.innerHTML = `<div class="bubble bubble--error">${html}</div>`;
-  } else {
-    wrap.innerHTML = `
-      <div class="msg-avatar">C</div>
-      <div class="msg-content">
-        <div class="bubble bubble--assistant">${html}</div>
-        <div class="msg-meta">
-          <span class="msg-time">${time}</span>
-        </div>
-      </div>`;
-  }
-
-  msgs.appendChild(wrap);
-  msgs.scrollTop = msgs.scrollHeight;
-  return wrap;
-}
-
-function appendTyping() {
-  const id   = 'typing-' + Date.now();
-  const msgs = $('messages');
-  const wrap = document.createElement('div');
-  wrap.id = id;
-  wrap.className = 'msg msg--assistant';
-  wrap.innerHTML = `
-    <div class="msg-avatar">C</div>
-    <div class="msg-content">
-      <div class="bubble bubble--assistant">
-        <div class="typing-wrap">
-          <div class="typing-dots"><span></span><span></span><span></span></div>
-          <span class="typing-label">thinking</span>
-        </div>
-      </div>
-    </div>`;
-  msgs.appendChild(wrap);
-  msgs.scrollTop = msgs.scrollHeight;
-  return id;
-}
-
-function removeTyping(id) { $(id)?.remove(); }
-
-function getTime() {
-  return new Date().toLocaleTimeString('en-IN', {
-    hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
+// ── Quick ask buttons ──
+document.querySelectorAll('.quick-ask').forEach(btn => {
+  btn.addEventListener('click', () => {
+    inputField.value = btn.dataset.q || '';
+    sendMessage();
+    if (window.innerWidth <= 768) closeSidebar();
   });
+});
+
+// ── Sidebar ──
+function openSidebar() {
+  sidebar.classList.add('open');
+  backdrop.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
-function escapeHTML(str) {
-  return str
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('active');
+  document.body.style.overflow = '';
 }
 
-function formatReply(text) {
-  text = text.replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/`([^`]+)`/g,'<code>$1</code>')
-    .replace(/\n\n/g,'</p><p>')
-    .replace(/\n/g,'<br>');
-}
+menuBtn.addEventListener('click', openSidebar);
+sidebarClose.addEventListener('click', closeSidebar);
+backdrop.addEventListener('click', closeSidebar);
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-/* ════════════════════════════════
-   TOAST
-════════════════════════════════ */
-function showToast(msg, duration = 2500) {
-  const wrap = $('toastWrap');
-  if (!wrap) return;
+// ── Toast ──
+function showToast(msg, duration = 2200) {
   const t = document.createElement('div');
   t.className = 'toast';
   t.textContent = msg;
-  wrap.appendChild(t);
+  toastWrap.appendChild(t);
+  requestAnimationFrame(() => { requestAnimationFrame(() => { t.classList.add('show'); }); });
   setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateY(6px)';
-    t.style.transition = 'all 0.3s ease';
+    t.classList.remove('show');
     setTimeout(() => t.remove(), 350);
   }, duration);
 }
 
-/* ════════════════════════════════
-   SPEECH RECOGNITION
-════════════════════════════════ */
-function setupRecognition() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
+// ── Touch swipe to close sidebar ──
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx < -60 && sidebar.classList.contains('open')) closeSidebar();
+}, { passive: true });
 
-  recognition = new SR();
-  recognition.continuous    = false;
-  recognition.interimResults = true;
-  recognition.lang          = 'en-IN';
+// ── Keyboard shortcut: Escape ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+});
 
-  recognition.onstart  = () => { isListening = true;  updateMicUI(true); };
-  recognition.onend    = () => { isListening = false; updateMicUI(false); };
-  recognition.onerror  = e  => {
-    stopListening();
-    if (e.error === 'not-allowed') showToast('Microphone access denied');
-  };
-  recognition.onresult = e => {
-    const t = Array.from(e.results).map(r => r[0].transcript).join('');
-    $('inputField').value = t;
-    if (e.results[e.results.length - 1].isFinal) {
-      setTimeout(submitMessage, 400);
-    }
-  };
-}
+// ── Init ──
+(function init() {
+  initSpeechRecognition();
+  showWelcome();
+  renderSuggestions('default');
+  inputField.focus();
 
-function startListening() {
-  if (!recognition) { showToast('Voice input not supported in this browser'); return; }
-  stopSpeaking();
-  try { recognition.start(); } catch(e) {}
-}
-
-function stopListening() {
-  if (recognition && isListening) recognition.stop();
-  isListening = false;
-  updateMicUI(false);
-}
-
-function updateMicUI(active) {
-  const btn = $('micBtn');
-  if (!btn) return;
-  btn.classList.toggle('listening', active);
-  btn.title = active ? 'Listening — click to stop' : 'Speak';
-}
-
-/* ════════════════════════════════
-   SPEECH SYNTHESIS
-════════════════════════════════ */
-if (window.speechSynthesis) {
-  window.speechSynthesis.getVoices();
-  window.speechSynthesis.addEventListener('voiceschanged', () => {});
-}
-
-function speak(text) {
-  if (!voiceEnabled || !window.speechSynthesis) return;
-  const clean = text.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
-  if (!clean) return;
-
-  stopSpeaking();
-  currentUtter         = new SpeechSynthesisUtterance(clean);
-  currentUtter.lang    = 'en-US';
-  currentUtter.rate    = 1.0;
-  currentUtter.pitch   = 1.0;
-  currentUtter.volume  = 1.0;
-
-  const voices = window.speechSynthesis.getVoices();
-  const v =
-    voices.find(v => v.name.includes('Google US English')) ||
-    voices.find(v => v.lang === 'en-US' && !v.localService) ||
-    voices.find(v => v.lang.startsWith('en-'));
-  if (v) currentUtter.voice = v;
-
-  const status = $('voiceStatus');
-  currentUtter.onstart = () => { isSpeaking = true;  if (status) { status.textContent='Speaking…'; status.className='voice-status speaking'; } };
-  currentUtter.onend   = () => { isSpeaking = false; if (status) { status.textContent='Voice on';  status.className='voice-status active'; } };
-  currentUtter.onerror = () => { isSpeaking = false; };
-
-  setTimeout(() => window.speechSynthesis.speak(currentUtter), 100);
-}
-
-function stopSpeaking() {
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
-  isSpeaking = false;
-}
+  // Show welcome toast
+  setTimeout(() => showToast('👋 Hey! Ask me about Pavan'), 1000);
+})();
