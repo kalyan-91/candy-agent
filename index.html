@@ -153,7 +153,8 @@ body.light .msgs::before{
 body.light .mbtn{background:rgba(255,255,255,0.70);border-color:rgba(109,40,217,0.14);color:var(--muted);}
 body.light .mbtn:hover{background:rgba(109,40,217,0.08);border-color:rgba(109,40,217,0.28);color:var(--v2);}
 
-html,body{
+html{height:100%;overflow:hidden;}
+body{
   height:100%;
   font-family:'Inter',sans-serif;
   color:var(--text);
@@ -162,6 +163,7 @@ html,body{
   background:var(--bg);
   transition:background .4s,color .4s;
 }
+
 
 /* ══════════ COSMOS ══════════ */
 .cosmos{position:fixed;inset:0;z-index:0;overflow:hidden;transition:background .4s;}
@@ -235,8 +237,15 @@ html,body{
 }
 
 /* ══════════ LAYOUT ══════════ */
-.app{position:relative;z-index:1;display:flex;height:100vh;padding:10px;gap:10px;}
-
+.app{
+  position:relative;
+  z-index:1;
+  display:flex;
+  height:100vh;
+  height:100dvh;
+  padding:10px;
+  gap:10px;
+}
 @keyframes rbw{to{background-position:300% center}}
 
 /* ══════════ SIDEBAR ══════════ */
@@ -452,8 +461,13 @@ html,body{
 
 /* ══════════ CHAT PANEL ══════════ */
 .chat{
-  flex:1;min-width:0;display:flex;flex-direction:column;
-  border-radius:22px;overflow:hidden;
+  flex:1;
+  min-width:0;
+  min-height:0;        /* ← ADD THIS */
+  display:flex;
+  flex-direction:column;
+  border-radius:22px;
+  overflow:hidden;
   background:linear-gradient(160deg,rgba(35,8,90,0.52),rgba(8,25,70,0.58),rgba(4,15,45,0.65));
   border:1px solid rgba(139,92,246,0.30);
   box-shadow:
@@ -524,7 +538,13 @@ html,body{
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
 
 /* ── Messages ── */
-.msgs-wrap{flex:1;overflow:hidden;position:relative;}
+.msgs-wrap{
+  flex:1;
+  min-height:0;        /* ← ADD THIS — critical for flex children to shrink */
+  overflow:hidden;
+  position:relative;
+}
+
 .chat-stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
 .cstar{
   position:absolute;height:2px;border-radius:100px;opacity:0;
@@ -634,9 +654,11 @@ html,body{
 
 /* ── Input area ── */
 .inp-area{
-  padding:14px 18px 18px;border-top:1px solid rgba(139,92,246,0.28);
+  padding:14px 18px 18px;
+  border-top:1px solid rgba(139,92,246,0.28);
   background:linear-gradient(90deg,rgba(30,8,80,0.55),rgba(8,20,60,0.50));
-  backdrop-filter:blur(20px);flex-shrink:0;
+  backdrop-filter:blur(20px);
+  flex-shrink:0;       /* ← ENSURE this stays */
   transition:background .4s,border-color .4s;
 }
 .inp-wrap{
