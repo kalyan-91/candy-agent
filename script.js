@@ -1,5 +1,31 @@
 'use strict';
 
+/* ══════════ PAVAN'S CURRENT FOCUS WIDGET ══════════ */
+(function () {
+  const focuses = [
+    'Building AI agents',
+    'Pursuing MCA @ JNTUA',
+    'Exploring LLMs & RAG',
+    'Crafting data dashboards',
+    'Learning full-stack dev',
+    'Open to internships',
+    'Deep in Python & ML',
+    'Building portfolio projects',
+  ];
+  let idx = 0;
+  const el = document.getElementById('focusText');
+  if (!el) return;
+  el.textContent = focuses[0];
+  setInterval(() => {
+    el.classList.add('fade');
+    setTimeout(() => {
+      idx = (idx + 1) % focuses.length;
+      el.textContent = focuses[idx];
+      el.classList.remove('fade');
+    }, 400);
+  }, 3500);
+})();
+
 /* ══════════ STAR CANVAS ══════════ */
 (function () {
   const cv = document.getElementById('sc'), ctx = cv.getContext('2d');
