@@ -396,6 +396,9 @@ body{
 #focusText{color:var(--v4);font-weight:500;font-size:.57rem;transition:opacity .4s;}
 #focusText.fade{opacity:0;}
 
+#ktime{color:var(--c4);}
+body.light #ktime{color:var(--c2);}
+
 /* ══ MOBILE ══ */
 @media(max-width:700px){
   .app{padding:0;gap:0;flex-direction:column;}
