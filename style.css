@@ -396,8 +396,15 @@ body{
 #focusText{color:var(--v4);font-weight:500;font-size:.57rem;transition:opacity .4s;}
 #focusText.fade{opacity:0;}
 
-#ktime{color:var(--c4);}
-body.light #ktime{color:var(--c2);}
+/* ══════════ INTERACTIVE CLOCK ══════════ */
+.clock-widget{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:16px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.22);margin-top:12px;transition:all .3s;cursor:default;}
+.clock-widget:hover{background:rgba(139,92,246,0.14);border-color:rgba(139,92,246,0.40);transform:scale(1.02);}
+#clockCanvas{border-radius:50%;flex-shrink:0;}
+.clock-info{display:flex;flex-direction:column;gap:3px;}
+.clock-digital{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--v4);letter-spacing:.08em;}
+.clock-label{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+body.light .clock-widget{background:rgba(109,40,217,0.06);border-color:rgba(109,40,217,0.18);}
+body.light .clock-digital{color:var(--v2);}
 
 /* ══ MOBILE ══ */
 @media(max-width:700px){
