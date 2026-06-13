@@ -35,14 +35,13 @@
     const hh = String(h % 12 || 12).padStart(2, '0');
     const mm = String(m).padStart(2, '0');
     const ampm = h >= 12 ? 'PM' : 'AM';
-    document.getElementById('ktime').textContent = `${hh}:${mm} ${ampm} IST · Anantapur`;
+    document.getElementById('ktime').textContent = `${hh}:${mm} ${ampm} IST · Anantapur / Kurnool`;
 
-    // Update online/away status
     const statusEl = document.querySelector('.hero-status');
     if (statusEl) {
       const isAway = h >= 22 || h < 7;
       statusEl.innerHTML = isAway
-        ? `<span class="hdot" style="background:#f59e0b;box-shadow:0 0 12px #f59e0b"></span>Likely asleep · Anantapur`
+        ? `<span class="hdot" style="background:#f59e0b;box-shadow:0 0 12px #f59e0b"></span>Likely asleep · Anantapur / Kurnool`
         : `<span class="hdot"></span>Online &middot; Ready to chat`;
     }
   }
