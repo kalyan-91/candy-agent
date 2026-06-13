@@ -473,6 +473,7 @@ window.addEventListener('DOMContentLoaded', () => {
   inpEl.addEventListener('input', () => resizeTA(inpEl));
   micEl.addEventListener('click', () => listening ? stopListen() : startListen());
   document.getElementById('clbtn').addEventListener('click', () => { hist = []; msgsEl.innerHTML = ''; stopSpeak(); welcome(); showToast('Chat cleared'); });
+  document.getElementById('vcfBtn')?.addEventListener('click', downloadVCF);
   document.getElementById('mpill').addEventListener('click', () => { voiceOn = !voiceOn; if (!voiceOn) stopSpeak(); updateMode(); showToast(voiceOn ? 'Voice on' : 'Voice off'); });
   msgsEl.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { inpEl.value = c.dataset.q; go(); } });
   document.getElementById('starters').addEventListener('click', e => { const b = e.target.closest('.starter'); if (b) { inpEl.value = b.dataset.q; go(); } });
@@ -580,6 +581,7 @@ async function go() {
     removeTyping(tid);
     await typeMsg(fmt(rep));
     hist.push({ role: 'assistant', content: rep });
+    addReactionBar();
     addSugg(rep);
     doSpeak(rep);
     if (hist.length > 40) hist = hist.slice(-40);
