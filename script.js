@@ -26,6 +26,30 @@
   }, 3500);
 })();
 
+// Live Time
+(function () {
+  function updateClock() {
+    const now = new Date();
+    const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const h = ist.getHours(), m = ist.getMinutes();
+    const hh = String(h % 12 || 12).padStart(2, '0');
+    const mm = String(m).padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    document.getElementById('ktime').textContent = `${hh}:${mm} ${ampm} IST · Anantapur`;
+
+    // Update online/away status
+    const statusEl = document.querySelector('.hero-status');
+    if (statusEl) {
+      const isAway = h >= 22 || h < 7;
+      statusEl.innerHTML = isAway
+        ? `<span class="hdot" style="background:#f59e0b;box-shadow:0 0 12px #f59e0b"></span>Likely asleep · Anantapur`
+        : `<span class="hdot"></span>Online &middot; Ready to chat`;
+    }
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+})();
+
 /* ══════════ STAR CANVAS ══════════ */
 (function () {
   const cv = document.getElementById('sc'), ctx = cv.getContext('2d');
