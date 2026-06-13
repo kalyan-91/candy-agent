@@ -1,6 +1,6 @@
 'use strict';
 
-/* ══════════ PAVAN'S CURRENT FOCUS WIDGET ══════════ */
+// Current Focus Widget
 (function () {
   const focuses = [
     'Building AI agents',
