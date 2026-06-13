@@ -177,6 +177,26 @@ function addReactionBar() {
   msgsEl.appendChild(row);
   msgsEl.scrollTop = msgsEl.scrollHeight;
 }
+
+/* ══════════ CANDY'S MOOD RING ══════════ */
+const MOOD_KEYWORDS = {
+  technical: /\b(python|sql|ml|machine learning|model|dataset|pandas|tensorflow|power bi|streamlit|java|api|code|algorithm|data|analytics|dashboard|neural|scikit|numpy|excel|database|github|programming|developer|software)\b/i,
+  recruiter: /\b(hire|hiring|job|intern|internship|recruit|salary|role|position|opportunity|candidate|cv|resume|work with|available|experience)\b/i,
+  personal:  /\b(family|story|background|journey|struggle|dream|goal|feel|emotion|personal|life|grow|inspire|motivation|first|proud|passion|believe)\b/i,
+  wow:       /\b(amazing|awesome|incredible|wow|brilliant|genius|love|great|fantastic|impressive|excellent|superb|outstanding|fire|perfect)\b/i,
+};
+
+function setMood(text) {
+  const core = document.querySelector('.pcore');
+  if (!core) return;
+  core.classList.remove('mood-casual','mood-technical','mood-recruiter','mood-personal','mood-wow');
+  if      (MOOD_KEYWORDS.wow.test(text))       core.classList.add('mood-wow');
+  else if (MOOD_KEYWORDS.recruiter.test(text)) core.classList.add('mood-recruiter');
+  else if (MOOD_KEYWORDS.technical.test(text)) core.classList.add('mood-technical');
+  else if (MOOD_KEYWORDS.personal.test(text))  core.classList.add('mood-personal');
+  else                                          core.classList.add('mood-casual');
+}
+
 /* ══════════ STAR CANVAS ══════════ */
 (function () {
   const cv = document.getElementById('sc'), ctx = cv.getContext('2d');
@@ -603,6 +623,7 @@ async function go() {
     removeTyping(tid);
     await typeMsg(fmt(rep));
     hist.push({ role: 'assistant', content: rep });
+    setMood(txt + ' ' + rep);
     addReactionBar();
     addSugg(rep);
     doSpeak(rep);
