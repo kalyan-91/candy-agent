@@ -127,7 +127,56 @@
   drawClock();
   setInterval(drawClock, 1000);
 })();
+/* ══════════ VCF DOWNLOAD ══════════ */
+function downloadVCF() {
+  const vcf = [
+    'BEGIN:VCARD', 'VERSION:3.0',
+    'FN:Pavan Kalyan Daroor',
+    'N:Daroor;Pavan Kalyan;;;',
+    'TITLE:MCA Student | Data Analytics & AI',
+    'EMAIL;TYPE=INTERNET:daroorpavankalyan@gmail.com',
+    'TEL;TYPE=CELL:+918919944203',
+    'URL:https://kalyanfinity-portfolio.netlify.app',
+    'X-SOCIALPROFILE;type=linkedin:https://linkedin.com/in/daroor-pavan-kalyan-370277253/',
+    'X-SOCIALPROFILE;type=github:https://github.com/kalyan-91',
+    'NOTE:Data Analytics aspirant. Open to internships and entry-level roles.',
+    'END:VCARD'
+  ].join('\r\n');
+  const blob = new Blob([vcf], { type: 'text/vcard' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'PavanKalyan.vcf';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Contact card downloaded!');
+}
 
+/* ══════════ REACTION BAR ══════════ */
+function addReactionBar() {
+  const reactions = [
+    { emoji: '🔥', label: 'Fire' },
+    { emoji: '👍', label: 'Helpful' },
+    { emoji: '🤩', label: 'Amazing' },
+    { emoji: '💬', label: 'Interesting' },
+  ];
+  const row = document.createElement('div');
+  row.className = 'react-bar';
+  const btns = reactions.map(r =>
+    `<button class="react-btn" data-emoji="${r.emoji}" title="${r.label}">${r.emoji}</button>`
+  ).join('');
+  row.innerHTML = `<span class="react-label">Was Candy helpful?</span><div class="react-emojis">${btns}</div>`;
+  row.addEventListener('click', e => {
+    const btn = e.target.closest('.react-btn');
+    if (!btn || btn.classList.contains('reacted')) return;
+    // Remove all previous reacted states in this bar
+    row.querySelectorAll('.react-btn').forEach(b => b.classList.remove('reacted'));
+    btn.classList.add('reacted');
+    showToast('Thanks for the reaction!');
+    setTimeout(() => { row.style.transition = 'opacity .5s'; row.style.opacity = '0'; setTimeout(() => row.remove(), 500); }, 1500);
+  });
+  msgsEl.appendChild(row);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
 /* ══════════ STAR CANVAS ══════════ */
 (function () {
   const cv = document.getElementById('sc'), ctx = cv.getContext('2d');
