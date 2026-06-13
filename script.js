@@ -35,7 +35,7 @@
     const hh = String(h % 12 || 12).padStart(2, '0');
     const mm = String(m).padStart(2, '0');
     const ampm = h >= 12 ? 'PM' : 'AM';
-    document.getElementById('ktime').textContent = `${hh}:${mm} ${ampm} IST · Anantapur / Kurnool`;
+    document.getElementById('ktime').textContent = `${hh}:${mm} ${ampm} IST · INDIA`;
 
     const statusEl = document.querySelector('.hero-status');
     if (statusEl) {
