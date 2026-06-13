@@ -26,27 +26,106 @@
   }, 3500);
 })();
 
-// Live Time
+/* ══════════ LIVE CLOCK ══════════ */
 (function () {
-  function updateClock() {
+  const canvas = document.getElementById('clockCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 80, H = 80, cx = W / 2, cy = H / 2, R = 34;
+
+  function drawClock() {
     const now = new Date();
     const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-    const h = ist.getHours(), m = ist.getMinutes();
+    const h = ist.getHours(), m = ist.getMinutes(), s = ist.getSeconds();
+
+    // Angles
+    const secAng  = (s / 60) * Math.PI * 2 - Math.PI / 2;
+    const minAng  = ((m + s / 60) / 60) * Math.PI * 2 - Math.PI / 2;
+    const hourAng = (((h % 12) + m / 60) / 12) * Math.PI * 2 - Math.PI / 2;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Outer glow ring
+    const grd = ctx.createRadialGradient(cx, cy, R - 4, cx, cy, R + 4);
+    grd.addColorStop(0, 'rgba(139,92,246,0.6)');
+    grd.addColorStop(1, 'rgba(6,182,212,0.0)');
+    ctx.beginPath(); ctx.arc(cx, cy, R + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = grd; ctx.lineWidth = 3; ctx.stroke();
+
+    // Clock face
+    const facegd = ctx.createRadialGradient(cx - 8, cy - 8, 2, cx, cy, R);
+    facegd.addColorStop(0, 'rgba(55,20,130,0.90)');
+    facegd.addColorStop(1, 'rgba(8,3,40,0.95)');
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fillStyle = facegd; ctx.fill();
+
+    // Border
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(139,92,246,0.50)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Hour markers
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
+      const isMajor = i % 3 === 0;
+      const r1 = R - (isMajor ? 7 : 5);
+      const r2 = R - 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+      ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+      ctx.strokeStyle = isMajor ? 'rgba(196,181,253,0.80)' : 'rgba(139,92,246,0.35)';
+      ctx.lineWidth = isMajor ? 1.8 : 1; ctx.stroke();
+    }
+
+    // Second arc track
+    ctx.beginPath();
+    ctx.arc(cx, cy, R - 6, -Math.PI / 2, secAng);
+    ctx.strokeStyle = 'rgba(244,63,94,0.30)'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Hour hand
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(hourAng) * (R * 0.52), cy + Math.sin(hourAng) * (R * 0.52));
+    ctx.strokeStyle = '#c4b5fd'; ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round'; ctx.stroke();
+
+    // Minute hand
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(minAng) * (R * 0.72), cy + Math.sin(minAng) * (R * 0.72));
+    ctx.strokeStyle = '#67e8f9'; ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round'; ctx.stroke();
+
+    // Second hand
+    ctx.beginPath();
+    ctx.moveTo(cx - Math.cos(secAng) * 6, cy - Math.sin(secAng) * 6);
+    ctx.lineTo(cx + Math.cos(secAng) * (R * 0.82), cy + Math.sin(secAng) * (R * 0.82));
+    ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 1.2;
+    ctx.lineCap = 'round'; ctx.stroke();
+
+    // Center dot
+    ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#f0e6ff'; ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, 1.8, 0, Math.PI * 2);
+    ctx.fillStyle = '#fb7185'; ctx.fill();
+
+    // Digital time
     const hh = String(h % 12 || 12).padStart(2, '0');
     const mm = String(m).padStart(2, '0');
     const ampm = h >= 12 ? 'PM' : 'AM';
-    document.getElementById('ktime').textContent = `${hh}:${mm} ${ampm} IST · INDIA`;
+    document.getElementById('ktime').textContent = `${hh}:${mm} ${ampm}`;
 
+    // Online/away status
     const statusEl = document.querySelector('.hero-status');
     if (statusEl) {
       const isAway = h >= 22 || h < 7;
       statusEl.innerHTML = isAway
-        ? `<span class="hdot" style="background:#f59e0b;box-shadow:0 0 12px #f59e0b"></span>Likely asleep · Anantapur / Kurnool`
+        ? `<span class="hdot" style="background:#f59e0b;box-shadow:0 0 12px #f59e0b"></span>Likely asleep · India`
         : `<span class="hdot"></span>Online &middot; Ready to chat`;
     }
   }
-  updateClock();
-  setInterval(updateClock, 30000);
+
+  drawClock();
+  setInterval(drawClock, 1000);
 })();
 
 /* ══════════ STAR CANVAS ══════════ */
