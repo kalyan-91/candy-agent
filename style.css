@@ -464,6 +464,15 @@ body.light .react-btn{background:rgba(109,40,217,0.05);border-color:rgba(109,40,
   100%{box-shadow:0 0 60px rgba(139,92,246,0.70),inset 0 0 30px rgba(139,92,246,0.20);}
 }
 
+/* ══════════ SKILL GALAXY ══════════ */
+.galaxy-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;}
+#galaxyCanvas{cursor:pointer;border-radius:50%;}
+.galaxy-info{width:100%;padding:10px 14px;border-radius:12px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.22);transition:all .3s;min-height:58px;}
+.gi-skill{font-family:'Space Grotesk',monospace;font-size:.78rem;font-weight:600;color:var(--v4);margin-bottom:4px;}
+.gi-projects{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--muted);line-height:1.6;}
+body.light .galaxy-info{background:rgba(109,40,217,0.06);border-color:rgba(109,40,217,0.18);}
+body.light .gi-projects{color:var(--muted2);}
+
 /* ══ MOBILE ══ */
 @media(max-width:700px){
   .app{padding:0;gap:0;flex-direction:column;}
