@@ -373,7 +373,7 @@ function setMood(text) {
   const logs = [
     '> Candy AI powered by Groq',
     '> MCA semester in progress @ JNTUA',
-    '> Studying: AI Agents & RAG pipelines',
+    '> Studying: AI Agents',
     '> Last commit: Candy AI UI update',
     '> Open to internships & entry-level roles',
     '> Portfolio live: kalyanfinity-portfolio.netlify.app',
