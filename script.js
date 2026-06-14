@@ -206,13 +206,13 @@ function setMood(text) {
 
  const planets = [
   { label:'AI',     color:'#a78bfa', size:16, orbitR:0,  angle:0,            speed:0,     desc:'Core focus — AI agents, LLMs, intelligent apps',        projects:'Candy AI · Portfolio' },
-  { label:'Python', color:'#22d3ee', size:10, orbitR:58, angle:0,            speed:0.009, desc:'Data wrangling, ML models, Streamlit apps',              projects:'InventoryIQ · Digit Recognizer' },
-  { label:'SQL',    color:'#fbbf24', size:9,  orbitR:58, angle:Math.PI*2/8,  speed:0.007, desc:'Queries, joins, stored procedures, Oracle & MySQL',       projects:'SPARMS · InventoryIQ' },
-  { label:'PowerBI',color:'#34d399', size:8,  orbitR:58, angle:Math.PI*4/8,  speed:0.008, desc:'DAX, Power Query, interactive dashboards',               projects:'Netflix Dashboard · Employee Attrition' },
-  { label:'Java',   color:'#fb7185', size:8,  orbitR:58, angle:Math.PI*6/8,  speed:0.006, desc:'Swing, JDBC, Maven, iText PDF, ZXing',                   projects:'Student Performance Analysis And Result Management system' },
-  { label:'HTML',   color:'#60a5fa', size:8,  orbitR:58, angle:Math.PI*8/8,  speed:0.010, desc:'Semantic HTML5, responsive layouts, accessibility',       projects:'Candy AI · Portfolio Website' },
-  { label:'CSS',    color:'#f97316', size:7,  orbitR:58, angle:Math.PI*10/8, speed:0.005, desc:'Flexbox, Grid, animations, glassmorphism',               projects:'Candy AI · Portfolio Website' },
-  { label:'JS',     color:'#facc15', size:7,  orbitR:58, angle:Math.PI*12/8, speed:0.008, desc:'DOM, fetch API, canvas, event handling',                 projects:'Candy AI · Portfolio Website' },
+  { label:'Python', color:'#22d3ee', size:10, orbitR:72, angle:0,            speed:0.009, desc:'Data wrangling, ML models, Streamlit apps',              projects:'InventoryIQ · Digit Recognizer · Zomato' },
+  { label:'SQL',    color:'#fbbf24', size:9,  orbitR:72, angle:Math.PI*2/8,  speed:0.007, desc:'Queries, joins, stored procedures, Oracle & MySQL',       projects:'Student Performance Analysis And Result Management System · InventoryIQ' },
+  { label:'PowerBI',color:'#34d399', size:8,  orbitR:72, angle:Math.PI*4/8,  speed:0.008, desc:'DAX, Power Query, interactive dashboards',               projects:'Netflix Dashboard · Employee Attrition' },
+  { label:'Java',   color:'#fb7185', size:8,  orbitR:72, angle:Math.PI*6/8,  speed:0.006, desc:'Swing, JDBC, Maven, iText PDF, ZXing',                   projects:'Student Performance Analysis And Result Management System ' },
+  { label:'HTML',   color:'#60a5fa', size:8,  orbitR:72, angle:Math.PI*8/8,  speed:0.010, desc:'Semantic HTML5, responsive layouts, accessibility',       projects:'Candy AI · Portfolio Website' },
+  { label:'CSS',    color:'#f97316', size:7,  orbitR:72, angle:Math.PI*10/8, speed:0.005, desc:'Flexbox, Grid, animations, glassmorphism',               projects:'Candy AI · Portfolio Website' },
+  { label:'JS',     color:'#facc15', size:7,  orbitR:72, angle:Math.PI*12/8, speed:0.008, desc:'DOM, fetch API, canvas, event handling',                 projects:'Candy AI · Portfolio Website' },
 ];
   const center = planets[0]; // Python at center
   let selected = null;
