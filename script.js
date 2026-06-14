@@ -724,10 +724,10 @@ const sendEl = document.getElementById('send');
 const micEl  = document.getElementById('mic');
 
 /* ══════════ INIT ══════════ */
-window.addEventListener('DOMContentLoaded', () => {
+ window.addEventListener('DOMContentLoaded', () => {
   initRecog();
-  welcome();
-
+  appendWelcome();
+   
   let th = 'dark';
   try { th = localStorage.getItem('candy-th') || 'dark'; } catch (e) {}
   applyTheme(th);
@@ -971,12 +971,12 @@ function showTourStep() {
   // Remove previous tour card
   tourMsgEl?.remove();
 
-  const msgs = document.getElementById('messages');
+  const msgs = document.getElementById('msgs');
   const wrap = document.createElement('div');
-  wrap.className = 'msg msg--assistant';
+  wrap.className = 'mrow';
   wrap.innerHTML = `
-    <div class="msg-avatar">C</div>
-    <div class="msg-content" style="max-width:85%">${html}</div>`;
+    <div class="mav">C</div>
+    <div style="max-width:85%">${html}</div>`;
   msgs.appendChild(wrap);
   msgs.scrollTop = msgs.scrollHeight;
   tourMsgEl = wrap;
