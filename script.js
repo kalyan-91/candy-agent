@@ -239,7 +239,9 @@ function setMood(text) {
   function drawOrbitRing(r) {
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.strokeStyle = 'rgba(139,92,246,0.12)';
+    ctx.strokeStyle = document.body.classList.contains('light')
+      ? 'rgba(109,40,217,0.25)'
+      : 'rgba(139,92,246,0.12)';
     ctx.lineWidth = 1;
     ctx.setLineDash([3,5]);
     ctx.stroke();
@@ -274,7 +276,9 @@ function setMood(text) {
   const lx = x + Math.cos(angle) * (r + 10);
   const ly = y + Math.sin(angle) * (r + 10);
   ctx.font=`500 ${p.orbitR===0?9:8}px JetBrains Mono,monospace`;
-  ctx.fillStyle='rgba(226,232,240,0.92)';
+  ctx.fillStyle = document.body.classList.contains('light')
+    ? 'rgba(30,22,64,0.90)'
+    : 'rgba(226,232,240,0.92)';
   ctx.textAlign = lx > cx ? 'left' : lx < cx - 5 ? 'right' : 'center';
   ctx.textBaseline = ly > cy ? 'top' : ly < cy - 5 ? 'bottom' : 'middle';
   ctx.fillText(p.label, lx, ly);
@@ -321,7 +325,9 @@ function setMood(text) {
 
     // Center label
     ctx.font = '600 9px JetBrains Mono, monospace';
-    ctx.fillStyle = 'rgba(196,181,253,0.95)';
+    ctx.fillStyle = document.body.classList.contains('light')
+      ? 'rgba(91,33,182,0.95)'
+      : 'rgba(196,181,253,0.95)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('AI', cx, cy);
