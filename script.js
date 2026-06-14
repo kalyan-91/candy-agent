@@ -369,9 +369,9 @@ function setMood(text) {
   if (!terminal) return;
 
   const logs = [
-    '> Candy AI running on Groq · LLaMA 3.3 70B',
+    '> Candy AI · Powered by Groq',,
     '> MCA semester in progress @ JNTUA',
-    '> Studying: AI Agents & RAG pipelines',
+    '> Studying: AI Agents',
     '> Last commit: Candy AI UI update',
     '> Open to internships & entry-level roles',
     '> Portfolio live: kalyanfinity-portfolio.netlify.app',
