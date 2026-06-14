@@ -1,5 +1,22 @@
 'use strict';
 
+const EMAILJS_SERVICE_ID  = 'service_7qybkps';
+const EMAILJS_TEMPLATE_ID = 'template_9n1oham';
+const EMAILJS_PUBLIC_KEY  = '82Cq0BUQFsL50OZ6V';
+let emailJSReady = false;
+
+(function loadEmailJS() {
+  if (typeof emailjs !== 'undefined') {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    emailJSReady = true;
+  } else {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    s.onload = () => { emailjs.init(EMAILJS_PUBLIC_KEY); emailJSReady = true; };
+    document.head.appendChild(s);
+  }
+})();
+
 // Current Focus Widget
 (function () {
   const focuses = [
@@ -723,6 +740,12 @@ const inpEl  = document.getElementById('inp');
 const sendEl = document.getElementById('send');
 const micEl  = document.getElementById('mic');
 
+const visitorSession = {
+  questions: [],
+  startTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+  pageUrl:   window.location.href,
+};
+
 /* ══════════ INIT ══════════ */
  window.addEventListener('DOMContentLoaded', () => {
   initRecog();
@@ -1061,12 +1084,52 @@ You are the standalone Candy AI agent at candy-agent.netlify.app. Tell visitors 
 - Never say you cannot tell the time — you always have the current time`;
 }
 
+/* ══════════ EMAIL REPORT ══════════ */
+async function sendVisitorReport() {
+  if (!emailJSReady || typeof emailjs === 'undefined') return;
+  if (visitorSession.questions.length === 0) return;
+
+  const questionLog = visitorSession.questions
+    .map((q, i) => `${i + 1}. [${q.time}]  ${q.message}`)
+    .join('\n');
+
+  const fullChat = hist
+    .map(m => `${m.role === 'user' ? 'Visitor' : 'Candy'}: ${m.content}`)
+    .join('\n\n');
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      time:         visitorSession.startTime,
+      page:         visitorSession.pageUrl,
+      questions:    questionLog,
+      conversation: fullChat.slice(0, 3000),
+      name:         'Candy Agent Visitor',
+      message:      questionLog,
+    });
+    console.log('[Candy Agent] Visitor report emailed');
+  } catch (e) {
+    console.warn('[Candy Agent] Email failed:', e);
+  }
+}
+
+window.addEventListener('beforeunload', () => {
+  if (visitorSession.questions.length > 0) sendVisitorReport();
+});
+
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
   const txt = inpEl.value.trim(); if (!txt) return;
   inpEl.value = ''; resizeTA(inpEl); stopListen();
   addMsg('user', esc(txt));
   hist.push({ role: 'user', content: txt });
+
+  // Track visitor question and send report on every message
+  visitorSession.questions.push({
+    time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }),
+    message: txt,
+  });
+  sendVisitorReport();
+
   const tid = addTyping();
   try {
     const r = await fetch(EP, {
