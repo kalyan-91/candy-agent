@@ -202,7 +202,7 @@ function setMood(text) {
   const canvas = document.getElementById('galaxyCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const W = 240, H = 240, cx = W/2, cy = H/2;
+  const W=260,H=260,cx=W/2,cy=H/2;
 
  const planets = [
   { label:'AI',     color:'#a78bfa', size:16, orbitR:0,  angle:0,            speed:0,     desc:'Core focus — AI agents, LLMs, intelligent apps',        projects:'Candy AI · Portfolio' },
@@ -253,11 +253,14 @@ function setMood(text) {
     ctx.shadowBlur = 0;
 
     // Label
-    ctx.font = `500 ${p.orbit === 0 ? 8 : 7}px JetBrains Mono, monospace`;
-    ctx.fillStyle = 'rgba(226,232,240,0.90)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillText(p.label, x, y + r + 4);
+  const angle = Math.atan2(y - cy, x - cx);
+  const lx = x + Math.cos(angle) * (r + 10);
+  const ly = y + Math.sin(angle) * (r + 10);
+  ctx.font=`500 ${p.orbitR===0?9:8}px JetBrains Mono,monospace`;
+  ctx.fillStyle='rgba(226,232,240,0.92)';
+  ctx.textAlign = lx > cx ? 'left' : lx < cx - 5 ? 'right' : 'center';
+  ctx.textBaseline = ly > cy ? 'top' : ly < cy - 5 ? 'bottom' : 'middle';
+  ctx.fillText(p.label, lx, ly);
   }
 
   function draw() {
