@@ -812,20 +812,190 @@ function updateMode() {
 }
 
 /* ══════════ WELCOME MESSAGE ══════════ */
-function welcome() {
-  const h = new Date().getHours();
-  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 21 ? 'Good evening' : 'Hey, night owl';
-  const cs = [
-    { l: 'Projects',    q: 'What projects has Pavan built?' },
-    { l: 'Skills',      q: "What are Pavan's strongest skills?" },
-    { l: 'Experience',  q: "Tell me about Pavan's internship" },
-    { l: 'Hire Pavan',  q: "I'm interested in hiring Pavan — how do I reach him?" }
+function appendWelcome() {
+  const hour = new Date().getHours();
+  const greeting =
+    hour >= 5  && hour < 12 ? 'Good morning' :
+    hour >= 12 && hour < 17 ? 'Good afternoon' :
+    hour >= 17 && hour < 21 ? 'Good evening' :
+    'Hey, night owl';
+
+  const chips = [
+    { label: 'Projects',   q: "What projects has Pavan built?" },
+    { label: 'Skills',     q: "What are Pavan's strongest skills?" },
+    { label: 'Experience', q: "Tell me about Pavan's internship" },
+    { label: 'Hire Pavan', q: "I am interested in hiring Pavan" },
   ];
-  const chips = `<div class="chips">${cs.map(c => `<button class="chip" data-q="${c.q}">${c.l}</button>`).join('')}</div>`;
-  const link  = `<a href="https://kalyanfinity-portfolio.netlify.app" target="_blank" class="portbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View Portfolio</a>`;
-  addMsg('ai', `${g}! I'm <strong>Candy</strong>, Pavan's personal AI. What would you like to know about him?${chips}${link}`);
+  const chipsHTML = chips.map(c =>
+    `<button class="chip" data-q="${c.q}">${c.label}</button>`
+  ).join('');
+
+  appendMessage('assistant',
+    `${greeting}! I am <strong>Candy</strong>, Pavan's personal AI. Ask me anything about him.
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">${chipsHTML}</div>
+    <button class="tour-start-btn" id="startTourBtn" onclick="startTour()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Take a Portfolio Tour
+    </button>`
+  );
 }
 
+// ══════════════════════════════
+// INTERACTIVE PORTFOLIO TOUR
+// ══════════════════════════════
+const TOUR_STEPS = [
+  {
+    section:  'Home',
+    anchor:   '',
+    icon:     'fas fa-home',
+    color:    '#8b5cf6',
+    title:    'Hero Section',
+    desc:     'Meet Pavan Kalyan — MCA Student and Data Analytics Aspirant from Kurnool, Andhra Pradesh. The hero section shows his roles, bio, and quick stats including 6 projects and 1 internship.',
+    highlight: ['Python', 'SQL', 'Power BI'],
+  },
+  {
+    section:  'Skills',
+    anchor:   '#skills',
+    icon:     'fas fa-brain',
+    color:    '#06b6d4',
+    title:    'Skills & Technologies',
+    desc:     'Explore Pavan\'s skill set across Programming, Visualization, Machine Learning, and Web Technologies. His top skills are SQL at 90%, Excel at 88%, Python at 85%, and Power BI at 85%.',
+    highlight: ['SQL 90%', 'Python 85%', 'Power BI 85%'],
+  },
+  {
+    section:  'Education',
+    anchor:   '#education',
+    icon:     'fas fa-graduation-cap',
+    color:    '#fbbf24',
+    title:    'Academic Journey',
+    desc:     'Pavan completed his BSc in Maths, Stats and Computer Science from Rayalaseema University in 2024. He is currently pursuing MCA at JNTUA Anantapur focusing on Data Analytics and Business Intelligence.',
+    highlight: ['MCA 2025–2027', 'BSc 2021–2024', 'JNTUA'],
+  },
+  {
+    section:  'Experience',
+    anchor:   '#experience',
+    icon:     'fas fa-briefcase',
+    color:    '#34d399',
+    title:    'Internship Experience',
+    desc:     'Pavan worked as a Data Science Intern at Interncall, Kurnool from January to April 2024. He built ML models, performed EDA on large datasets, and created business visualizations using Python.',
+    highlight: ['Interncall', 'Jan–Apr 2024', 'ML Models'],
+  },
+  {
+    section:  'Projects',
+    anchor:   '#projects',
+    icon:     'fas fa-code',
+    color:    '#f472b6',
+    title:    'Featured Projects',
+    desc:     'Pavan has built 6 projects — SPARMS Java desktop app, InventoryIQ Streamlit dashboard, Digit Recognizer CNN app, Netflix Power BI Dashboard, Employee Attrition Analysis, and Zomato Predictive Analysis.',
+    highlight: ['6 Projects', '2 Live Apps', 'Java + Python + Power BI'],
+  },
+  {
+    section:  'Contact',
+    anchor:   '#contact',
+    icon:     'fas fa-paper-plane',
+    color:    '#f59e0b',
+    title:    'Get in Touch',
+    desc:     'Pavan is actively open to internships and entry-level Data Analyst roles. You can reach him via email, LinkedIn, WhatsApp, or the contact form on his portfolio.',
+    highlight: ['Open to Hire', 'Kurnool, AP', 'Responds Fast'],
+  },
+];
+
+let tourStep    = 0;
+let tourActive  = false;
+let tourMsgEl   = null;
+
+function startTour() {
+  if (tourActive) return;
+  tourActive = true;
+  tourStep   = 0;
+  document.getElementById('startTourBtn')?.remove();
+  appendMessage('assistant', 'Starting your portfolio tour! Click <strong>Next</strong> to explore each section, or <strong>End Tour</strong> anytime.');
+  setTimeout(showTourStep, 500);
+}
+
+function showTourStep() {
+  const step   = TOUR_STEPS[tourStep];
+  if (!step) { endTour(); return; }
+
+  const isLast   = tourStep === TOUR_STEPS.length - 1;
+  const progress = tourStep + 1;
+  const total    = TOUR_STEPS.length;
+  const pct      = Math.round((progress / total) * 100);
+
+  const tagsHTML = step.highlight.map(t =>
+    `<span class="tour-tag">${t}</span>`
+  ).join('');
+
+  const html = `
+    <div class="tour-card">
+      <div class="tour-card-top">
+        <div class="tour-card-icon" style="background:${step.color}22;border-color:${step.color}44">
+          <i class="${step.icon}" style="color:${step.color}"></i>
+        </div>
+        <div class="tour-card-meta">
+          <div class="tour-card-title">${step.title}</div>
+          <div class="tour-card-progress">${progress} of ${total}</div>
+        </div>
+      </div>
+
+      <div class="tour-progress-bar">
+        <div class="tour-progress-fill" style="width:${pct}%;background:${step.color}"></div>
+      </div>
+
+      <p class="tour-card-desc">${step.desc}</p>
+
+      <div class="tour-tags">${tagsHTML}</div>
+
+      <div class="tour-card-actions">
+        <a href="https://kalyanfinity-portfolio.netlify.app/${step.anchor}"
+           target="_blank"
+           class="tour-visit-btn"
+           style="border-color:${step.color}55;color:${step.color}">
+          <i class="fas fa-external-link-alt"></i>
+          Visit ${step.section}
+        </a>
+        <div class="tour-nav-btns">
+          <button class="tour-end-btn" onclick="endTour()">End Tour</button>
+          <button class="tour-next-btn" style="background:${step.color}" onclick="${isLast ? 'endTour()' : 'nextTourStep()'}">
+            ${isLast ? 'Finish' : 'Next'}
+            <i class="fas fa-${isLast ? 'check' : 'arrow-right'}"></i>
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  // Remove previous tour card
+  tourMsgEl?.remove();
+
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg msg--assistant';
+  wrap.innerHTML = `
+    <div class="msg-avatar">C</div>
+    <div class="msg-content" style="max-width:85%">${html}</div>`;
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  tourMsgEl = wrap;
+}
+
+function nextTourStep() {
+  tourStep++;
+  showTourStep();
+}
+
+function endTour() {
+  tourActive = false;
+  tourMsgEl?.remove();
+  tourMsgEl  = null;
+  tourStep   = 0;
+  appendMessage('assistant',
+    'Tour complete! Hope you got a great overview of Pavan\'s portfolio. Feel free to ask me anything else or reach out to him directly at <strong>daroorpavankalyan@gmail.com</strong>.'
+  );
+}
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
   const txt = inpEl.value.trim(); if (!txt) return;
