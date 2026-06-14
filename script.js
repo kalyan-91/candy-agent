@@ -404,21 +404,6 @@ function setMood(text) {
       setTimeout(nextLog, 2200);
     }
   }
-
-  // Live updated time
-  const updatedEl = document.getElementById('aimUpdated');
-  if (updatedEl) {
-    setInterval(() => {
-      const now = new Date();
-      const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-      const h = String(ist.getHours()%12||12).padStart(2,'0');
-      const m = String(ist.getMinutes()).padStart(2,'0');
-      const a = ist.getHours()>=12?'PM':'AM';
-      updatedEl.textContent = `Live · ${h}:${m} ${a}`;
-    }, 1000);
-  }
-
-  setTimeout(nextLog, 800);
 })();
 
 /* ══════════ STAR CANVAS ══════════ */
