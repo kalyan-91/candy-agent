@@ -1014,6 +1014,53 @@ function endTour() {
     'Tour complete! Hope you got a great overview of Pavan\'s portfolio. Feel free to ask me anything else or reach out to him directly at <strong>daroorpavankalyan@gmail.com</strong>.'
   );
 }
+
+/* ══════════ LIVE CONTEXT ══════════ */
+function getLiveContext() {
+  const now = new Date();
+  const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const h   = ist.getHours();
+  const m   = String(ist.getMinutes()).padStart(2, '0');
+  const hh  = String(h % 12 || 12).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const day   = days[ist.getDay()];
+  const date  = ist.getDate();
+  const month = months[ist.getMonth()];
+  const year  = ist.getFullYear();
+  const isAway = h >= 22 || h < 7;
+
+  return `
+
+== LIVE CONTEXT (updated every message) ==
+- Current time in India IST: ${hh}:${m} ${ampm}
+- Current day and date: ${day}, ${date} ${month} ${year}
+- Pavan status: ${isAway ? 'Likely asleep — it is late night in India' : 'Online and active — it is daytime in India'}
+- Timezone: Asia/Kolkata IST UTC+5:30
+
+== CANDY AGENT FEATURES ==
+You are the standalone Candy AI agent at candy-agent.netlify.app. Tell visitors about these features when asked:
+- Live analog clock in sidebar showing current IST time with hour, minute, second hands
+- Current focus widget — cycles through: Building AI agents, Pursuing MCA at JNTUA, Exploring LLMs and RAG, Crafting data dashboards, Learning full-stack dev, Open to internships, Deep in Python and ML, Building portfolio projects
+- Skill galaxy — interactive canvas showing Pavan skills as orbiting planets. AI at center, Python, SQL, Power BI, Java, HTML, CSS, JavaScript orbit around it. Click each planet to see skill details and related projects
+- AI activity monitor — live terminal in sidebar showing real time logs of what Pavan is working on with typewriter effect
+- Candy mood ring — the planet avatar in sidebar changes color based on conversation topic: purple for technical, green for recruiter, pink for personal, gold for wow moments
+- Reaction bar — appears after each Candy response so visitor can react with fire, thumbs up, amazing, or interesting emoji
+- VCF download button — visitor can download Pavan contact card directly to their phone contacts
+- Portfolio tour button — guided tour through all 6 sections of Pavan main portfolio with Visit buttons
+- Theme toggle — visitor can switch between dark cosmic and light mode
+- Voice mode — visitor can speak to Candy using microphone and Candy speaks back
+- Starter questions in sidebar — quick question buttons to start conversation
+- View Portfolio button in welcome message — opens kalyanfinity-portfolio.netlify.app
+
+== IMPORTANT TIME RULES ==
+- If someone asks what time it is, say the current IST time confidently: it is ${hh}:${m} ${ampm} in India right now
+- If someone asks what day or date it is, answer directly: today is ${day}, ${date} ${month} ${year}
+- If someone asks if Pavan is awake or online, use the status: ${isAway ? 'Pavan is likely asleep right now since it is late night in India' : 'Pavan is likely online and active right now since it is daytime in India'}
+- Never say you cannot tell the time — you always have the current time`;
+}
+
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
   const txt = inpEl.value.trim(); if (!txt) return;
@@ -1027,7 +1074,7 @@ async function go() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: MDL,
-        messages: [{ role: 'system', content: SYS }, ...hist],
+        messages: [{ role: 'system', content: SYS + getLiveContext() }, ...hist],
         max_tokens: 600, temperature: .85, top_p: .9, stream: false
       })
     });
