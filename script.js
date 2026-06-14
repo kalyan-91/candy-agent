@@ -197,6 +197,169 @@ function setMood(text) {
   else                                          core.classList.add('mood-casual');
 }
 
+/* ══════════ SKILL GALAXY ══════════ */
+(function () {
+  const canvas = document.getElementById('galaxyCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 240, H = 240, cx = W/2, cy = H/2;
+
+ const planets = [
+  { label:'AI',     color:'#a78bfa', size:16, orbitR:0,  angle:0,            speed:0,     desc:'Core focus — AI agents, LLMs, intelligent apps',        projects:'Candy AI · Portfolio' },
+  { label:'Python', color:'#22d3ee', size:10, orbitR:58, angle:0,            speed:0.009, desc:'Data wrangling, ML models, Streamlit apps',              projects:'InventoryIQ · Digit Recognizer' },
+  { label:'SQL',    color:'#fbbf24', size:9,  orbitR:58, angle:Math.PI*2/8,  speed:0.007, desc:'Queries, joins, stored procedures, Oracle & MySQL',       projects:'SPARMS · InventoryIQ' },
+  { label:'PowerBI',color:'#34d399', size:8,  orbitR:58, angle:Math.PI*4/8,  speed:0.008, desc:'DAX, Power Query, interactive dashboards',               projects:'Netflix Dashboard · Employee Attrition' },
+  { label:'Java',   color:'#fb7185', size:8,  orbitR:58, angle:Math.PI*6/8,  speed:0.006, desc:'Swing, JDBC, Maven, iText PDF, ZXing',                   projects:'Student Performance Analysis And Result Management system' },
+  { label:'HTML',   color:'#60a5fa', size:8,  orbitR:58, angle:Math.PI*8/8,  speed:0.010, desc:'Semantic HTML5, responsive layouts, accessibility',       projects:'Candy AI · Portfolio Website' },
+  { label:'CSS',    color:'#f97316', size:7,  orbitR:58, angle:Math.PI*10/8, speed:0.005, desc:'Flexbox, Grid, animations, glassmorphism',               projects:'Candy AI · Portfolio Website' },
+  { label:'JS',     color:'#facc15', size:7,  orbitR:58, angle:Math.PI*12/8, speed:0.008, desc:'DOM, fetch API, canvas, event handling',                 projects:'Candy AI · Portfolio Website' },
+];
+  const center = planets[0]; // Python at center
+  let selected = null;
+  let animId = null;
+  let pulseT = 0;
+
+  function drawOrbitRing(r) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(139,92,246,0.12)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawPlanet(p, x, y, pulse) {
+    const isSelected = selected === p;
+    const r = p.size + (isSelected ? 3 : 0) + (pulse * (isSelected ? 2 : 0.5));
+
+    // Glow
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, r*2.5);
+    grd.addColorStop(0, p.color + '55');
+    grd.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.arc(x, y, r*2.5, 0, Math.PI*2);
+    ctx.fillStyle = grd; ctx.fill();
+
+    // Planet body
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    const pg = ctx.createRadialGradient(x-r*0.3, y-r*0.3, 0, x, y, r);
+    pg.addColorStop(0, '#fff');
+    pg.addColorStop(0.3, p.color);
+    pg.addColorStop(1, p.color + '88');
+    ctx.fillStyle = pg;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = isSelected ? 20 : 10;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Label
+    ctx.font = `500 ${p.orbit === 0 ? 8 : 7}px JetBrains Mono, monospace`;
+    ctx.fillStyle = 'rgba(226,232,240,0.90)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(p.label, x, y + r + 4);
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    pulseT += 0.04;
+    const pulse = Math.sin(pulseT) * 0.5 + 0.5;
+
+    // Background glow
+    const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 110);
+    bg.addColorStop(0, 'rgba(109,40,217,0.12)');
+    bg.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.arc(cx, cy, 110, 0, Math.PI*2);
+    ctx.fillStyle = bg; ctx.fill();
+
+    // Orbit rings
+    drawOrbitRing(62);
+
+    // Orbiting planets
+    for (let i = 1; i < planets.length; i++) {
+      const p = planets[i];
+      p.angle += p.speed;
+      const x = cx + Math.cos(p.angle) * p.orbitR;
+      const y = cy + Math.sin(p.angle) * p.orbitR;
+      p._x = x; p._y = y;
+
+      // Connection line to center when selected
+      if (selected === p) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = p.color + '44';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      drawPlanet(p, x, y, pulse);
+    }
+
+    // Center planet (Python/AI)
+    center._x = cx; center._y = cy;
+    drawPlanet(center, cx, cy, pulse);
+
+    // Center label
+    ctx.font = '600 9px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(196,181,253,0.95)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('AI', cx, cy);
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  // Click detection
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (W / rect.width);
+    const my = (e.clientY - rect.top) * (H / rect.height);
+
+    let hit = null;
+    for (const p of planets) {
+      const dx = mx - (p._x || cx);
+      const dy = my - (p._y || cy);
+      if (Math.sqrt(dx*dx + dy*dy) < p.size + 10) { hit = p; break; }
+    }
+
+    selected = (selected === hit) ? null : hit;
+
+    const skillEl = document.getElementById('giSkill');
+    const projEl = document.getElementById('giProjects');
+    const infoEl = document.getElementById('galaxyInfo');
+
+    if (selected) {
+      skillEl.textContent = selected.label;
+      skillEl.style.color = selected.color;
+      projEl.textContent = selected.desc + '\n\nProjects: ' + selected.projects;
+      infoEl.style.borderColor = selected.color + '55';
+      infoEl.style.background = selected.color + '11';
+    } else {
+      skillEl.textContent = 'Click a planet';
+      skillEl.style.color = '';
+      projEl.textContent = 'Explore Pavan\'s skills';
+      infoEl.style.borderColor = '';
+      infoEl.style.background = '';
+    }
+  });
+
+  // Hover cursor
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (W / rect.width);
+    const my = (e.clientY - rect.top) * (H / rect.height);
+    let hovering = false;
+    for (const p of planets) {
+      const dx = mx - (p._x || cx);
+      const dy = my - (p._y || cy);
+      if (Math.sqrt(dx*dx + dy*dy) < p.size + 10) { hovering = true; break; }
+    }
+    canvas.style.cursor = hovering ? 'pointer' : 'default';
+  });
+
+  draw();
+})();
+
 /* ══════════ STAR CANVAS ══════════ */
 (function () {
   const cv = document.getElementById('sc'), ctx = cv.getContext('2d');
