@@ -363,6 +363,64 @@ function setMood(text) {
   draw();
 })();
 
+/* ══════════ AI ACTIVITY MONITOR ══════════ */
+(function(){
+  const terminal = document.getElementById('aimTerminal');
+  if (!terminal) return;
+
+  const logs = [
+    '> Candy AI running on Groq · LLaMA 3.3 70B',
+    '> MCA semester in progress @ JNTUA',
+    '> Studying: AI Agents & RAG pipelines',
+    '> Last commit: Candy AI UI update',
+    '> Open to internships & entry-level roles',
+    '> Portfolio live: kalyanfinity-portfolio.netlify.app',
+    '> Skills: Python · SQL · Power BI · Java · AI',
+    '> Status: Building · Learning · Growing',
+  ];
+
+  let logIdx = 0;
+  let charIdx = 0;
+  let currentLine = '';
+  let lineEl = null;
+
+  function nextLog() {
+    lineEl = document.createElement('div');
+    terminal.insertBefore(lineEl, terminal.querySelector('.aim-cursor'));
+    currentLine = logs[logIdx % logs.length];
+    logIdx++;
+    charIdx = 0;
+    typeChar();
+  }
+
+  function typeChar() {
+    if (charIdx < currentLine.length) {
+      lineEl.textContent += currentLine[charIdx++];
+      setTimeout(typeChar, 38);
+    } else {
+      // Keep only last 3 lines
+      const lines = terminal.querySelectorAll('div');
+      if (lines.length > 3) lines[0].remove();
+      setTimeout(nextLog, 2200);
+    }
+  }
+
+  // Live updated time
+  const updatedEl = document.getElementById('aimUpdated');
+  if (updatedEl) {
+    setInterval(() => {
+      const now = new Date();
+      const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      const h = String(ist.getHours()%12||12).padStart(2,'0');
+      const m = String(ist.getMinutes()).padStart(2,'0');
+      const a = ist.getHours()>=12?'PM':'AM';
+      updatedEl.textContent = `Live · ${h}:${m} ${a}`;
+    }, 1000);
+  }
+
+  setTimeout(nextLog, 800);
+})();
+
 /* ══════════ STAR CANVAS ══════════ */
 (function () {
   const cv = document.getElementById('sc'), ctx = cv.getContext('2d');
