@@ -740,7 +740,7 @@ const micEl  = document.getElementById('mic');
   inpEl.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
   inpEl.addEventListener('input', () => resizeTA(inpEl));
   micEl.addEventListener('click', () => listening ? stopListen() : startListen());
-  document.getElementById('clbtn').addEventListener('click', () => { hist = []; msgsEl.innerHTML = ''; stopSpeak(); welcome(); showToast('Chat cleared'); });
+  document.getElementById('clbtn').addEventListener('click', () => { hist = []; msgsEl.innerHTML = ''; stopSpeak(); appendWelcome(); showToast('Chat cleared'); });
   document.getElementById('vcfBtn')?.addEventListener('click', downloadVCF);
   document.getElementById('mpill').addEventListener('click', () => { voiceOn = !voiceOn; if (!voiceOn) stopSpeak(); updateMode(); showToast(voiceOn ? 'Voice on' : 'Voice off'); });
   msgsEl.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { inpEl.value = c.dataset.q; go(); } });
@@ -842,6 +842,16 @@ function appendWelcome() {
       Take a Portfolio Tour
     </button>`
   );
+}
+
+function appendMessage(role, html) {
+  const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const row = document.createElement('div');
+  row.className = 'mrow';
+  row.innerHTML = `<div class="mav">C</div><div><div class="bai">${html}</div><div class="mt">${t}</div></div>`;
+  msgsEl.appendChild(row);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+  return row;
 }
 
 // ══════════════════════════════
