@@ -363,15 +363,17 @@ function setMood(text) {
   draw();
 })();
 
+ 
+
 /* ══════════ AI ACTIVITY MONITOR ══════════ */
 (function(){
   const terminal = document.getElementById('aimTerminal');
   if (!terminal) return;
 
   const logs = [
-    '> Candy AI · Powered by Groq',,
+    '> Candy AI powered by Groq',
     '> MCA semester in progress @ JNTUA',
-    '> Studying: AI Agents',
+    '> Studying: AI Agents & RAG pipelines',
     '> Last commit: Candy AI UI update',
     '> Open to internships & entry-level roles',
     '> Portfolio live: kalyanfinity-portfolio.netlify.app',
@@ -405,7 +407,7 @@ function setMood(text) {
     }
   }
 
-   // Live updated time
+  // Live updated time
   const updatedEl = document.getElementById('aimUpdated');
   if (updatedEl) {
     setInterval(() => {
