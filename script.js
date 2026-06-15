@@ -483,27 +483,7 @@ function setMood(text) {
    (with Web Speech API)
 ══════════════════════════════════════════ */
  
-/* ══════════ TYPING INDICATOR PULSE ══════════ */
-(function(){
-  const av = document.querySelector('.chdr-av');
-  if (!av) return;
-  let typingTimer = null;
-
-  document.getElementById('inp')?.addEventListener('input', () => {
-    av.classList.add('typing-aware');
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-      av.classList.remove('typing-aware');
-    }, 1500);
-  });
-
-  document.getElementById('inp')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      av.classList.remove('typing-aware');
-      clearTimeout(typingTimer);
-    }
-  });
-})();
+ 
 
 /* ══════════ COSMOS SHOOTING STARS ══════════ */
 (function () {
