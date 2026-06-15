@@ -775,14 +775,27 @@ const visitorSession = {
   msgsEl.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { inpEl.value = c.dataset.q; go(); } });
   document.getElementById('starters').addEventListener('click', e => { const b = e.target.closest('.starter'); if (b) { inpEl.value = b.dataset.q; go(); } });
 
-document.getElementById('adminLockBtn')?.addEventListener('click', () => {
-  if (adminUnlocked) { showAdminPanel(); return; }
-  const pass = prompt('Enter admin password:');
-  if (pass === ADMIN_PASS) { adminUnlocked = true; showAdminPanel(); }
-  else if (pass !== null) showToast('Wrong password');
+ document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
+  const pass = document.getElementById('adminPassInput').value;
+  if (pass === ADMIN_PASS) {
+    adminUnlocked = true;
+    document.getElementById('adminLogin').style.display = 'none';
+    showAdminPanel();
+  } else {
+    const err = document.getElementById('adminErr');
+    err.textContent = 'Wrong password';
+    setTimeout(() => err.textContent = '', 2000);
+    document.getElementById('adminPassInput').value = '';
+  }
+});
+document.getElementById('adminPassInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('adminLoginBtn')?.click();
 });
 document.getElementById('apClose')?.addEventListener('click', () => {
   document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('adminLogin').style.display = 'block';
+  adminUnlocked = false;
+  document.getElementById('adminPassInput').value = '';
 });
 });
 
