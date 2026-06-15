@@ -743,6 +743,70 @@ function setMood(text) {
 
 })();
 
+/* ══════════════════════════════════════════
+   DROP-IN REPLACEMENT — paste these two functions
+   into your main script, replacing the old doSpeak
+   and stopSpeak
+══════════════════════════════════════════ */
+
+function doSpeak(txt) {
+  if (!voiceOn || !window.speechSynthesis) return;
+  const clean = txt.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  if (!clean) return;
+  stopSpeak();
+
+  function _speak() {
+    const vv = speechSynthesis.getVoices();
+    utter = new SpeechSynthesisUtterance(clean);
+    utter.lang   = 'en-US';
+    utter.rate   = 0.95;
+    utter.pitch  = 1;
+    utter.volume = 1;
+
+    if (vv.length) {
+      const pv = vv.find(v => v.name.includes('Google US English'))
+               || vv.find(v => v.lang === 'en-US' && !v.localService)
+               || vv.find(v => v.lang.startsWith('en-'));
+      if (pv) utter.voice = pv;
+    }
+
+    const pill = document.getElementById('mpill');
+    utter.onstart = () => { speaking = true;  pill && pill.classList.add('vspk'); };
+    utter.onend   = () => { speaking = false; pill && pill.classList.remove('vspk'); clearInterval(window._ttsKeep); };
+    utter.onerror = e => { speaking = false; pill && pill.classList.remove('vspk'); clearInterval(window._ttsKeep); console.warn('TTS:', e.error); };
+
+    speechSynthesis.speak(utter);
+
+    /* Chrome silently kills speech after ~15s — keep it alive */
+    clearInterval(window._ttsKeep);
+    window._ttsKeep = setInterval(() => {
+      if (!speechSynthesis.speaking) { clearInterval(window._ttsKeep); return; }
+      speechSynthesis.pause();
+      speechSynthesis.resume();
+    }, 10000);
+  }
+
+  /* Voices may not be loaded yet on first call */
+  if (speechSynthesis.getVoices().length) {
+    _speak();
+  } else {
+    pendSpeak = txt;
+    speechSynthesis.addEventListener('voiceschanged', function h() {
+      speechSynthesis.removeEventListener('voiceschanged', h);
+      _speak();
+      pendSpeak = null;
+    });
+  }
+}
+
+function stopSpeak() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  speaking = false;
+  clearInterval(window._ttsKeep);
+  const pill = document.getElementById('mpill');
+  if (pill) pill.classList.remove('vspk');
+}
+
 /* ══════════ TYPING INDICATOR PULSE ══════════ */
 (function(){
   const av = document.querySelector('.chdr-av');
