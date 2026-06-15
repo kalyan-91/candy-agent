@@ -948,7 +948,7 @@ function setMood(text) {
   });
 
   // Auto-open first channel after 1.5s to demo the feature
-  setTimeout(() => openBroadcastPanel(0), 1500);
+  //setTimeout(() => openBroadcastPanel(0), 1500);
 
 })();
 /* ══════════ TYPING INDICATOR PULSE ══════════ */
