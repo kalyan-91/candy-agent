@@ -774,6 +774,16 @@ const visitorSession = {
   document.getElementById('mpill').addEventListener('click', () => { voiceOn = !voiceOn; if (!voiceOn) stopSpeak(); updateMode(); showToast(voiceOn ? 'Voice on' : 'Voice off'); });
   msgsEl.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { inpEl.value = c.dataset.q; go(); } });
   document.getElementById('starters').addEventListener('click', e => { const b = e.target.closest('.starter'); if (b) { inpEl.value = b.dataset.q; go(); } });
+
+document.getElementById('adminLockBtn')?.addEventListener('click', () => {
+  if (adminUnlocked) { showAdminPanel(); return; }
+  const pass = prompt('Enter admin password:');
+  if (pass === ADMIN_PASS) { adminUnlocked = true; showAdminPanel(); }
+  else if (pass !== null) showToast('Wrong password');
+});
+document.getElementById('apClose')?.addEventListener('click', () => {
+  document.getElementById('adminPanel').style.display = 'none';
+});
 });
 
 /* ══════════ THEME ══════════ */
@@ -1247,24 +1257,6 @@ window.addEventListener('beforeunload', trackSession);
 /* ══════════ ADMIN PANEL ══════════ */
 const ADMIN_PASS = 'Kalyan@21'; // your password
 let adminUnlocked = false;
-
-document.getElementById('adminLockBtn').addEventListener('click', () => {
-  if (adminUnlocked) {
-    showAdminPanel();
-    return;
-  }
-  const pass = prompt('Enter admin password:');
-  if (pass === ADMIN_PASS) {
-    adminUnlocked = true;
-    showAdminPanel();
-  } else if (pass !== null) {
-    showToast('Wrong password');
-  }
-});
-
-document.getElementById('apClose').addEventListener('click', () => {
-  document.getElementById('adminPanel').style.display = 'none';
-});
 
 async function showAdminPanel() {
   const panel = document.getElementById('adminPanel');
