@@ -485,16 +485,59 @@ function setMood(text) {
 (function initScanner(){
 
   /* ── Speech helpers ── */
-  function speak(text, delay) {
+  let speechQueue = [];
+  let isSpeaking  = false;
+
+  function getFemaleVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = [
+      'Google UK English Female',
+      'Google US English',
+      'Samantha',
+      'Karen',
+      'Moira',
+      'Tessa',
+      'Fiona',
+      'Victoria',
+    ];
+    for (const name of preferred) {
+      const v = voices.find(v => v.name === name);
+      if (v) return v;
+    }
+    // Fallback: first female-labelled voice
+    return voices.find(v => /female/i.test(v.name)) || null;
+  }
+
+  function processQueue() {
+    if (isSpeaking || speechQueue.length === 0) return;
+    isSpeaking = true;
+    const text = speechQueue.shift();
+    const utt  = new SpeechSynthesisUtterance(text);
+    utt.rate   = 0.82;
+    utt.pitch  = 1.1;
+    utt.volume = 1;
+    const voice = getFemaleVoice();
+    if (voice) utt.voice = voice;
+    utt.onend = () => { isSpeaking = false; processQueue(); };
+    utt.onerror = () => { isSpeaking = false; processQueue(); };
+    window.speechSynthesis.speak(utt);
+  }
+
+  function enqueueSpeak(text) {
     if (!window.speechSynthesis) return;
-    setTimeout(() => {
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.rate  = 0.92;
-      utt.pitch = 1.05;
-      utt.volume = 1;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utt);
-    }, delay);
+    speechQueue.push(text);
+    // Voices may not be loaded yet on first call
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.onvoiceschanged = () => { processQueue(); };
+    } else {
+      processQueue();
+    }
+  }
+
+  function cancelSpeech() {
+    speechQueue = [];
+    isSpeaking  = false;
+    window.speechSynthesis && window.speechSynthesis.cancel();
   }
 
   function stripHtml(html) {
@@ -705,8 +748,8 @@ function setMood(text) {
     const ch = CHANNELS[idx];
     if (!panel) return;
 
-    // Cancel any ongoing speech
-    window.speechSynthesis && window.speechSynthesis.cancel();
+    // Cancel any ongoing speech and clear queue
+    cancelSpeech();
 
     // Set colours via CSS vars
     if (innerEl) {
@@ -724,8 +767,8 @@ function setMood(text) {
 
     panel.classList.add('active');
 
-    // Announce channel name via speech
-    speak('Tuning to ' + ch.name, 300);
+    // Announce channel name via speech (slight delay for panel open animation)
+    setTimeout(() => enqueueSpeak('Tuning to ' + ch.name), 400);
 
     // Animate: status → fill → lines
     setTimeout(() => { if(statusEl) { statusEl.innerHTML = ch.transmitMsg; } }, 300);
@@ -741,8 +784,8 @@ function setMood(text) {
         div.innerHTML = line;
         contentEl.appendChild(div);
         requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add('show')));
-        // Speak the plain-text version of this line
-        speak(stripHtml(line), 0);
+        // Enqueue plain-text version of this line
+        enqueueSpeak(stripHtml(line));
       }, 2400 + i * 280);
     });
   }
@@ -753,7 +796,7 @@ function setMood(text) {
   if (askBtn) {
     askBtn.addEventListener('click', () => {
       const ch = CHANNELS[activeIdx];
-      window.speechSynthesis && window.speechSynthesis.cancel();
+      cancelSpeech();
       panel.classList.remove('active');
       if (typeof handleSend === 'function') {
         setTimeout(() => handleSend(ch.askQ), 200);
@@ -762,13 +805,13 @@ function setMood(text) {
   }
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
-      window.speechSynthesis && window.speechSynthesis.cancel();
+      cancelSpeech();
       panel.classList.remove('active');
     });
   }
   panel?.addEventListener('click', e => {
     if (e.target === panel) {
-      window.speechSynthesis && window.speechSynthesis.cancel();
+      cancelSpeech();
       panel.classList.remove('active');
     }
   });
@@ -777,7 +820,6 @@ function setMood(text) {
   //setTimeout(() => openBroadcastPanel(0), 1500);
 
 })();
-
 /* ══════════ TYPING INDICATOR PULSE ══════════ */
 (function(){
   const av = document.querySelector('.chdr-av');
