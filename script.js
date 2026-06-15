@@ -1243,6 +1243,77 @@ function trackSession() {
 window.addEventListener('pagehide', trackSession);
 window.addEventListener('beforeunload', trackSession);
 
+
+/* ══════════ ADMIN PANEL ══════════ */
+const ADMIN_PASS = 'Kalyan@21'; // your password
+let adminUnlocked = false;
+
+document.getElementById('adminLockBtn').addEventListener('click', () => {
+  if (adminUnlocked) {
+    showAdminPanel();
+    return;
+  }
+  const pass = prompt('Enter admin password:');
+  if (pass === ADMIN_PASS) {
+    adminUnlocked = true;
+    showAdminPanel();
+  } else if (pass !== null) {
+    showToast('Wrong password');
+  }
+});
+
+document.getElementById('apClose').addEventListener('click', () => {
+  document.getElementById('adminPanel').style.display = 'none';
+});
+
+async function showAdminPanel() {
+  const panel = document.getElementById('adminPanel');
+  const content = document.getElementById('apContent');
+  panel.style.display = 'block';
+  content.innerHTML = '<div class="ap-loading">Fetching analytics...</div>';
+
+  try {
+    const res = await fetch(`https://pk-groq-proxy.daroorpavankalyan.workers.dev/analytics?key=${ADMIN_PASS}&format=json`);
+    const data = await res.json();
+
+    const peakHour = data.heatmap.indexOf(Math.max(...data.heatmap));
+    const maxHeat = Math.max(...data.heatmap) || 1;
+
+    content.innerHTML = `
+      <div class="ap-stats">
+        <div class="ap-stat"><span class="ap-num">${data.visitors}</span><span class="ap-lbl">Visitors</span></div>
+        <div class="ap-stat"><span class="ap-num">${data.sessions}</span><span class="ap-lbl">Sessions</span></div>
+        <div class="ap-stat"><span class="ap-num">${Math.floor(data.avgDuration/60)}m${data.avgDuration%60}s</span><span class="ap-lbl">Avg Time</span></div>
+        <div class="ap-stat"><span class="ap-num">${data.bounceRate}%</span><span class="ap-lbl">Bounce</span></div>
+      </div>
+
+      <div class="ap-section">
+        <div class="ap-sec-title">Top Questions</div>
+        ${data.questions.slice(0,5).map((q,i) => `
+          <div class="ap-qrow">
+            <span class="ap-qrank">${i+1}</span>
+            <span class="ap-qtext" title="${q.q}">${q.q}</span>
+            <span class="ap-qcount">${q.count}x</span>
+          </div>`).join('') || '<p class="ap-empty">No questions yet</p>'}
+      </div>
+
+      <div class="ap-section">
+        <div class="ap-sec-title">Active Hours (IST)</div>
+        <div class="ap-heat">
+          ${data.heatmap.map((v,h) => `
+            <div class="ap-hcol" title="${h}:00 — ${v} visits">
+              <div class="ap-hbar" style="height:${Math.max(2,Math.round((v/maxHeat)*40))}px"></div>
+              <span class="ap-hlbl">${h%6===0?h:''}</span>
+            </div>`).join('')}
+        </div>
+        <p class="ap-peak">Peak: ${peakHour}:00–${peakHour+1}:00 · ${data.heatmap[peakHour]} visits</p>
+      </div>
+    `;
+  } catch (err) {
+    content.innerHTML = '<p class="ap-empty">Failed to load analytics.</p>';
+  }
+}
+
 /* ══════════ UTILITIES ══════════ */
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmt(t) { return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>').replace(/\n/g,'<br>'); }
