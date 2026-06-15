@@ -126,6 +126,163 @@
     </div>
   </div>
 </div>
+
+    <!-- ╔══════════════════════════════════════════════╗
+     SPACE FREQUENCY SCANNER — HTML SNIPPETS
+     ══════════════════════════════════════════════
+     (A) Paste inside your <aside> sidebar,
+         after the last .sb-divider, before </aside>
+     (B) Paste just before </body>
+     ╚══════════════════════════════════════════════╝ -->
+
+<!-- ── (A) SIDEBAR SCANNER — paste inside <aside> ── -->
+<div class="sb-divider"></div>
+
+<!-- ════ SPACE FREQUENCY SCANNER ════ -->
+    <div class="sb-divider"></div>
+    <div class="scanner-section">
+      <div class="scanner-label">
+        Space Frequency Scanner
+        <span class="scanner-label-dot"></span>
+      </div>
+
+      <!-- Frequency readout -->
+      <div class="freq-display">
+        <div class="freq-readout" id="freqReadout">α-101 <span id="freqStatus">SCANNING</span></div>
+        <div class="freq-waveform" id="freqWaveform"></div>
+      </div>
+
+      <!-- Dial -->
+      <div class="dial-wrap">
+        <div class="dial-outer" id="dialOuter">
+          <div class="dial-track"></div>
+          <svg class="dial-ring-svg" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="44" fill="none"
+              stroke="url(#dialGrad)" stroke-width="1.5"
+              stroke-dasharray="4 3" opacity="0.5"/>
+            <defs>
+              <linearGradient id="dialGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#00d4ff"/>
+                <stop offset="50%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#fbbf24"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="dial-face">
+            <div class="dial-symbol" id="dialSymbol">α</div>
+            <div class="dial-num" id="dialNum">101</div>
+          </div>
+          <div class="dial-needle" id="dialNeedle"></div>
+        </div>
+      </div>
+
+      <!-- Channel buttons -->
+      <div class="channels-grid" id="channelsGrid">
+        <button class="channel-btn active" data-ch="0"
+          style="--ch-color:rgba(0,212,255,0.1);--ch-border:rgba(0,212,255,0.32);--ch-shadow:rgba(0,212,255,0.12);--ch-color-solid:#00d4ff">
+          <div class="ch-indicator">α</div>
+          <div class="ch-info">
+            <div class="ch-freq">α-101</div>
+            <div class="ch-name">Projects Database</div>
+          </div>
+          <div class="ch-signal">
+            <div class="ch-signal-bar" style="height:5px"></div>
+            <div class="ch-signal-bar" style="height:8px"></div>
+            <div class="ch-signal-bar" style="height:12px"></div>
+            <div class="ch-signal-bar" style="height:9px"></div>
+          </div>
+        </button>
+        <button class="channel-btn" data-ch="1"
+          style="--ch-color:rgba(167,139,250,0.1);--ch-border:rgba(167,139,250,0.32);--ch-shadow:rgba(167,139,250,0.12);--ch-color-solid:#a78bfa">
+          <div class="ch-indicator" style="border-color:rgba(167,139,250,0.3);color:#a78bfa">β</div>
+          <div class="ch-info">
+            <div class="ch-freq" style="color:#a78bfa">β-205</div>
+            <div class="ch-name">Skills Database</div>
+          </div>
+          <div class="ch-signal">
+            <div class="ch-signal-bar" style="height:8px;background:#a78bfa"></div>
+            <div class="ch-signal-bar" style="height:12px;background:#a78bfa"></div>
+            <div class="ch-signal-bar" style="height:6px;background:#a78bfa"></div>
+            <div class="ch-signal-bar" style="height:10px;background:#a78bfa"></div>
+          </div>
+        </button>
+        <button class="channel-btn" data-ch="2"
+          style="--ch-color:rgba(251,191,36,0.1);--ch-border:rgba(251,191,36,0.32);--ch-shadow:rgba(251,191,36,0.12);--ch-color-solid:#fbbf24">
+          <div class="ch-indicator" style="border-color:rgba(251,191,36,0.3);color:#fbbf24">γ</div>
+          <div class="ch-info">
+            <div class="ch-freq" style="color:#fbbf24">γ-309</div>
+            <div class="ch-name">Career Journey</div>
+          </div>
+          <div class="ch-signal">
+            <div class="ch-signal-bar" style="height:10px;background:#fbbf24"></div>
+            <div class="ch-signal-bar" style="height:6px;background:#fbbf24"></div>
+            <div class="ch-signal-bar" style="height:13px;background:#fbbf24"></div>
+            <div class="ch-signal-bar" style="height:8px;background:#fbbf24"></div>
+          </div>
+        </button>
+        <button class="channel-btn" data-ch="3"
+          style="--ch-color:rgba(125,211,252,0.1);--ch-border:rgba(125,211,252,0.32);--ch-shadow:rgba(125,211,252,0.12);--ch-color-solid:#7dd3fc">
+          <div class="ch-indicator" style="border-color:rgba(125,211,252,0.3);color:#7dd3fc">δ</div>
+          <div class="ch-info">
+            <div class="ch-freq" style="color:#7dd3fc">δ-412</div>
+            <div class="ch-name">AI & Tech Journey</div>
+          </div>
+          <div class="ch-signal">
+            <div class="ch-signal-bar" style="height:7px;background:#7dd3fc"></div>
+            <div class="ch-signal-bar" style="height:11px;background:#7dd3fc"></div>
+            <div class="ch-signal-bar" style="height:9px;background:#7dd3fc"></div>
+            <div class="ch-signal-bar" style="height:14px;background:#7dd3fc"></div>
+          </div>
+        </button>
+        <button class="channel-btn" data-ch="4"
+          style="--ch-color:rgba(244,63,94,0.1);--ch-border:rgba(244,63,94,0.32);--ch-shadow:rgba(244,63,94,0.14);--ch-color-solid:#f43f5e">
+          <div class="ch-indicator" style="border-color:rgba(244,63,94,0.3);color:#f43f5e">Ω</div>
+          <div class="ch-info">
+            <div class="ch-freq" style="color:#f43f5e">Ω-999</div>
+            <div class="ch-name">Secret Transmission</div>
+          </div>
+          <div class="ch-signal">
+            <div class="ch-signal-bar" style="height:14px;background:#f43f5e"></div>
+            <div class="ch-signal-bar" style="height:5px;background:#f43f5e"></div>
+            <div class="ch-signal-bar" style="height:11px;background:#f43f5e"></div>
+            <div class="ch-signal-bar" style="height:7px;background:#f43f5e"></div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+
+<!-- ── (B) BROADCAST MODAL — paste before </body> ── -->
+
+<!-- ════ BROADCAST PANEL ════ -->
+<div class="broadcast-panel" id="broadcastPanel">
+  <div class="broadcast-inner" id="broadcastInner">
+    <div class="broadcast-scanlines"></div>
+    <div class="broadcast-corner broadcast-corner--tl"></div>
+    <div class="broadcast-corner broadcast-corner--tr"></div>
+    <div class="broadcast-corner broadcast-corner--bl"></div>
+    <div class="broadcast-corner broadcast-corner--br"></div>
+    <div class="broadcast-header">
+      <div class="broadcast-icon" id="broadcastIcon">α</div>
+      <div>
+        <div class="broadcast-channel-name" id="broadcastChannelName">CHANNEL α-101</div>
+        <div class="broadcast-title" id="broadcastTitle">Projects Database</div>
+        <div class="broadcast-status">
+          <div class="broadcast-status-dot" id="broadcastStatusDot"></div>
+          <span id="broadcastStatusText">Establishing connection...</span>
+        </div>
+      </div>
+    </div>
+    <div class="broadcast-signal-bar">
+      <div class="broadcast-signal-fill" id="broadcastFill"></div>
+    </div>
+    <div class="broadcast-content" id="broadcastContent"></div>
+    <div class="broadcast-actions">
+      <button class="broadcast-btn-primary" id="broadcastAsk">Ask Candy about this</button>
+      <button class="broadcast-btn-close" id="broadcastClose">Close</button>
+    </div>
+  </div>
+</div>
     
   <div class="hero-meta">
   <div class="vmeta-item focus-item" id="pavanFocus">
