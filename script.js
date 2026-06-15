@@ -482,475 +482,559 @@ function setMood(text) {
    SPACE FREQUENCY SCANNER JS
    (with Web Speech API)
 ══════════════════════════════════════════ */
-(function initScanner(){
+const CHANNELS = [
+  {
+    sym:'α', freq:'α-101', name:'Projects Database',
+    color:'#00d4ff', color2:'#0099bb', shadow:'rgba(0,212,255,0.28)', border:'rgba(0,212,255,0.35)',
+    dialDeg:-225, musicUrl:'https://ice2.somafm.com/spacestation-128-mp3',
+    statusMsg:'CONNECTED — α-101',
+    transmitMsg:'Signal acquired. Accessing Projects Database...',
+    lines:[
+      {hi:'SPARMS',         dim:'────────',  rest:'Java Swing · Role-based dashboards · OMR scanning · PDF export'},
+      {hi:'InventoryIQ',    dim:'────────',  rest:'Streamlit · Inventory analytics · Audit logs · CSV export (live)'},
+      {hi:'Digit Recognizer',dim:'──────', rest:'CNN · Handwritten digits 0–9 · Live canvas demo on Streamlit'},
+      {hi:'Netflix Dashboard',dim:'─────', rest:'Power BI · 5000+ titles · Genre & country deep analysis'},
+      {hi:'Employee Attrition',dim:'────', rest:'ML classification · Power BI HR dashboard · Churn prediction'},
+      {hi:'Zomato Analysis', dim:'──────', rest:'Restaurant ratings · Cuisine trends · Predictive ML models'},
+    ],
+    askQ:"Tell me about all of Pavan's projects in detail",
+  },
+  {
+    sym:'β', freq:'β-205', name:'Skills Network',
+    color:'#a78bfa', color2:'#7c3aed', shadow:'rgba(167,139,250,0.28)', border:'rgba(167,139,250,0.35)',
+    dialDeg:-135, musicUrl:'https://ice1.somafm.com/deepspaceone-128-mp3',
+    statusMsg:'CONNECTED — β-205',
+    transmitMsg:'Transmission received. Loading Skills Network...',
+    lines:[
+      {hi:'Data & Analytics', dim:'────', rest:'SQL 90% · Excel 88% · Power BI 85% · Plotly 75%'},
+      {hi:'Python Ecosystem', dim:'────', rest:'Python 85% · Pandas 85% · NumPy 80% · Matplotlib 80%'},
+      {hi:'Machine Learning', dim:'────', rest:'Scikit-learn 75% · TensorFlow 70% · Seaborn 80%'},
+      {hi:'Programming',      dim:'──────', rest:'Java 70% · HTML 85% · CSS 80% · JavaScript 70%'},
+      {hi:'Tools & Platforms',dim:'──────', rest:'Streamlit · OpenCV · GitHub · Maven · JDBC · Jupyter'},
+    ],
+    askQ:"What are all of Pavan's skills and proficiency levels?",
+  },
+  {
+    sym:'γ', freq:'γ-309', name:'Career Journey',
+    color:'#fbbf24', color2:'#d97706', shadow:'rgba(251,191,36,0.25)', border:'rgba(251,191,36,0.35)',
+    dialDeg:-45, musicUrl:'https://ice2.somafm.com/groovesalad-128-mp3',
+    statusMsg:'CONNECTED — γ-309',
+    transmitMsg:'Decoding trajectory. Mapping Career Journey...',
+    lines:[
+      {hi:'2021–2024',     dim:'────────', rest:'BSc MSCS · Maths, Stats, Computer Science · Kurnool'},
+      {hi:'Jan–Apr 2024',  dim:'───────', rest:'Data Science Intern · Interncall · Python, EDA & ML'},
+      {hi:'2025–2027',     dim:'────────', rest:'MCA · JNTUA Anantapur · Data Analytics focus'},
+      {hi:'Goal',          dim:'──────────', rest:'Senior Data Analyst → AI-driven product builder'},
+      {hi:'Open to',       dim:'─────────', rest:'Internships & entry-level Data Analyst / Data Science roles'},
+      {hi:'Motto',         dim:'──────────', rest:'Learn by building. Ship real products. Always.'},
+    ],
+    askQ:"Tell me about Pavan's career journey and what he is looking for",
+  },
+  {
+    sym:'δ', freq:'δ-412', name:'AI & Tech Matrix',
+    color:'#7dd3fc', color2:'#0284c7', shadow:'rgba(125,211,252,0.25)', border:'rgba(125,211,252,0.35)',
+    dialDeg:45, musicUrl:'https://ice2.somafm.com/dronezone-128-mp3',
+    statusMsg:'CONNECTED — δ-412',
+    transmitMsg:'Neural link established. Loading AI & Tech Matrix...',
+    lines:[
+      {hi:'AI Tools',      dim:'──────────', rest:'Groq · LLaMA 3.3 70B · OpenAI APIs · Hugging Face'},
+      {hi:'ML Stack',      dim:'──────────', rest:'TensorFlow · Scikit-learn · CNNs · EDA pipelines'},
+      {hi:'Data Viz',      dim:'──────────', rest:'Power BI · Plotly · Seaborn · Matplotlib · DAX'},
+      {hi:'AI Projects',   dim:'──────────', rest:'Candy AI personal assistant · Digit recogniser CNN'},
+      {hi:'Interest',      dim:'───────────', rest:'AI agents · Intelligent SaaS apps · Automation'},
+      {hi:'Learning style',dim:'──────────', rest:'Build first. Learn deeply. Ship constantly.'},
+    ],
+    askQ:"Tell me about Pavan's AI and technology journey and interests",
+  },
+  {
+    sym:'Ω', freq:'Ω-999', name:'Secret Transmission',
+    color:'#f43f5e', color2:'#be123c', shadow:'rgba(244,63,94,0.28)', border:'rgba(244,63,94,0.35)',
+    dialDeg:135, musicUrl:'https://ice2.somafm.com/missioncontrol-128-mp3',
+    statusMsg:'DECRYPTED — Ω-999',
+    transmitMsg:'⚠ ENCRYPTED CHANNEL · Bypassing security protocols...',
+    lines:[
+      {hi:'Hidden fact',     dim:'──────', rest:'First in his family to pursue a tech career'},
+      {hi:'Secret weapon',   dim:'────', rest:'Learns any technology by building with it within days'},
+      {hi:'True motivation', dim:'──', rest:'Turns ideas into real products that people actually use'},
+      {hi:'Unlocked skill',  dim:'───', rest:'Built Candy AI — a full personal AI assistant from scratch'},
+      {hi:'Life philosophy', dim:'──', rest:'Discipline, curiosity, and a relentless bias toward action'},
+      {hi:'Final message',   dim:'───', rest:'Hire Pavan. You won\'t find another like him.'},
+    ],
+    askQ:"Tell me the secret facts about Pavan that make him stand out",
+  },
+];
 
-  /* ══════════════════════════════════════════
-     SPACE RADIO AUDIO ENGINE
-  ══════════════════════════════════════════ */
+const MUSIC_STATIONS = [
+  'https://ice2.somafm.com/spacestation-128-mp3',
+  'https://ice1.somafm.com/deepspaceone-128-mp3',
+  'https://ice2.somafm.com/groovesalad-128-mp3',
+  'https://ice2.somafm.com/dronezone-128-mp3',
+  'https://ice2.somafm.com/missioncontrol-128-mp3',
+];
 
-  /* ── Web Audio context (lazy) ── */
-  let audioCtx = null;
-  function getAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    return audioCtx;
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+let activeChannel = -1;
+let isPlaying     = false;
+let musicIdx      = 0;
+let audioCtx      = null;
+let analyser      = null;
+let source        = null;
+let fakePhase     = 0;
+let vizFrame      = null;
+
+/* ════════════════════════════════════════════════════
+   DOM
+════════════════════════════════════════════════════ */
+const audio           = document.getElementById('radioAudio');
+const playBtn         = document.getElementById('playBtn');
+const iPlay           = document.getElementById('iPlay');
+const iPause          = document.getElementById('iPause');
+const prevBtn         = document.getElementById('prevBtn');
+const nextBtn         = document.getElementById('nextBtn');
+const speakBtn        = document.getElementById('speakBtn');
+const volSlider       = document.getElementById('volSlider');
+const liveBadge       = document.getElementById('liveBadge');
+const freqReadout     = document.getElementById('freqReadout');
+const freqWave        = document.getElementById('freqWave');
+const channelGrid     = document.getElementById('channelGrid');
+const dialSym         = document.getElementById('dialSym');
+const dialNum         = document.getElementById('dialNum');
+const dialNeedle      = document.getElementById('dialNeedle');
+const stationReadout  = document.getElementById('stationReadout');
+const nowInner        = document.getElementById('nowInner');
+const broadcastPanel  = document.getElementById('broadcastPanel');
+const broadcastInner  = document.getElementById('broadcastInner');
+const bcIcon          = document.getElementById('bcIcon');
+const bcChName        = document.getElementById('bcChName');
+const bcTitle         = document.getElementById('bcTitle');
+const bcStatus        = document.getElementById('bcStatus');
+const bcFill          = document.getElementById('bcFill');
+const bcContent       = document.getElementById('bcContent');
+const bcAskBtn        = document.getElementById('bcAskBtn');
+const bcClose         = document.getElementById('bcClose');
+const vizCanvas       = document.getElementById('viz');
+const vCtx            = vizCanvas.getContext('2d');
+
+/* ════════════════════════════════════════════════════
+   STAR FIELD
+════════════════════════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('starCanvas'),c=cv.getContext('2d');
+  let W,H,stars=[];
+  const cols=['#ddd6fe','#a5f3fc','#fde68a','#fda4af','#ffffff','#00d4ff44','#a78bfa44'];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;
+    stars=[];for(let i=0;i<220;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.2,a:Math.random(),da:(Math.random()-.5)*.008,col:cols[Math.floor(Math.random()*cols.length)]});}
+  function draw(){c.clearRect(0,0,W,H);
+    stars.forEach(s=>{s.a=Math.max(.04,Math.min(1,s.a+s.da));if(s.a<=.04||s.a>=1)s.da*=-1;
+      c.beginPath();c.arc(s.x,s.y,s.r,0,Math.PI*2);c.fillStyle=s.col;c.globalAlpha=s.a;c.shadowColor=s.col;c.shadowBlur=4;c.fill();});
+    c.globalAlpha=1;requestAnimationFrame(draw);}
+  addEventListener('resize',resize);resize();draw();
+})();
+
+/* ════════════════════════════════════════════════════
+   DIAL TICKS (SVG)
+════════════════════════════════════════════════════ */
+(function(){
+  const g = document.getElementById('dialTicks');
+  const cx=48,cy=48,r=43,n=36;
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2 - Math.PI/2;
+    const isMajor=i%9===0;
+    const len=isMajor?7:3;
+    const x1=cx+Math.cos(a)*(r-len), y1=cy+Math.sin(a)*(r-len);
+    const x2=cx+Math.cos(a)*r,       y2=cy+Math.sin(a)*r;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1);line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2);line.setAttribute('y2',y2);
+    line.setAttribute('stroke',isMajor?'rgba(0,212,255,0.45)':'rgba(0,212,255,0.15)');
+    line.setAttribute('stroke-width',isMajor?'1.5':'1');
+    g.appendChild(line);
+  }
+})();
+
+/* ════════════════════════════════════════════════════
+   FREQ WAVE BARS
+════════════════════════════════════════════════════ */
+(function(){
+  for(let i=0;i<28;i++){
+    const b=document.createElement('div');b.className='fw-bar';
+    b.style.cssText=`--spd:${.38+Math.random()*.55}s;--dl:${Math.random()*.5}s;height:${3+Math.random()*10}px`;
+    freqWave.appendChild(b);
+  }
+})();
+
+/* ════════════════════════════════════════════════════
+   WEB AUDIO ENGINE
+════════════════════════════════════════════════════ */
+function getCtx(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+function playStatic(dur=0.18,vol=0.10){
+  try{const c=getCtx(),buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*vol;
+    const src=c.createBufferSource();src.buffer=buf;
+    const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1800;bp.Q.value=0.6;
+    const g=c.createGain();g.gain.setValueAtTime(1,c.currentTime);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);
+    src.connect(bp);bp.connect(g);g.connect(c.destination);src.start();}catch(e){}
+}
+function playBeep(freq=880,dur=0.09,vol=0.07){
+  try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
+    o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+dur);}catch(e){}
+}
+function playTuningSweep(){
+  try{const c=getCtx(),o=c.createOscillator(),g=c.createGain(),ws=c.createWaveShaper();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(200,c.currentTime);
+    o.frequency.linearRampToValueAtTime(1400,c.currentTime+.35);
+    o.frequency.linearRampToValueAtTime(880,c.currentTime+.55);
+    g.gain.setValueAtTime(0.06,c.currentTime);g.gain.linearRampToValueAtTime(0.0001,c.currentTime+.6);
+    const curve=new Float32Array(256);
+    for(let i=0;i<256;i++){const x=(i*2)/256-1;curve[i]=(Math.PI+80)*x/(Math.PI+80*Math.abs(x));}
+    ws.curve=curve;o.connect(ws);ws.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.65);}catch(e){}
+}
+
+/* ════════════════════════════════════════════════════
+   CANDY VOICE (TTS)
+════════════════════════════════════════════════════ */
+let speechQ=[], isSpeaking=false;
+
+function getCandyVoice(){
+  const vs=speechSynthesis.getVoices();
+  return vs.find(v=>v.name.includes('Google US English'))
+      || vs.find(v=>v.lang==='en-US'&&!v.localService)
+      || vs.find(v=>v.lang.startsWith('en-'))
+      || null;
+}
+
+function processQ(){
+  if(isSpeaking||speechQ.length===0)return;
+  isSpeaking=true;
+  const item=speechQ.shift();
+  if(!item.announcement)playStatic(0.10,0.08);
+  setTimeout(()=>{
+    const u=new SpeechSynthesisUtterance(item.text);
+    const v=getCandyVoice();if(v)u.voice=v;
+    u.lang='en-US';
+    if(item.announcement){u.rate=0.80;u.pitch=1.00;u.volume=1.0;}
+    else{u.rate=0.88;u.pitch=1.06;u.volume=0.95;}
+    u.onend=()=>{
+      if(!item.announcement)playBeep(660,0.07,0.06);
+      setTimeout(()=>{isSpeaking=false;processQ();},item.announcement?380:160);
+    };
+    u.onerror=()=>{isSpeaking=false;processQ();};
+    speechSynthesis.speak(u);
+  },item.announcement?0:70);
+}
+
+function enqueue(text,announcement=false){
+  if(!window.speechSynthesis)return;
+  speechQ.push({text,announcement});
+  if(speechSynthesis.getVoices().length===0)speechSynthesis.onvoiceschanged=()=>processQ();
+  else processQ();
+}
+
+function cancelSpeech(){
+  speechQ=[];isSpeaking=false;
+  window.speechSynthesis&&speechSynthesis.cancel();
+}
+
+function stripHtml(html){
+  const d=document.createElement('div');d.innerHTML=html;
+  return (d.textContent||d.innerText||'').replace(/[─━┄┈·•…]+/g,',').replace(/\s{2,}/g,' ').trim();
+}
+
+/* ════════════════════════════════════════════════════
+   BUILD CHANNEL GRID
+════════════════════════════════════════════════════ */
+function buildChannels(){
+  channelGrid.innerHTML='';
+  CHANNELS.forEach((ch,i)=>{
+    const btn=document.createElement('button');
+    btn.className='channel-btn';
+    btn.dataset.idx=i;
+    btn.style.cssText=`--ch-color:${ch.color}22;--ch-border:${ch.border};--ch-shadow:${ch.shadow};--ch-solid:${ch.color}`;
+    const bars=[5,9,13,17,9].map((h,bi)=>`<div class="ch-sb" style="height:${h}px"></div>`).join('');
+    btn.innerHTML=`
+      <div class="ch-indicator">${ch.sym}</div>
+      <div class="ch-info">
+        <div class="ch-freq">${ch.freq}</div>
+        <div class="ch-name">${ch.name}</div>
+      </div>
+      <div class="ch-signal">${bars}</div>
+    `;
+    btn.addEventListener('click',()=>openBroadcast(i));
+    channelGrid.appendChild(btn);
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   DIAL UPDATE
+════════════════════════════════════════════════════ */
+function updateDial(ch){
+  if(ch==null){
+    dialSym.textContent='—';dialNum.textContent='SELECT';
+    dialNeedle.style.transform='rotate(-225deg) translateY(-2px)';
+    stationReadout.textContent='IDLE';
+    freqReadout.innerHTML='— — — . — —<span class="freq-readout-unit">MHz</span>';
+    freqReadout.style.color='var(--cyan)';freqReadout.style.textShadow='';
+    return;
+  }
+  dialSym.textContent=ch.sym;
+  dialNum.textContent=ch.freq;
+  dialNeedle.style.transform=`rotate(${ch.dialDeg}deg) translateY(-2px)`;
+  stationReadout.textContent=ch.name.toUpperCase();
+  const freqNum=(88+Math.abs(ch.dialDeg)*.18).toFixed(1);
+  freqReadout.innerHTML=`${freqNum} . ${ch.sym}<span class="freq-readout-unit">MHz</span>`;
+  freqReadout.style.color=ch.color;
+  freqReadout.style.textShadow=`0 0 12px ${ch.shadow},0 0 26px ${ch.shadow.replace('.28','.14').replace('.25','.12')}`;
+}
+
+/* ════════════════════════════════════════════════════
+   BROADCAST PANEL
+════════════════════════════════════════════════════ */
+function openBroadcast(idx){
+  const ch=CHANNELS[idx];
+
+  /* sound */
+  playTuningSweep();
+
+  /* update active */
+  activeChannel=idx;
+  document.querySelectorAll('.channel-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  updateDial(ch);
+
+  /* switch background music to this channel's station */
+  if(isPlaying){
+    audio.src=ch.musicUrl;audio.volume=parseFloat(volSlider.value);audio.load();
+    audio.play().catch(()=>{});
   }
 
-  /* ── Static crackle burst ── */
-  function playStatic(duration = 0.18, volume = 0.12) {
-    try {
-      const ctx    = getAudioCtx();
-      const buf    = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
-      const data   = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * volume;
-      const src    = ctx.createBufferSource();
-      src.buffer   = buf;
-      // Band-pass so it sounds like radio static, not white noise
-      const bp     = ctx.createBiquadFilter();
-      bp.type      = 'bandpass';
-      bp.frequency.value = 1800;
-      bp.Q.value   = 0.6;
-      const gain   = ctx.createGain();
-      gain.gain.setValueAtTime(1, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
-      src.connect(bp); bp.connect(gain); gain.connect(ctx.destination);
-      src.start();
-    } catch(e) {}
-  }
+  /* style overlay */
+  broadcastInner.style.setProperty('--bc',ch.color);
+  broadcastInner.style.setProperty('--bc2',ch.color2);
+  broadcastInner.style.setProperty('--bs',ch.shadow);
+  document.querySelectorAll('.bc').forEach(c=>c.style.borderColor=ch.color);
+  bcIcon.textContent=ch.sym;bcIcon.style.color=ch.color;bcIcon.style.borderColor=ch.color;
+  bcIcon.style.boxShadow=`0 0 20px ${ch.shadow}`;
+  bcChName.textContent=ch.freq;bcChName.style.color=ch.color;
+  bcTitle.textContent=ch.name;
+  bcStatus.textContent=ch.statusMsg;
+  document.querySelector('.bst-dot').style.background=ch.color;
+  bcAskBtn.style.background=`linear-gradient(135deg,${ch.color},${ch.color2})`;
+  bcAskBtn.style.boxShadow=`0 4px 14px ${ch.shadow}`;
 
-  /* ── Soft confirm beep ── */
-  function playBeep(freq = 880, duration = 0.09, vol = 0.08) {
-    try {
-      const ctx  = getAudioCtx();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type   = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(vol, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + duration);
-    } catch(e) {}
-  }
+  /* build content lines */
+  bcContent.innerHTML=ch.lines.map((l,i)=>
+    `<div class="bc-line" data-i="${i}">
+      <span class="hi">${l.hi}</span>
+      <span class="dim"> ${l.dim} </span>
+      ${l.rest}
+    </div>`
+  ).join('');
 
-  /* ── Tuning sweep (channel lock-in sound) ── */
-  function playTuningSweep() {
-    try {
-      const ctx  = getAudioCtx();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type   = 'sawtooth';
-      osc.frequency.setValueAtTime(200, ctx.currentTime);
-      osc.frequency.linearRampToValueAtTime(1400, ctx.currentTime + 0.35);
-      osc.frequency.linearRampToValueAtTime(880,  ctx.currentTime + 0.55);
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
-      // Add slight distortion via waveshaper
-      const ws   = ctx.createWaveShaper();
-      const curve = new Float32Array(256);
-      for (let i = 0; i < 256; i++) { const x = (i * 2) / 256 - 1; curve[i] = (Math.PI + 80) * x / (Math.PI + 80 * Math.abs(x)); }
-      ws.curve = curve;
-      osc.connect(ws); ws.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + 0.65);
-    } catch(e) {}
-  }
+  /* show panel */
+  bcFill.style.width='0%';
+  broadcastPanel.classList.add('active');
+  cancelSpeech();
 
-  /* ── Low transmission hum under announcement ── */
-  function playTransmissionHum(durationSec = 2.0) {
-    try {
-      const ctx  = getAudioCtx();
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type   = 'sine';
-      osc.frequency.value = 60;
-      gain.gain.setValueAtTime(0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.2);
-      gain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + durationSec - 0.3);
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + durationSec);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + durationSec);
-    } catch(e) {}
-  }
+  /* signal bar animation */
+  setTimeout(()=>{ bcFill.style.width='100%'; },80);
 
-  /* ── Voice helpers ── */
-  let speechQueue = [];
-  let isSpeaking  = false;
+  /* announce + reveal lines */
+  enqueue(ch.transmitMsg,true);
 
-  function getFemaleVoice() {
-    const voices = window.speechSynthesis.getVoices();
-    // Priority: warm, calm, natural female voices
-    const preferred = [
-      'Google UK English Female',
-      'Samantha',           // macOS / iOS
-      'Karen',              // Australian female
-      'Moira',              // Irish female
-      'Tessa',              // South African female
-      'Fiona',              // Scottish female
-      'Microsoft Zira',     // Windows female
-      'Microsoft Eva',
-    ];
-    for (const name of preferred) {
-      const v = voices.find(v => v.name === name);
-      if (v) return v;
-    }
-    return voices.find(v => /female/i.test(v.name)) || null;
-  }
+  const lines=bcContent.querySelectorAll('.bc-line');
+  const textLines=ch.lines.map(l=>`${l.hi}. ${l.rest}`);
 
-  /* Each queue item: { text, isAnnouncement } */
-  function processQueue() {
-    if (isSpeaking || speechQueue.length === 0) return;
-    isSpeaking = true;
-    const item = speechQueue.shift();
-
-    // Tiny static crackle before each line (not before the announcement)
-    if (!item.isAnnouncement) {
-      playStatic(0.12, 0.10);
-    }
-
-    setTimeout(() => {
-      const utt    = new SpeechSynthesisUtterance(item.text);
-      const voice  = getFemaleVoice();
-      if (voice) utt.voice = voice;
-
-      if (item.isAnnouncement) {
-        // Channel announcement: slower, deeper, dramatic
-        utt.rate   = 0.75;
-        utt.pitch  = 0.95;
-        utt.volume = 1.0;
-      } else {
-        // Data lines: calm, clear, slightly slower than normal
-        utt.rate   = 0.85;
-        utt.pitch  = 1.08;
-        utt.volume = 0.95;
-      }
-
-      utt.onend  = () => {
-        // Soft beep after each data line
-        if (!item.isAnnouncement) playBeep(660, 0.07, 0.06);
-        setTimeout(() => { isSpeaking = false; processQueue(); }, item.isAnnouncement ? 400 : 180);
-      };
-      utt.onerror = () => { isSpeaking = false; processQueue(); };
-      window.speechSynthesis.speak(utt);
-    }, item.isAnnouncement ? 0 : 80);
-  }
-
-  function enqueueSpeak(text, isAnnouncement = false) {
-    if (!window.speechSynthesis) return;
-    speechQueue.push({ text, isAnnouncement });
-    if (speechSynthesis.getVoices().length === 0) {
-      speechSynthesis.onvoiceschanged = () => processQueue();
-    } else {
-      processQueue();
-    }
-  }
-
-  function cancelSpeech() {
-    speechQueue = [];
-    isSpeaking  = false;
-    window.speechSynthesis && window.speechSynthesis.cancel();
-  }
-
-  function stripHtml(html) {
-    const d = document.createElement('div');
-    d.innerHTML = html;
-    // Clean up box-drawing chars and extra spaces for cleaner TTS
-    return (d.textContent || d.innerText || '')
-      .replace(/[─━┄┈·•…]+/g, ',')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-  }
-
-  const CHANNELS = [
-    {
-      sym:'α', freq:'α-101', name:'Projects Database',
-      color:'#00d4ff', color2:'#0099bb', shadow:'rgba(0,212,255,0.28)',
-      dialDeg: -60,
-      transmitMsg: 'Signal acquired. Accessing <span class="highlight">Projects Database</span>...',
-      statusMsg: 'CONNECTED — α-101',
-      lines: [
-        '<span class="highlight">SPARMS</span> <span class="dim">─────</span> Java Swing · Role-based dashboards · OMR scanning · PDF export',
-        '<span class="highlight">InventoryIQ</span> <span class="dim">─────</span> Streamlit · Inventory analytics · Audit logs · CSV export',
-        '<span class="highlight">Digit Recognizer</span> <span class="dim">─</span> CNN · Handwritten digits 0–9 · Live canvas demo',
-        '<span class="highlight">Netflix Dashboard</span> <span class="dim">─</span> Power BI · 5000+ titles · Genre & country analysis',
-        '<span class="highlight">Employee Attrition</span> <span class="dim">─</span> ML classification · Power BI HR dashboard',
-        '<span class="highlight">Zomato Analysis</span> <span class="dim">──</span> Restaurant ratings · Predictive ML models',
-      ],
-      askQ: 'Tell me about all of Pavan\'s projects in detail',
-    },
-    {
-      sym:'β', freq:'β-205', name:'Skills Database',
-      color:'#a78bfa', color2:'#7c3aed', shadow:'rgba(167,139,250,0.28)',
-      dialDeg: -20,
-      transmitMsg: 'Transmission received. Loading <span class="highlight">Skills Network</span>...',
-      statusMsg: 'CONNECTED — β-205',
-      lines: [
-        '<span class="highlight">Data & Analytics</span> <span class="dim">────</span> SQL 90% · Excel 88% · Power BI 85% · Plotly 75%',
-        '<span class="highlight">Python Ecosystem</span> <span class="dim">────</span> Python 85% · Pandas 85% · NumPy 80% · Matplotlib 80%',
-        '<span class="highlight">Machine Learning</span> <span class="dim">────</span> Scikit-learn 75% · TensorFlow 70% · Seaborn 80%',
-        '<span class="highlight">Programming</span> <span class="dim">──────────</span> Java 70% · HTML 85% · CSS 80% · JavaScript 70%',
-        '<span class="highlight">Tools</span> <span class="dim">────────────────</span> Streamlit · OpenCV · GitHub · Maven · JDBC',
-      ],
-      askQ: 'What are all of Pavan\'s skills and proficiency levels?',
-    },
-    {
-      sym:'γ', freq:'γ-309', name:'Career Journey',
-      color:'#fbbf24', color2:'#d97706', shadow:'rgba(251,191,36,0.25)',
-      dialDeg: 20,
-      transmitMsg: 'Decoding trajectory. Mapping <span class="highlight">Career Journey</span>...',
-      statusMsg: 'CONNECTED — γ-309',
-      lines: [
-        '<span class="highlight">2021–2024</span> <span class="dim">──</span> BSc MSCS · Maths, Stats, Computer Science · Kurnool',
-        '<span class="highlight">Jan–Apr 2024</span> <span class="dim">─</span> Data Science Intern · Interncall · Python & ML',
-        '<span class="highlight">2025–2027</span> <span class="dim">──</span> MCA · JNTUA Anantapur · Data Analytics focus',
-        '<span class="highlight">Goal</span> <span class="dim">───────────</span> Senior Data Analyst → AI-driven product builder',
-        '<span class="highlight">Open to</span> <span class="dim">────────</span> Internships & entry-level Data Analyst roles',
-        '<span class="highlight">Motto</span> <span class="dim">──────────</span> Learn by building. Ship real products.',
-      ],
-      askQ: 'Tell me about Pavan\'s career journey and what he is looking for',
-    },
-    {
-      sym:'δ', freq:'δ-412', name:'AI & Tech Journey',
-      color:'#7dd3fc', color2:'#0284c7', shadow:'rgba(125,211,252,0.25)',
-      dialDeg: 60,
-      transmitMsg: 'Neural link established. Loading <span class="highlight">AI & Tech Matrix</span>...',
-      statusMsg: 'CONNECTED — δ-412',
-      lines: [
-        '<span class="highlight">AI Tools</span> <span class="dim">──────────</span> Groq · LLaMA · OpenAI APIs · Hugging Face',
-        '<span class="highlight">ML Stack</span> <span class="dim">──────────</span> TensorFlow · Scikit-learn · CNNs · EDA pipelines',
-        '<span class="highlight">Data Viz</span> <span class="dim">──────────</span> Power BI · Plotly · Seaborn · Matplotlib · DAX',
-        '<span class="highlight">AI Projects</span> <span class="dim">──────</span> Candy AI assistant · Digit recogniser CNN',
-        '<span class="highlight">Interest</span> <span class="dim">───────────</span> AI agents · Intelligent apps · Automation · SaaS',
-        '<span class="highlight">Learning style</span> <span class="dim">───</span> Build first. Learn deeply. Ship constantly.',
-      ],
-      askQ: 'Tell me about Pavan\'s AI and technology journey and interests',
-    },
-    {
-      sym:'Ω', freq:'Ω-999', name:'Secret Transmission',
-      color:'#f43f5e', color2:'#be123c', shadow:'rgba(244,63,94,0.28)',
-      dialDeg: 108,
-      transmitMsg: '<span class="highlight">⚠ ENCRYPTED CHANNEL</span> · Bypassing security protocols...',
-      statusMsg: 'DECRYPTED — Ω-999',
-      lines: [
-        '<span class="highlight">Hidden fact</span> <span class="dim">──────</span> First in his family to pursue a tech career',
-        '<span class="highlight">Secret weapon</span> <span class="dim">────</span> Learns any technology by building with it in days',
-        '<span class="highlight">True motivation</span> <span class="dim">──</span> Turns ideas into real products people actually use',
-        '<span class="highlight">Unlocked skill</span> <span class="dim">───</span> Built Candy AI — a full personal AI assistant',
-        '<span class="highlight">Final broadcast</span> <span class="dim">──</span> Pavan is not just a student. He is a builder.',
-        '<span class="dim">>>> END OF TRANSMISSION <<<</span>',
-      ],
-      askQ: 'Tell me something surprising and personal about Pavan',
-    },
-  ];
-
-  let activeIdx = 0;
-  let dialDeg = CHANNELS[0].dialDeg;
-
-  // Build waveform bars
-  const waveform = document.getElementById('freqWaveform');
-  if (waveform) {
-    for (let i = 0; i < 22; i++) {
-      const b = document.createElement('div');
-      b.className = 'freq-waveform-bar';
-      const spd = (0.35 + Math.random() * 0.65).toFixed(2) + 's';
-      const del = (Math.random() * 0.5).toFixed(2) + 's';
-      b.style.setProperty('--spd', spd);
-      b.style.setProperty('--delay', del);
-      b.style.height = (3 + Math.random() * 12) + 'px';
-      waveform.appendChild(b);
-    }
-  }
-
-  // Dial interaction
-  const dialOuter = document.getElementById('dialOuter');
-  const dialNeedle = document.getElementById('dialNeedle');
-
-  function setNeedle(deg) {
-    if (dialNeedle) dialNeedle.style.transform = `rotate(${deg}deg)`;
-  }
-  setNeedle(dialDeg);
-
-  // Click on dial cycles channels
-  if (dialOuter) {
-    let dragging = false, startY = 0, startDeg = 0;
-    dialOuter.addEventListener('mousedown', e => {
-      dragging = true; startY = e.clientY; startDeg = dialDeg;
-    });
-    window.addEventListener('mousemove', e => {
-      if (!dragging) return;
-      const dy = startY - e.clientY;
-      dialDeg = startDeg + dy * 1.8;
-      setNeedle(dialDeg);
-      // find closest channel
-      const diffs = CHANNELS.map((c,i) => ({i, d: Math.abs(((dialDeg % 360 + 360) % 360) - ((c.dialDeg % 360 + 360) % 360))}));
-      diffs.sort((a,b) => a.d - b.d);
-      if (diffs[0].i !== activeIdx) setChannel(diffs[0].i, false);
-    });
-    window.addEventListener('mouseup', () => { if (dragging) { dragging = false; snapToChannel(activeIdx); } });
-    // Touch
-    dialOuter.addEventListener('touchstart', e => { dragging=true; startY=e.touches[0].clientY; startDeg=dialDeg; },{passive:true});
-    window.addEventListener('touchmove', e => {
-      if (!dragging) return;
-      const dy = startY - e.touches[0].clientY;
-      dialDeg = startDeg + dy * 1.8; setNeedle(dialDeg);
-      const diffs = CHANNELS.map((c,i)=>({i,d:Math.abs(((dialDeg%360+360)%360)-((c.dialDeg%360+360)%360))}));
-      diffs.sort((a,b)=>a.d-b.d);
-      if (diffs[0].i !== activeIdx) setChannel(diffs[0].i, false);
-    },{passive:true});
-    window.addEventListener('touchend',()=>{ if(dragging){dragging=false;snapToChannel(activeIdx);}});
-    // Click without drag = next channel
-    dialOuter.addEventListener('click', e => {
-      if (Math.abs((e.clientY||0) - (startY||0)) < 5) {
-        const next = (activeIdx + 1) % CHANNELS.length;
-        setChannel(next, true);
-      }
-    });
-  }
-
-  function snapToChannel(idx) {
-    dialDeg = CHANNELS[idx].dialDeg;
-    setNeedle(dialDeg);
-  }
-
-  // Channel button clicks
-  const grid = document.getElementById('channelsGrid');
-  if (grid) {
-    grid.addEventListener('click', e => {
-      const btn = e.target.closest('.channel-btn');
-      if (!btn) return;
-      const idx = parseInt(btn.dataset.ch);
-      setChannel(idx, true);
-    });
-  }
-
-  function setChannel(idx, openBroadcast) {
-    activeIdx = idx;
-    const ch = CHANNELS[idx];
-    // Update freq readout
-    const ro = document.getElementById('freqReadout');
-    if (ro) {
-      const status = document.getElementById('freqStatus');
-      ro.childNodes[0].textContent = ch.freq + ' ';
-      if (status) status.textContent = 'TUNING';
-      setTimeout(() => { if(status) status.textContent = 'LOCKED'; }, 600);
-    }
-    // Update dial face
-    const sym = document.getElementById('dialSymbol');
-    const num = document.getElementById('dialNum');
-    if (sym) sym.textContent = ch.sym;
-    if (num) num.textContent = ch.freq.split('-')[1] || '';
-    // Snap needle
-    snapToChannel(idx);
-    // Update active button
-    document.querySelectorAll('.channel-btn').forEach((b,i) => b.classList.toggle('active', i === idx));
-    // Waveform color
-    const wf = document.getElementById('freqWaveform');
-    if (wf) wf.querySelectorAll('.freq-waveform-bar').forEach(b => { b.style.background = ch.color + '44'; });
-    if (openBroadcast) {
-      playStatic(0.1, 0.08);
-      openBroadcastPanel(idx);
-    }
-  }
-
-  // Broadcast panel
-  const panel     = document.getElementById('broadcastPanel');
-  const fillEl    = document.getElementById('broadcastFill');
-  const contentEl = document.getElementById('broadcastContent');
-  const iconEl    = document.getElementById('broadcastIcon');
-  const chNameEl  = document.getElementById('broadcastChannelName');
-  const titleEl   = document.getElementById('broadcastTitle');
-  const statusEl  = document.getElementById('broadcastStatusText');
-  const innerEl   = document.getElementById('broadcastInner');
-
-  function openBroadcastPanel(idx) {
-    const ch = CHANNELS[idx];
-    if (!panel) return;
-
-    // Cancel any ongoing speech and clear queue
-    cancelSpeech();
-
-    // Set colours via CSS vars
-    if (innerEl) {
-      innerEl.style.setProperty('--broadcast-color', ch.color);
-      innerEl.style.setProperty('--broadcast-color2', ch.color2);
-      innerEl.style.setProperty('--broadcast-shadow', ch.shadow);
-    }
-    // Reset
-    if (fillEl)    { fillEl.style.width = '0%'; fillEl.style.background = `linear-gradient(90deg,${ch.color},${ch.color2})`; }
-    if (contentEl) contentEl.innerHTML = '';
-    if (iconEl)    { iconEl.textContent = ch.sym; iconEl.style.color = ch.color; iconEl.style.borderColor = ch.color; }
-    if (chNameEl)  chNameEl.textContent = 'CHANNEL ' + ch.freq;
-    if (titleEl)   titleEl.textContent = ch.name;
-    if (statusEl)  statusEl.textContent = 'Establishing connection...';
-
-    panel.classList.add('active');
-
-    // 1. Tuning sweep sound immediately on open
-    setTimeout(() => playTuningSweep(), 100);
-
-    // 2. Static burst then dramatic channel announcement
-    setTimeout(() => {
-      playStatic(0.22, 0.14);
-    }, 350);
-    setTimeout(() => {
-      playTransmissionHum(2.2);
-      enqueueSpeak('Incoming transmission. Frequency ' + ch.freq + '. ' + ch.name + '.', true);
-    }, 600);
-
-    // 3. Animate: status → fill → lines
-    setTimeout(() => { if(statusEl) { statusEl.innerHTML = ch.transmitMsg; } }, 300);
-    setTimeout(() => { if(fillEl) fillEl.style.width = '100%'; }, 500);
-    setTimeout(() => {
-      if(statusEl) statusEl.textContent = ch.statusMsg;
-      // Lock-in beep sequence on connection confirmed
-      playBeep(440, 0.08, 0.07);
-      setTimeout(() => playBeep(660, 0.08, 0.07), 120);
-      setTimeout(() => playBeep(880, 0.12, 0.08), 240);
-    }, 2200);
-
-    // 4. Show lines one by one — staggered more for dramatic rhythm
-    ch.lines.forEach((line, i) => {
-      setTimeout(() => {
-        if (!contentEl) return;
-        const div = document.createElement('div');
-        div.className = 'line';
-        div.innerHTML = line;
-        contentEl.appendChild(div);
-        requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add('show')));
-        // Enqueue as data line (triggers crackle before + beep after)
-        enqueueSpeak(stripHtml(line), false);
-      }, 2700 + i * 420);
-    });
-  }
-
-  // Ask button
-  const askBtn   = document.getElementById('broadcastAsk');
-  const closeBtn = document.getElementById('broadcastClose');
-  if (askBtn) {
-    askBtn.addEventListener('click', () => {
-      const ch = CHANNELS[activeIdx];
-      cancelSpeech();
-      panel.classList.remove('active');
-      if (typeof handleSend === 'function') {
-        setTimeout(() => handleSend(ch.askQ), 200);
-      }
-    });
-  }
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      cancelSpeech();
-      panel.classList.remove('active');
-    });
-  }
-  panel?.addEventListener('click', e => {
-    if (e.target === panel) {
-      cancelSpeech();
-      panel.classList.remove('active');
-    }
+  lines.forEach((el,i)=>{
+    setTimeout(()=>{
+      el.classList.add('show');
+      enqueue(textLines[i],false);
+    }, 550 + i*320);
   });
 
-  // Auto-open first channel after 1.5s to demo the feature
-  //setTimeout(() => openBroadcastPanel(0), 1500);
+  /* bottom marquee */
+  nowInner.textContent=`[${ch.freq}] ${ch.name} · ${ch.lines.map(l=>l.hi).join(' · ')}`;
 
-})();
+  /* ask button */
+  bcAskBtn.onclick=()=>{
+    window.open('https://kalyanfinity-portfolio.netlify.app','_blank');
+    closeBroadcast();
+  };
+}
+
+function closeBroadcast(){
+  broadcastPanel.classList.remove('active');
+  cancelSpeech();
+}
+bcClose.addEventListener('click',closeBroadcast);
+broadcastPanel.addEventListener('click',e=>{if(e.target===broadcastPanel)closeBroadcast();});
+
+/* ════════════════════════════════════════════════════
+   MUSIC PLAYBACK
+════════════════════════════════════════════════════ */
+function loadAndPlay(){
+  const url=activeChannel>=0?CHANNELS[activeChannel].musicUrl:MUSIC_STATIONS[musicIdx];
+  audio.src=url;audio.volume=parseFloat(volSlider.value);audio.load();
+  audio.play()
+    .then(()=>{setPlaying(true);tryAnalyser();})
+    .catch(()=>{setPlaying(false);});
+}
+
+function tryAnalyser(){
+  try{
+    if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    if(source){try{source.disconnect();}catch(e){}}
+    source=audioCtx.createMediaElementSource(audio);
+    analyser=audioCtx.createAnalyser();
+    analyser.fftSize=256;analyser.smoothingTimeConstant=0.84;
+    source.connect(analyser);analyser.connect(audioCtx.destination);
+  }catch(e){analyser=null;}
+}
+
+function setPlaying(s){
+  isPlaying=s;
+  iPlay.style.display=s?'none':'';
+  iPause.style.display=s?'':'none';
+  playBtn.classList.toggle('playing',s);
+  liveBadge.classList.toggle('off',!s);
+}
+
+audio.addEventListener('error',()=>{
+  setTimeout(()=>loadAndPlay(),3000);
+});
+
+playBtn.addEventListener('click',()=>{
+  if(isPlaying){audio.pause();setPlaying(false);}
+  else{
+    if(!audio.src){loadAndPlay();}
+    else{if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();audio.play().then(()=>setPlaying(true)).catch(()=>{});}
+  }
+});
+
+prevBtn.addEventListener('click',()=>{
+  musicIdx=(musicIdx-1+MUSIC_STATIONS.length)%MUSIC_STATIONS.length;
+  if(isPlaying)loadAndPlay();
+});
+nextBtn.addEventListener('click',()=>{
+  musicIdx=(musicIdx+1)%MUSIC_STATIONS.length;
+  if(isPlaying)loadAndPlay();
+});
+
+/* ════════════════════════════════════════════════════
+   VOLUME
+════════════════════════════════════════════════════ */
+volSlider.addEventListener('input',()=>{
+  audio.volume=parseFloat(volSlider.value);updateVolGrad();
+});
+function updateVolGrad(){
+  const p=Math.round(parseFloat(volSlider.value)*100);
+  volSlider.style.background=`linear-gradient(90deg,var(--cyan) 0%,var(--violet) ${p}%,rgba(255,255,255,0.08) ${p}%)`;
+}
+updateVolGrad();
+
+/* ════════════════════════════════════════════════════
+   SPEAK BUTTON — reads current channel
+════════════════════════════════════════════════════ */
+speakBtn.addEventListener('click',()=>{
+  if(activeChannel<0){
+    cancelSpeech();
+    enqueue("Welcome to Candy Radio. I'm your host for Pavan Kalyan's portfolio. Select a channel to begin transmission.",true);
+    return;
+  }
+  cancelSpeech();
+  const ch=CHANNELS[activeChannel];
+  enqueue(ch.transmitMsg,true);
+  ch.lines.forEach((l,i)=>setTimeout(()=>enqueue(`${l.hi}. ${l.rest}`),i*200));
+});
+
+/* ════════════════════════════════════════════════════
+   CIRCULAR VISUALIZER
+════════════════════════════════════════════════════ */
+const VW=130, VH=130, VCX=VW/2, VCY=VH/2;
+const BARS=72, BASER=38, MAXBAR=26;
+
+function drawViz(){
+  vizFrame=requestAnimationFrame(drawViz);
+  const ch=activeChannel>=0?CHANNELS[activeChannel]:null;
+  const col=ch?ch.color:'#00d4ff';
+  const shadow=ch?ch.shadow:'rgba(0,212,255,0.5)';
+
+  vCtx.clearRect(0,0,VW,VH);
+  let data;
+  if(analyser){
+    const buf=new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(buf);
+    data=new Float32Array(BARS);
+    const step=Math.floor(buf.length/BARS);
+    for(let i=0;i<BARS;i++)data[i]=buf[i*step]/255;
+  }else{
+    fakePhase+=isPlaying?.032:.007;
+    data=new Float32Array(BARS);
+    for(let i=0;i<BARS;i++){
+      const t=fakePhase+(i/BARS)*Math.PI*2;
+      data[i]=isPlaying
+        ?Math.max(0,.12+.42*Math.sin(t)+.20*Math.sin(t*2.8+1)+.10*Math.sin(t*5.3+2))
+        :Math.max(0,.03+.05*Math.sin(t*.4));
+    }
+  }
+
+  /* base circle */
+  vCtx.beginPath();vCtx.arc(VCX,VCY,BASER,0,Math.PI*2);
+  vCtx.strokeStyle='rgba(0,212,255,0.10)';vCtx.lineWidth=1;vCtx.stroke();
+
+  /* inner glow */
+  const ig=vCtx.createRadialGradient(VCX,VCY,0,VCX,VCY,BASER-1);
+  ig.addColorStop(0,shadow.replace('.28',isPlaying?'.09':'.04').replace('.25',isPlaying?'.08':'.03'));
+  ig.addColorStop(1,'transparent');
+  vCtx.beginPath();vCtx.arc(VCX,VCY,BASER-1,0,Math.PI*2);vCtx.fillStyle=ig;vCtx.fill();
+
+  /* bars */
+  for(let i=0;i<BARS;i++){
+    const angle=(i/BARS)*Math.PI*2-Math.PI/2;
+    const amp=data[i];
+    const barH=amp*MAXBAR+(isPlaying?1.5:.5);
+    const x1=VCX+Math.cos(angle)*BASER, y1=VCY+Math.sin(angle)*BASER;
+    const x2=VCX+Math.cos(angle)*(BASER+barH), y2=VCY+Math.sin(angle)*(BASER+barH);
+    const a=.28+amp*.72;
+    vCtx.beginPath();vCtx.moveTo(x1,y1);vCtx.lineTo(x2,y2);
+    vCtx.strokeStyle=amp>.65?`rgba(255,255,255,${a*.9})`:col+Math.round(a*255).toString(16).padStart(2,'0');
+    vCtx.lineWidth=1.8;vCtx.lineCap='round';vCtx.stroke();
+  }
+
+  /* rotating arc */
+  if(isPlaying){
+    const ap=(fakePhase*.15)%(Math.PI*2);
+    vCtx.beginPath();vCtx.arc(VCX,VCY,BASER,ap,ap+Math.PI*.9);
+    vCtx.strokeStyle=col+'44';vCtx.lineWidth=2.5;vCtx.stroke();
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
+function init(){
+  buildChannels();
+  updateDial(null);
+  drawViz();
+
+  /* Welcome speech */
+  setTimeout(()=>{
+    enqueue("Welcome to Candy Radio. I'm the voice of Pavan Kalyan's portfolio. Press play for ambient space music, then select a channel to hear about his projects, skills, career, and more.",true);
+  },700);
+}
+
+if(window.speechSynthesis){
+  speechSynthesis.getVoices().length>0?init():speechSynthesis.addEventListener('voiceschanged',init,{once:true});
+  setTimeout(init,600);
+}else{init();}
+
 /* ══════════ TYPING INDICATOR PULSE ══════════ */
 (function(){
   const av = document.querySelector('.chdr-av');
