@@ -1033,7 +1033,7 @@ body.light .story-row:hover   { background: rgba(109,40,217,0.05); }
 .ap-peak{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:6px;}
 
  /* ══════════════════════ BG ══════════════════════ */
-.sr-bg{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.sr-bg{display:none;}
 .sr-bg::before{
   content:'';position:absolute;inset:0;
   background:
@@ -1065,7 +1065,7 @@ body.light .story-row:hover   { background: rgba(109,40,217,0.05); }
 /* ══════════════════════ LAYOUT ══════════════════════ */
 .sr-wrap{
   position:relative;z-index:1;
-  height:100vh;display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   padding:14px;
 }
 
@@ -1080,7 +1080,7 @@ body.light .story-row:hover   { background: rgba(109,40,217,0.05); }
     0 0 0 1px rgba(255,255,255,0.035) inset,
     0 32px 80px rgba(0,0,0,0.65),
     0 0 60px rgba(0,212,255,0.05);
-  overflow:hidden;
+  overflow:visible;
   display:flex;flex-direction:column;
   position:relative;
 }
