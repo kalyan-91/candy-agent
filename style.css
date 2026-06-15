@@ -1414,19 +1414,6 @@ body.light .story-row:hover   { background: rgba(109,40,217,0.05); }
 }
 .bc-btn-close:hover{border-color:rgba(244,63,94,.3);color:var(--rose);}
 
-/* ══════════════════════ UTIL ══════════════════════ */
-@media(max-width:440px){
-  .sr-card{border-radius:0;min-height:100svh;border-left:none;border-right:none;}
-  .sr-wrap{padding:0;}
-  .viz-wrap{width:110px;height:110px;}
-  #viz{width:110px;height:110px;}
-  .dial-wrap{width:88px;height:88px;}
-}
-@media(max-height:700px){
-  .channels-section{padding-top:9px;}
-  .channel-btn{padding:6px 12px;}
-  .ctrl-section{padding:9px 18px 12px;}
-}
 /* ══ MOBILE ══ */
 @media(max-width:700px){
   .app{padding:0;gap:0;flex-direction:column;}
