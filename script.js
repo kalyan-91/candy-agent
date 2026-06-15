@@ -484,51 +484,160 @@ function setMood(text) {
 ══════════════════════════════════════════ */
 (function initScanner(){
 
-  /* ── Speech helpers ── */
+  /* ══════════════════════════════════════════
+     SPACE RADIO AUDIO ENGINE
+  ══════════════════════════════════════════ */
+
+  /* ── Web Audio context (lazy) ── */
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  /* ── Static crackle burst ── */
+  function playStatic(duration = 0.18, volume = 0.12) {
+    try {
+      const ctx    = getAudioCtx();
+      const buf    = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+      const data   = buf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * volume;
+      const src    = ctx.createBufferSource();
+      src.buffer   = buf;
+      // Band-pass so it sounds like radio static, not white noise
+      const bp     = ctx.createBiquadFilter();
+      bp.type      = 'bandpass';
+      bp.frequency.value = 1800;
+      bp.Q.value   = 0.6;
+      const gain   = ctx.createGain();
+      gain.gain.setValueAtTime(1, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+      src.connect(bp); bp.connect(gain); gain.connect(ctx.destination);
+      src.start();
+    } catch(e) {}
+  }
+
+  /* ── Soft confirm beep ── */
+  function playBeep(freq = 880, duration = 0.09, vol = 0.08) {
+    try {
+      const ctx  = getAudioCtx();
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type   = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + duration);
+    } catch(e) {}
+  }
+
+  /* ── Tuning sweep (channel lock-in sound) ── */
+  function playTuningSweep() {
+    try {
+      const ctx  = getAudioCtx();
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type   = 'sawtooth';
+      osc.frequency.setValueAtTime(200, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(1400, ctx.currentTime + 0.35);
+      osc.frequency.linearRampToValueAtTime(880,  ctx.currentTime + 0.55);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.6);
+      // Add slight distortion via waveshaper
+      const ws   = ctx.createWaveShaper();
+      const curve = new Float32Array(256);
+      for (let i = 0; i < 256; i++) { const x = (i * 2) / 256 - 1; curve[i] = (Math.PI + 80) * x / (Math.PI + 80 * Math.abs(x)); }
+      ws.curve = curve;
+      osc.connect(ws); ws.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.65);
+    } catch(e) {}
+  }
+
+  /* ── Low transmission hum under announcement ── */
+  function playTransmissionHum(durationSec = 2.0) {
+    try {
+      const ctx  = getAudioCtx();
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type   = 'sine';
+      osc.frequency.value = 60;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.2);
+      gain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + durationSec - 0.3);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + durationSec);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + durationSec);
+    } catch(e) {}
+  }
+
+  /* ── Voice helpers ── */
   let speechQueue = [];
   let isSpeaking  = false;
 
   function getFemaleVoice() {
     const voices = window.speechSynthesis.getVoices();
+    // Priority: warm, calm, natural female voices
     const preferred = [
       'Google UK English Female',
-      'Google US English',
-      'Samantha',
-      'Karen',
-      'Moira',
-      'Tessa',
-      'Fiona',
-      'Victoria',
+      'Samantha',           // macOS / iOS
+      'Karen',              // Australian female
+      'Moira',              // Irish female
+      'Tessa',              // South African female
+      'Fiona',              // Scottish female
+      'Microsoft Zira',     // Windows female
+      'Microsoft Eva',
     ];
     for (const name of preferred) {
       const v = voices.find(v => v.name === name);
       if (v) return v;
     }
-    // Fallback: first female-labelled voice
     return voices.find(v => /female/i.test(v.name)) || null;
   }
 
+  /* Each queue item: { text, isAnnouncement } */
   function processQueue() {
     if (isSpeaking || speechQueue.length === 0) return;
     isSpeaking = true;
-    const text = speechQueue.shift();
-    const utt  = new SpeechSynthesisUtterance(text);
-    utt.rate   = 0.82;
-    utt.pitch  = 1.1;
-    utt.volume = 1;
-    const voice = getFemaleVoice();
-    if (voice) utt.voice = voice;
-    utt.onend = () => { isSpeaking = false; processQueue(); };
-    utt.onerror = () => { isSpeaking = false; processQueue(); };
-    window.speechSynthesis.speak(utt);
+    const item = speechQueue.shift();
+
+    // Tiny static crackle before each line (not before the announcement)
+    if (!item.isAnnouncement) {
+      playStatic(0.12, 0.10);
+    }
+
+    setTimeout(() => {
+      const utt    = new SpeechSynthesisUtterance(item.text);
+      const voice  = getFemaleVoice();
+      if (voice) utt.voice = voice;
+
+      if (item.isAnnouncement) {
+        // Channel announcement: slower, deeper, dramatic
+        utt.rate   = 0.75;
+        utt.pitch  = 0.95;
+        utt.volume = 1.0;
+      } else {
+        // Data lines: calm, clear, slightly slower than normal
+        utt.rate   = 0.85;
+        utt.pitch  = 1.08;
+        utt.volume = 0.95;
+      }
+
+      utt.onend  = () => {
+        // Soft beep after each data line
+        if (!item.isAnnouncement) playBeep(660, 0.07, 0.06);
+        setTimeout(() => { isSpeaking = false; processQueue(); }, item.isAnnouncement ? 400 : 180);
+      };
+      utt.onerror = () => { isSpeaking = false; processQueue(); };
+      window.speechSynthesis.speak(utt);
+    }, item.isAnnouncement ? 0 : 80);
   }
 
-  function enqueueSpeak(text) {
+  function enqueueSpeak(text, isAnnouncement = false) {
     if (!window.speechSynthesis) return;
-    speechQueue.push(text);
-    // Voices may not be loaded yet on first call
+    speechQueue.push({ text, isAnnouncement });
     if (speechSynthesis.getVoices().length === 0) {
-      speechSynthesis.onvoiceschanged = () => { processQueue(); };
+      speechSynthesis.onvoiceschanged = () => processQueue();
     } else {
       processQueue();
     }
@@ -543,7 +652,11 @@ function setMood(text) {
   function stripHtml(html) {
     const d = document.createElement('div');
     d.innerHTML = html;
-    return d.textContent || d.innerText || '';
+    // Clean up box-drawing chars and extra spaces for cleaner TTS
+    return (d.textContent || d.innerText || '')
+      .replace(/[─━┄┈·•…]+/g, ',')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
   }
 
   const CHANNELS = [
@@ -731,7 +844,10 @@ function setMood(text) {
     // Waveform color
     const wf = document.getElementById('freqWaveform');
     if (wf) wf.querySelectorAll('.freq-waveform-bar').forEach(b => { b.style.background = ch.color + '44'; });
-    if (openBroadcast) openBroadcastPanel(idx);
+    if (openBroadcast) {
+      playStatic(0.1, 0.08);
+      openBroadcastPanel(idx);
+    }
   }
 
   // Broadcast panel
@@ -767,15 +883,30 @@ function setMood(text) {
 
     panel.classList.add('active');
 
-    // Announce channel name via speech (slight delay for panel open animation)
-    setTimeout(() => enqueueSpeak('Tuning to ' + ch.name), 400);
+    // 1. Tuning sweep sound immediately on open
+    setTimeout(() => playTuningSweep(), 100);
 
-    // Animate: status → fill → lines
+    // 2. Static burst then dramatic channel announcement
+    setTimeout(() => {
+      playStatic(0.22, 0.14);
+    }, 350);
+    setTimeout(() => {
+      playTransmissionHum(2.2);
+      enqueueSpeak('Incoming transmission. Frequency ' + ch.freq + '. ' + ch.name + '.', true);
+    }, 600);
+
+    // 3. Animate: status → fill → lines
     setTimeout(() => { if(statusEl) { statusEl.innerHTML = ch.transmitMsg; } }, 300);
     setTimeout(() => { if(fillEl) fillEl.style.width = '100%'; }, 500);
-    setTimeout(() => { if(statusEl) statusEl.textContent = ch.statusMsg; }, 2200);
+    setTimeout(() => {
+      if(statusEl) statusEl.textContent = ch.statusMsg;
+      // Lock-in beep sequence on connection confirmed
+      playBeep(440, 0.08, 0.07);
+      setTimeout(() => playBeep(660, 0.08, 0.07), 120);
+      setTimeout(() => playBeep(880, 0.12, 0.08), 240);
+    }, 2200);
 
-    // Show lines one by one + speak each line
+    // 4. Show lines one by one — staggered more for dramatic rhythm
     ch.lines.forEach((line, i) => {
       setTimeout(() => {
         if (!contentEl) return;
@@ -784,9 +915,9 @@ function setMood(text) {
         div.innerHTML = line;
         contentEl.appendChild(div);
         requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add('show')));
-        // Enqueue plain-text version of this line
-        enqueueSpeak(stripHtml(line));
-      }, 2400 + i * 280);
+        // Enqueue as data line (triggers crackle before + beep after)
+        enqueueSpeak(stripHtml(line), false);
+      }, 2700 + i * 420);
     });
   }
 
@@ -817,7 +948,7 @@ function setMood(text) {
   });
 
   // Auto-open first channel after 1.5s to demo the feature
-  //setTimeout(() => openBroadcastPanel(0), 1500);
+  setTimeout(() => openBroadcastPanel(0), 1500);
 
 })();
 /* ══════════ TYPING INDICATOR PULSE ══════════ */
