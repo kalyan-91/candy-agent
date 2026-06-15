@@ -1223,6 +1223,25 @@ function addSugg(rep) {
   msgsEl.appendChild(row); msgsEl.scrollTop = msgsEl.scrollHeight;
 }
 
+/* ══════════ ANALYTICS TRACKING ══════════ */
+const SESSION_START = Date.now();
+let sessionMessageCount = 0;
+const TRACK_EP = 'https://pk-groq-proxy.daroorpavankalyan.workers.dev/track';
+
+function trackSession() {
+  const duration = Math.round((Date.now() - SESSION_START) / 1000);
+  const hour = new Date().getHours();
+  navigator.sendBeacon(TRACK_EP, JSON.stringify({
+    type: 'session',
+    duration,
+    messageCount: sessionMessageCount,
+    hour
+  }));
+}
+
+window.addEventListener('pagehide', trackSession);
+window.addEventListener('beforeunload', trackSession);
+
 /* ══════════ UTILITIES ══════════ */
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmt(t) { return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>').replace(/\n/g,'<br>'); }
