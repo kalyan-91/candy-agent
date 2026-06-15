@@ -1228,3 +1228,200 @@ function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 function fmt(t) { return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`(.*?)`/g,'<code>$1</code>').replace(/\n/g,'<br>'); }
 function resizeTA(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 function showToast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2400); }
+
+/* ══════════════════════════════
+   CANDY STATUS STORY
+══════════════════════════════ */
+(function () {
+  const now  = new Date();
+  const ist  = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const h    = ist.getHours();
+  const isAway = h >= 22 || h < 7;
+
+  const STORIES = [
+    {
+      tag:       'Current Focus',
+      tagColor:  '#8b5cf6',
+      tagBg:     'rgba(139,92,246,0.12)',
+      icon:      '🚀',
+      title:     'Building AI Agents',
+      desc:      'Pavan is currently deep into building intelligent AI agents and exploring LLMs, RAG systems, and autonomous tools. Every day he experiments with new ideas and ships something new.',
+      highlights: ['AI Agents', 'LLMs', 'RAG', 'Groq API'],
+      highlightColor: '#8b5cf6',
+      dur: 6,
+    },
+    {
+      tag:       'Academic Life',
+      tagColor:  '#06b6d4',
+      tagBg:     'rgba(6,182,212,0.12)',
+      icon:      '🎓',
+      title:     'MCA @ JNTUA',
+      desc:      'Pursuing MCA at Jawaharlal Nehru Technological University, Anantapur. Focusing on Data Analytics, Database Management, and Business Intelligence alongside building real projects.',
+      highlights: ['JNTUA Anantapur', '2025–2027', 'Data Analytics', 'BI'],
+      highlightColor: '#06b6d4',
+      dur: 5,
+    },
+    {
+      tag:       'Status',
+      tagColor:  isAway ? '#f59e0b' : '#00c864',
+      tagBg:     isAway ? 'rgba(245,158,11,0.12)' : 'rgba(0,200,100,0.10)',
+      icon:      isAway ? '🌙' : '💻',
+      title:     isAway ? 'Taking a rest' : 'Online & Active',
+      desc:      isAway
+        ? 'It is late night in India right now. Pavan is likely resting but will respond to messages soon. Feel free to leave your contact and he will get back to you.'
+        : 'Pavan is currently active and online in India. He is open to conversations, collaborations, and new opportunities. Reach out anytime!',
+      highlights: isAway
+        ? ['India IST', 'Will respond soon', 'Leave a message']
+        : ['India IST', 'Ready to connect', 'Open to hire'],
+      highlightColor: isAway ? '#f59e0b' : '#00c864',
+      dur: 5,
+    },
+    {
+      tag:       'Open To',
+      tagColor:  '#f472b6',
+      tagBg:     'rgba(244,114,182,0.12)',
+      icon:      '🤝',
+      title:     'Internships & Roles',
+      desc:      'Pavan is actively looking for internships and entry-level Data Analyst or Data Science roles. He brings hands-on project experience, strong Python and SQL skills, and a passion for building.',
+      highlights: ['Data Analyst', 'Data Science', 'Internship', 'Entry Level'],
+      highlightColor: '#f472b6',
+      dur: 5,
+    },
+    {
+      tag:       'Latest Project',
+      tagColor:  '#fbbf24',
+      tagBg:     'rgba(251,191,36,0.12)',
+      icon:      '⚡',
+      title:     'Candy AI Agent',
+      desc:      'Just shipped Candy — a standalone AI agent built with Groq, featuring a live skill galaxy, mood ring, portfolio tour, reaction bar, and real time activity monitor. All built from scratch.',
+      highlights: ['Groq LLaMA', 'Skill Galaxy', 'Mood Ring', 'Live Features'],
+      highlightColor: '#fbbf24',
+      dur: 6,
+    },
+  ];
+
+  let currentStory = 0;
+  let storyTimer   = null;
+  let isOpen       = false;
+
+  const overlay   = document.getElementById('storyOverlay');
+  const trigger   = document.getElementById('storyTrigger') || document.getElementById('storyRow');
+  const closeBtn  = document.getElementById('storyClose');
+  const prevBtn   = document.getElementById('storyPrev');
+  const nextBtn   = document.getElementById('storyNext');
+  const contentEl = document.getElementById('storyContent');
+  const barsEl    = document.getElementById('storyProgressBars');
+  const timeEl    = document.getElementById('storyTime');
+  const previewEl = document.getElementById('storyPreview');
+
+  if (!overlay || !trigger) return;
+
+  // Set preview text
+  if (previewEl) previewEl.textContent = STORIES[0].title;
+
+  // Build progress bars
+  STORIES.forEach((_, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'story-prog-bar';
+    bar.innerHTML = `<div class="story-prog-fill" id="spf${i}"></div>`;
+    barsEl.appendChild(bar);
+  });
+
+  // Build story slides
+  STORIES.forEach((s, i) => {
+    const highlightsHTML = s.highlights.map(h =>
+      `<span class="story-highlight" style="color:${s.highlightColor};border-color:${s.highlightColor}44;background:${s.tagBg}">${h}</span>`
+    ).join('');
+
+    const slide = document.createElement('div');
+    slide.className = 'story-slide';
+    slide.id = `story-slide-${i}`;
+    slide.innerHTML = `
+      <div class="story-slide-icon">${s.icon}</div>
+      <span class="story-slide-tag" style="color:${s.tagColor};background:${s.tagBg};border:1px solid ${s.tagColor}33">
+        ${s.tag}
+      </span>
+      <div class="story-slide-title">${s.title}</div>
+      <div class="story-slide-desc">${s.desc}</div>
+      <div class="story-slide-highlights">${highlightsHTML}</div>`;
+    contentEl.appendChild(slide);
+  });
+
+  function updateTime() {
+    if (!timeEl) return;
+    const n = new Date();
+    const i = new Date(n.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const hh = String(i.getHours() % 12 || 12).padStart(2, '0');
+    const mm = String(i.getMinutes()).padStart(2, '0');
+    const ap = i.getHours() >= 12 ? 'PM' : 'AM';
+    timeEl.textContent = `Today · ${hh}:${mm} ${ap} IST`;
+  }
+
+  function showStory(idx) {
+    clearTimeout(storyTimer);
+
+    // Reset all slides and bars
+    document.querySelectorAll('.story-slide').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.story-prog-fill').forEach((f, i) => {
+      f.classList.remove('active');
+      f.style.animationDuration = '';
+      if (i < idx) f.classList.add('done');
+      else { f.classList.remove('done'); f.style.width = '0'; }
+    });
+
+    currentStory = idx;
+    const slide = document.getElementById(`story-slide-${idx}`);
+    if (slide) slide.classList.add('active');
+
+    const fill = document.getElementById(`spf${idx}`);
+    if (fill) {
+      fill.style.setProperty('--dur', STORIES[idx].dur + 's');
+      fill.classList.add('active');
+    }
+
+    updateTime();
+
+    storyTimer = setTimeout(() => {
+      if (currentStory < STORIES.length - 1) showStory(currentStory + 1);
+      else closeStory();
+    }, STORIES[idx].dur * 1000);
+  }
+
+  function openStory() {
+    isOpen = true;
+    overlay.classList.add('open');
+    showStory(0);
+  }
+
+  function closeStory() {
+    isOpen = false;
+    overlay.classList.remove('open');
+    clearTimeout(storyTimer);
+    // Reset all
+    document.querySelectorAll('.story-prog-fill').forEach(f => {
+      f.classList.remove('active', 'done');
+      f.style.width = '0';
+    });
+  }
+
+  // Events
+  trigger.addEventListener('click', openStory);
+  closeBtn?.addEventListener('click', closeStory);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeStory(); });
+
+  prevBtn?.addEventListener('click', () => {
+    if (currentStory > 0) showStory(currentStory - 1);
+  });
+  nextBtn?.addEventListener('click', () => {
+    if (currentStory < STORIES.length - 1) showStory(currentStory + 1);
+    else closeStory();
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (!isOpen) return;
+    if (e.key === 'ArrowRight') nextBtn?.click();
+    if (e.key === 'ArrowLeft')  prevBtn?.click();
+    if (e.key === 'Escape')     closeStory();
+  });
+})();
