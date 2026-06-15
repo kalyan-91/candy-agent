@@ -1127,6 +1127,7 @@ async function go() {
   const txt = inpEl.value.trim(); if (!txt) return;
   inpEl.value = ''; resizeTA(inpEl); stopListen();
   addMsg('user', esc(txt));
+  sessionMessageCount++;
   hist.push({ role: 'user', content: txt });
 
   // Track visitor question and send report on every message
