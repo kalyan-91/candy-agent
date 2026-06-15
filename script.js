@@ -478,6 +478,272 @@ function setMood(text) {
   addEventListener('resize', resize); resize(); draw();
 })();
 
+/* ══════════════════════════════════════════
+   SPACE FREQUENCY SCANNER JS
+══════════════════════════════════════════ */
+(function initScanner(){
+
+  const CHANNELS = [
+    {
+      sym:'α', freq:'α-101', name:'Projects Database',
+      color:'#00d4ff', color2:'#0099bb', shadow:'rgba(0,212,255,0.28)',
+      dialDeg: -60,
+      transmitMsg: 'Signal acquired. Accessing <span class="highlight">Projects Database</span>...',
+      statusMsg: 'CONNECTED — α-101',
+      lines: [
+        '<span class="highlight">SPARMS</span> <span class="dim">─────</span> Java Swing · Role-based dashboards · OMR scanning · PDF export',
+        '<span class="highlight">InventoryIQ</span> <span class="dim">─────</span> Streamlit · Inventory analytics · Audit logs · CSV export',
+        '<span class="highlight">Digit Recognizer</span> <span class="dim">─</span> CNN · Handwritten digits 0–9 · Live canvas demo',
+        '<span class="highlight">Netflix Dashboard</span> <span class="dim">─</span> Power BI · 5000+ titles · Genre & country analysis',
+        '<span class="highlight">Employee Attrition</span> <span class="dim">─</span> ML classification · Power BI HR dashboard',
+        '<span class="highlight">Zomato Analysis</span> <span class="dim">──</span> Restaurant ratings · Predictive ML models',
+      ],
+      askQ: 'Tell me about all of Pavan\'s projects in detail',
+    },
+    {
+      sym:'β', freq:'β-205', name:'Skills Database',
+      color:'#a78bfa', color2:'#7c3aed', shadow:'rgba(167,139,250,0.28)',
+      dialDeg: -20,
+      transmitMsg: 'Transmission received. Loading <span class="highlight">Skills Network</span>...',
+      statusMsg: 'CONNECTED — β-205',
+      lines: [
+        '<span class="highlight">Data & Analytics</span> <span class="dim">────</span> SQL 90% · Excel 88% · Power BI 85% · Plotly 75%',
+        '<span class="highlight">Python Ecosystem</span> <span class="dim">────</span> Python 85% · Pandas 85% · NumPy 80% · Matplotlib 80%',
+        '<span class="highlight">Machine Learning</span> <span class="dim">────</span> Scikit-learn 75% · TensorFlow 70% · Seaborn 80%',
+        '<span class="highlight">Programming</span> <span class="dim">──────────</span> Java 70% · HTML 85% · CSS 80% · JavaScript 70%',
+        '<span class="highlight">Tools</span> <span class="dim">────────────────</span> Streamlit · OpenCV · GitHub · Maven · JDBC',
+      ],
+      askQ: 'What are all of Pavan\'s skills and proficiency levels?',
+    },
+    {
+      sym:'γ', freq:'γ-309', name:'Career Journey',
+      color:'#fbbf24', color2:'#d97706', shadow:'rgba(251,191,36,0.25)',
+      dialDeg: 20,
+      transmitMsg: 'Decoding trajectory. Mapping <span class="highlight">Career Journey</span>...',
+      statusMsg: 'CONNECTED — γ-309',
+      lines: [
+        '<span class="highlight">2021–2024</span> <span class="dim">──</span> BSc MSCS · Maths, Stats, Computer Science · Kurnool',
+        '<span class="highlight">Jan–Apr 2024</span> <span class="dim">─</span> Data Science Intern · Interncall · Python & ML',
+        '<span class="highlight">2025–2027</span> <span class="dim">──</span> MCA · JNTUA Anantapur · Data Analytics focus',
+        '<span class="highlight">Goal</span> <span class="dim">───────────</span> Senior Data Analyst → AI-driven product builder',
+        '<span class="highlight">Open to</span> <span class="dim">────────</span> Internships & entry-level Data Analyst roles',
+        '<span class="highlight">Motto</span> <span class="dim">──────────</span> Learn by building. Ship real products.',
+      ],
+      askQ: 'Tell me about Pavan\'s career journey and what he is looking for',
+    },
+    {
+      sym:'δ', freq:'δ-412', name:'AI & Tech Journey',
+      color:'#7dd3fc', color2:'#0284c7', shadow:'rgba(125,211,252,0.25)',
+      dialDeg: 60,
+      transmitMsg: 'Neural link established. Loading <span class="highlight">AI & Tech Matrix</span>...',
+      statusMsg: 'CONNECTED — δ-412',
+      lines: [
+        '<span class="highlight">AI Tools</span> <span class="dim">──────────</span> Groq · LLaMA · OpenAI APIs · Hugging Face',
+        '<span class="highlight">ML Stack</span> <span class="dim">──────────</span> TensorFlow · Scikit-learn · CNNs · EDA pipelines',
+        '<span class="highlight">Data Viz</span> <span class="dim">──────────</span> Power BI · Plotly · Seaborn · Matplotlib · DAX',
+        '<span class="highlight">AI Projects</span> <span class="dim">──────</span> Candy AI assistant · Digit recogniser CNN',
+        '<span class="highlight">Interest</span> <span class="dim">───────────</span> AI agents · Intelligent apps · Automation · SaaS',
+        '<span class="highlight">Learning style</span> <span class="dim">───</span> Build first. Learn deeply. Ship constantly.',
+      ],
+      askQ: 'Tell me about Pavan\'s AI and technology journey and interests',
+    },
+    {
+      sym:'Ω', freq:'Ω-999', name:'Secret Transmission',
+      color:'#f43f5e', color2:'#be123c', shadow:'rgba(244,63,94,0.28)',
+      dialDeg: 108,
+      transmitMsg: '<span class="highlight">⚠ ENCRYPTED CHANNEL</span> · Bypassing security protocols...',
+      statusMsg: 'DECRYPTED — Ω-999',
+      lines: [
+        '<span class="highlight">Hidden fact</span> <span class="dim">──────</span> First in his family to pursue a tech career',
+        '<span class="highlight">Secret weapon</span> <span class="dim">────</span> Learns any technology by building with it in days',
+        '<span class="highlight">True motivation</span> <span class="dim">──</span> Turns ideas into real products people actually use',
+        '<span class="highlight">Unlocked skill</span> <span class="dim">───</span> Built Candy AI — a full personal AI assistant',
+        '<span class="highlight">Final broadcast</span> <span class="dim">──</span> Pavan is not just a student. He is a builder.',
+        '<span class="dim">>>> END OF TRANSMISSION <<<</span>',
+      ],
+      askQ: 'Tell me something surprising and personal about Pavan',
+    },
+  ];
+
+  let activeIdx = 0;
+  let dialDeg = CHANNELS[0].dialDeg;
+
+  // Build waveform bars
+  const waveform = document.getElementById('freqWaveform');
+  if (waveform) {
+    for (let i = 0; i < 22; i++) {
+      const b = document.createElement('div');
+      b.className = 'freq-waveform-bar';
+      const spd = (0.35 + Math.random() * 0.65).toFixed(2) + 's';
+      const del = (Math.random() * 0.5).toFixed(2) + 's';
+      b.style.setProperty('--spd', spd);
+      b.style.setProperty('--delay', del);
+      b.style.height = (3 + Math.random() * 12) + 'px';
+      waveform.appendChild(b);
+    }
+  }
+
+  // Dial interaction
+  const dialOuter = document.getElementById('dialOuter');
+  const dialNeedle = document.getElementById('dialNeedle');
+
+  function setNeedle(deg) {
+    if (dialNeedle) dialNeedle.style.transform = `rotate(${deg}deg)`;
+  }
+  setNeedle(dialDeg);
+
+  // Click on dial cycles channels
+  if (dialOuter) {
+    let dragging = false, startY = 0, startDeg = 0;
+    dialOuter.addEventListener('mousedown', e => {
+      dragging = true; startY = e.clientY; startDeg = dialDeg;
+    });
+    window.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const dy = startY - e.clientY;
+      dialDeg = startDeg + dy * 1.8;
+      setNeedle(dialDeg);
+      // find closest channel
+      const diffs = CHANNELS.map((c,i) => ({i, d: Math.abs(((dialDeg % 360 + 360) % 360) - ((c.dialDeg % 360 + 360) % 360))}));
+      diffs.sort((a,b) => a.d - b.d);
+      if (diffs[0].i !== activeIdx) setChannel(diffs[0].i, false);
+    });
+    window.addEventListener('mouseup', () => { if (dragging) { dragging = false; snapToChannel(activeIdx); } });
+    // Touch
+    dialOuter.addEventListener('touchstart', e => { dragging=true; startY=e.touches[0].clientY; startDeg=dialDeg; },{passive:true});
+    window.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      const dy = startY - e.touches[0].clientY;
+      dialDeg = startDeg + dy * 1.8; setNeedle(dialDeg);
+      const diffs = CHANNELS.map((c,i)=>({i,d:Math.abs(((dialDeg%360+360)%360)-((c.dialDeg%360+360)%360))}));
+      diffs.sort((a,b)=>a.d-b.d);
+      if (diffs[0].i !== activeIdx) setChannel(diffs[0].i, false);
+    },{passive:true});
+    window.addEventListener('touchend',()=>{ if(dragging){dragging=false;snapToChannel(activeIdx);}});
+    // Click without drag = next channel
+    dialOuter.addEventListener('click', e => {
+      if (Math.abs((e.clientY||0) - (startY||0)) < 5) {
+        const next = (activeIdx + 1) % CHANNELS.length;
+        setChannel(next, true);
+      }
+    });
+  }
+
+  function snapToChannel(idx) {
+    dialDeg = CHANNELS[idx].dialDeg;
+    setNeedle(dialDeg);
+  }
+
+  // Channel button clicks
+  const grid = document.getElementById('channelsGrid');
+  if (grid) {
+    grid.addEventListener('click', e => {
+      const btn = e.target.closest('.channel-btn');
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.ch);
+      setChannel(idx, true);
+    });
+  }
+
+  function setChannel(idx, openBroadcast) {
+    activeIdx = idx;
+    const ch = CHANNELS[idx];
+    // Update freq readout
+    const ro = document.getElementById('freqReadout');
+    if (ro) {
+      const status = document.getElementById('freqStatus');
+      ro.childNodes[0].textContent = ch.freq + ' ';
+      if (status) status.textContent = 'TUNING';
+      setTimeout(() => { if(status) status.textContent = 'LOCKED'; }, 600);
+    }
+    // Update dial face
+    const sym = document.getElementById('dialSymbol');
+    const num = document.getElementById('dialNum');
+    if (sym) sym.textContent = ch.sym;
+    if (num) num.textContent = ch.freq.split('-')[1] || '';
+    // Snap needle
+    snapToChannel(idx);
+    // Update active button
+    document.querySelectorAll('.channel-btn').forEach((b,i) => b.classList.toggle('active', i === idx));
+    // Waveform color
+    const wf = document.getElementById('freqWaveform');
+    if (wf) wf.querySelectorAll('.freq-waveform-bar').forEach(b => { b.style.background = ch.color + '44'; });
+    if (openBroadcast) openBroadcastPanel(idx);
+  }
+
+  // Broadcast panel
+  const panel     = document.getElementById('broadcastPanel');
+  const fillEl    = document.getElementById('broadcastFill');
+  const contentEl = document.getElementById('broadcastContent');
+  const iconEl    = document.getElementById('broadcastIcon');
+  const chNameEl  = document.getElementById('broadcastChannelName');
+  const titleEl   = document.getElementById('broadcastTitle');
+  const statusEl  = document.getElementById('broadcastStatusText');
+  const innerEl   = document.getElementById('broadcastInner');
+
+  function openBroadcastPanel(idx) {
+    const ch = CHANNELS[idx];
+    if (!panel) return;
+
+    // Set colours via CSS vars
+    if (innerEl) {
+      innerEl.style.setProperty('--broadcast-color', ch.color);
+      innerEl.style.setProperty('--broadcast-color2', ch.color2);
+      innerEl.style.setProperty('--broadcast-shadow', ch.shadow);
+    }
+    // Reset
+    if (fillEl)    { fillEl.style.width = '0%'; fillEl.style.background = `linear-gradient(90deg,${ch.color},${ch.color2})`; }
+    if (contentEl) contentEl.innerHTML = '';
+    if (iconEl)    { iconEl.textContent = ch.sym; iconEl.style.color = ch.color; iconEl.style.borderColor = ch.color; }
+    if (chNameEl)  chNameEl.textContent = 'CHANNEL ' + ch.freq;
+    if (titleEl)   titleEl.textContent = ch.name;
+    if (statusEl)  statusEl.textContent = 'Establishing connection...';
+
+    panel.classList.add('active');
+
+    // Animate: status → fill → lines
+    setTimeout(() => { if(statusEl) { statusEl.innerHTML = ch.transmitMsg; } }, 300);
+    setTimeout(() => { if(fillEl) fillEl.style.width = '100%'; }, 500);
+    setTimeout(() => { if(statusEl) statusEl.textContent = ch.statusMsg; }, 2200);
+
+    // Show lines one by one
+    ch.lines.forEach((line, i) => {
+      setTimeout(() => {
+        if (!contentEl) return;
+        const div = document.createElement('div');
+        div.className = 'line';
+        div.innerHTML = line;
+        contentEl.appendChild(div);
+        requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add('show')));
+      }, 2400 + i * 280);
+    });
+  }
+
+  // Ask button
+  const askBtn   = document.getElementById('broadcastAsk');
+  const closeBtn = document.getElementById('broadcastClose');
+  if (askBtn) {
+    askBtn.addEventListener('click', () => {
+      const ch = CHANNELS[activeIdx];
+      panel.classList.remove('active');
+      if (typeof handleSend === 'function') {
+        setTimeout(() => handleSend(ch.askQ), 200);
+      }
+    });
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => panel.classList.remove('active'));
+  }
+  panel?.addEventListener('click', e => {
+    if (e.target === panel) panel.classList.remove('active');
+  });
+
+  // Auto-open first channel after 1.5s to demo the feature
+  //setTimeout(() => openBroadcastPanel(0), 1500);
+
+})();
+
+
 /* ══════════ TYPING INDICATOR PULSE ══════════ */
 (function(){
   const av = document.querySelector('.chdr-av');
