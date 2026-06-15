@@ -480,8 +480,28 @@ function setMood(text) {
 
 /* ══════════════════════════════════════════
    SPACE FREQUENCY SCANNER JS
+   (with Web Speech API)
 ══════════════════════════════════════════ */
 (function initScanner(){
+
+  /* ── Speech helpers ── */
+  function speak(text, delay) {
+    if (!window.speechSynthesis) return;
+    setTimeout(() => {
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate  = 0.92;
+      utt.pitch = 1.05;
+      utt.volume = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utt);
+    }, delay);
+  }
+
+  function stripHtml(html) {
+    const d = document.createElement('div');
+    d.innerHTML = html;
+    return d.textContent || d.innerText || '';
+  }
 
   const CHANNELS = [
     {
@@ -685,6 +705,9 @@ function setMood(text) {
     const ch = CHANNELS[idx];
     if (!panel) return;
 
+    // Cancel any ongoing speech
+    window.speechSynthesis && window.speechSynthesis.cancel();
+
     // Set colours via CSS vars
     if (innerEl) {
       innerEl.style.setProperty('--broadcast-color', ch.color);
@@ -701,12 +724,15 @@ function setMood(text) {
 
     panel.classList.add('active');
 
+    // Announce channel name via speech
+    speak('Tuning to ' + ch.name, 300);
+
     // Animate: status → fill → lines
     setTimeout(() => { if(statusEl) { statusEl.innerHTML = ch.transmitMsg; } }, 300);
     setTimeout(() => { if(fillEl) fillEl.style.width = '100%'; }, 500);
     setTimeout(() => { if(statusEl) statusEl.textContent = ch.statusMsg; }, 2200);
 
-    // Show lines one by one
+    // Show lines one by one + speak each line
     ch.lines.forEach((line, i) => {
       setTimeout(() => {
         if (!contentEl) return;
@@ -715,6 +741,8 @@ function setMood(text) {
         div.innerHTML = line;
         contentEl.appendChild(div);
         requestAnimationFrame(() => requestAnimationFrame(() => div.classList.add('show')));
+        // Speak the plain-text version of this line
+        speak(stripHtml(line), 0);
       }, 2400 + i * 280);
     });
   }
@@ -725,6 +753,7 @@ function setMood(text) {
   if (askBtn) {
     askBtn.addEventListener('click', () => {
       const ch = CHANNELS[activeIdx];
+      window.speechSynthesis && window.speechSynthesis.cancel();
       panel.classList.remove('active');
       if (typeof handleSend === 'function') {
         setTimeout(() => handleSend(ch.askQ), 200);
@@ -732,17 +761,22 @@ function setMood(text) {
     });
   }
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => panel.classList.remove('active'));
+    closeBtn.addEventListener('click', () => {
+      window.speechSynthesis && window.speechSynthesis.cancel();
+      panel.classList.remove('active');
+    });
   }
   panel?.addEventListener('click', e => {
-    if (e.target === panel) panel.classList.remove('active');
+    if (e.target === panel) {
+      window.speechSynthesis && window.speechSynthesis.cancel();
+      panel.classList.remove('active');
+    }
   });
 
   // Auto-open first channel after 1.5s to demo the feature
   //setTimeout(() => openBroadcastPanel(0), 1500);
 
 })();
-
 
 /* ══════════ TYPING INDICATOR PULSE ══════════ */
 (function(){
