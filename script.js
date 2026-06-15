@@ -1134,7 +1134,7 @@ async function go() {
     time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }),
     message: txt,
   });
-  sendVisitorReport();
+ 
 
   const tid = addTyping();
   try {
@@ -1153,6 +1153,7 @@ async function go() {
     removeTyping(tid);
     await typeMsg(fmt(rep));
     hist.push({ role: 'assistant', content: rep });
+    sendVisitorReport();
     setMood(txt + ' ' + rep);
     addReactionBar();
     addSugg(rep);
