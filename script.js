@@ -714,6 +714,486 @@ function setMood(text) {
 
   updateStation();
 })();
+
+/* ═══════════════════════════════════════════════════
+   LIVING UNIVERSE — living-universe.js
+   Paste this file and add <script src="living-universe.js"></script>
+   just before </body> in your index.html
+   (after script.js)
+═══════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  /* ── Canvas setup ── */
+  const canvas = document.getElementById('luCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 260, H = 260, CX = W / 2, CY = H / 2;
+
+  /* ── State ── */
+  const state = {
+    exploration: 0,
+    stars: 0,
+    planets: 0,
+    satellites: 0,
+    wormholes: 0,
+    stage: 0,
+    unlockedPlanets: new Set(),
+    omegaShown: false,
+  };
+
+  /* ── Planet definitions ── */
+  const PLANETS = [
+    { id: 'skills',   label: '⬡ Skills',   color: '#a78bfa', orbitR: 55, size: 9,  angle: 0,            speed: 0.006, sats: 3  },
+    { id: 'projects', label: '⬡ Projects', color: '#22d3ee', orbitR: 75, size: 8,  angle: Math.PI*.5,   speed: 0.005, sats: 4  },
+    { id: 'career',   label: '⬡ Career',   color: '#fbbf24', orbitR: 95, size: 7,  angle: Math.PI,      speed: 0.004, sats: 2  },
+    { id: 'ai',       label: '⬡ AI',       color: '#f472b6', orbitR: 112,size: 8,  angle: Math.PI*1.5,  speed: 0.007, sats: 3  },
+    { id: 'comms',    label: '⬡ Comms',    color: '#34d399', orbitR: 125,size: 6,  angle: Math.PI*.75,  speed: 0.003, sats: 2  },
+    { id: 'omega',    label: 'Ω Omega',    color: '#ff6b35', orbitR: 118,size: 10, angle: Math.PI*1.25, speed: 0.002, sats: 5  },
+  ];
+
+  /* ── Star field ── */
+  let stars = [];
+  function initStars(count) {
+    stars = [];
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 20 + Math.random() * (CX - 22);
+      stars.push({
+        x: CX + Math.cos(angle) * r,
+        y: CY + Math.sin(angle) * r,
+        r: Math.random() * 1.4 + .2,
+        a: Math.random(),
+        da: (Math.random() - .5) * .012,
+        col: ['#ddd6fe','#a5f3fc','#fde68a','#fda4af','#ffffff'][Math.floor(Math.random()*5)],
+        born: Date.now() + Math.random() * 2000,
+      });
+    }
+  }
+  initStars(30);
+
+  /* ── Satellites per planet ── */
+  const satMap = {};
+  PLANETS.forEach(p => {
+    satMap[p.id] = [];
+    for (let i = 0; i < p.sats; i++) {
+      satMap[p.id].push({
+        angle: (i / p.sats) * Math.PI * 2,
+        speed: 0.03 + Math.random() * .02,
+        r: p.size + 10 + Math.random() * 6,
+        size: 2 + Math.random() * 1.5,
+      });
+    }
+  });
+
+  /* ── Wormhole spots ── */
+  const wormholes = [
+    { x: CX + 30, y: CY - 90, active: false, angle: 0 },
+    { x: CX - 80, y: CY + 40, active: false, angle: 0 },
+    { x: CX + 90, y: CY + 60, active: false, angle: 0 },
+    { x: CX - 30, y: CY - 110,active: false, angle: 0 },
+  ];
+
+  /* ── Nebula patches ── */
+  const nebulas = [
+    { x: CX - 60, y: CY + 50,  r: 30, col: 'rgba(139,92,246,', opacity: 0 },
+    { x: CX + 70, y: CY - 40,  r: 25, col: 'rgba(6,182,212,',  opacity: 0 },
+    { x: CX - 40, y: CY - 70,  r: 20, col: 'rgba(244,114,182,',opacity: 0 },
+  ];
+
+  /* ── Particles ── */
+  let particles = [];
+  function spawnParticles(x, y, col, count) {
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1 + Math.random() * 2.5;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        r: 1.5 + Math.random() * 2,
+        col, life: 1,
+        decay: .02 + Math.random() * .03,
+      });
+    }
+  }
+
+  /* ── Draw helpers ── */
+  function drawGlow(x, y, r, col, opacity) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, col.replace(')', `,${opacity})`).replace('rgba(','rgba('));
+    // safer approach:
+    const c1 = col + opacity + ')';
+    const c2 = col + '0)';
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, r);
+    grd.addColorStop(0, c1);
+    grd.addColorStop(1, c2);
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+  }
+
+  function drawPlanet(p, unlocked) {
+    const x = CX + Math.cos(p.angle) * p.orbitR;
+    const y = CY + Math.sin(p.angle) * p.orbitR;
+    p._x = x; p._y = y;
+
+    // Orbit ring
+    ctx.beginPath();
+    ctx.arc(CX, CY, p.orbitR, 0, Math.PI * 2);
+    ctx.strokeStyle = unlocked
+      ? `${p.color}22`
+      : 'rgba(139,92,246,0.06)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 6]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    if (!unlocked) return;
+
+    // Glow
+    const g = ctx.createRadialGradient(x, y, 0, x, y, p.size * 3);
+    g.addColorStop(0, p.color + '44');
+    g.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(x, y, p.size * 3, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    // Planet body
+    const pg = ctx.createRadialGradient(x - p.size * .3, y - p.size * .3, 0, x, y, p.size);
+    pg.addColorStop(0, '#fff');
+    pg.addColorStop(.3, p.color);
+    pg.addColorStop(1, p.color + '88');
+    ctx.beginPath();
+    ctx.arc(x, y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = pg;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Label
+    ctx.font = '500 7px JetBrains Mono, monospace';
+    ctx.fillStyle = 'rgba(226,232,240,.85)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const labelY = y + p.size + 9;
+    ctx.fillText(p.label, x, labelY);
+
+    // Satellites
+    const sats = satMap[p.id];
+    sats.forEach(s => {
+      s.angle += s.speed;
+      const sx = x + Math.cos(s.angle) * s.r;
+      const sy = y + Math.sin(s.angle) * s.r;
+      ctx.beginPath();
+      ctx.arc(sx, sy, s.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + 'cc';
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+  }
+
+  /* ── Main draw loop ── */
+  let raf;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const now = Date.now();
+
+    /* Background deep glow */
+    const bg = ctx.createRadialGradient(CX, CY, 0, CX, CY, CX);
+    bg.addColorStop(0, 'rgba(109,40,217,.14)');
+    bg.addColorStop(.5,'rgba(6,182,212,.05)');
+    bg.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(CX, CY, CX, 0, Math.PI * 2);
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    /* Nebulas */
+    nebulas.forEach(n => {
+      if (n.opacity <= 0) return;
+      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+      g.addColorStop(0, n.col + n.opacity + ')');
+      g.addColorStop(1, n.col + '0)');
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = g;
+      ctx.fill();
+    });
+
+    /* Stars */
+    stars.forEach(s => {
+      if (now < s.born) return;
+      s.a = Math.max(.04, Math.min(1, s.a + s.da));
+      if (s.a <= .04 || s.a >= 1) s.da *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = s.col;
+      ctx.globalAlpha = s.a;
+      ctx.shadowColor = s.col;
+      ctx.shadowBlur = s.r > 1 ? 5 : 2;
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
+
+    /* Wormholes */
+    wormholes.forEach(w => {
+      if (!w.active) return;
+      w.angle += .03;
+      ctx.save();
+      ctx.translate(w.x, w.y);
+      ctx.rotate(w.angle);
+      for (let i = 0; i < 3; i++) {
+        const r = 8 - i * 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(139,92,246,${.5 - i * .12})`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    });
+
+    /* Planets */
+    PLANETS.forEach(p => {
+      const unlocked = state.unlockedPlanets.has(p.id);
+      if (unlocked) p.angle += p.speed;
+      drawPlanet(p, unlocked);
+    });
+
+    /* Center core */
+    const coreG = ctx.createRadialGradient(CX, CY, 0, CX, CY, 14);
+    coreG.addColorStop(0, '#fff');
+    coreG.addColorStop(.3, '#a78bfa');
+    coreG.addColorStop(1, '#7c3aed88');
+    ctx.beginPath();
+    ctx.arc(CX, CY, 14, 0, Math.PI * 2);
+    ctx.fillStyle = coreG;
+    ctx.shadowColor = '#a78bfa';
+    ctx.shadowBlur = 20 + Math.sin(now * .002) * 8;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    /* Particles */
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= .96;
+      p.vy *= .96;
+      p.life -= p.decay;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = p.life;
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    raf = requestAnimationFrame(draw);
+  }
+  draw();
+
+  /* ── UI updaters ── */
+  function animateStat(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    el.classList.remove('pop');
+    void el.offsetWidth;
+    el.classList.add('pop');
+  }
+
+  function updateUI() {
+    const pct = Math.min(100, Math.round(state.exploration));
+    document.getElementById('luPct').textContent = pct + '%';
+    document.getElementById('luBarFill').style.width = pct + '%';
+    animateStat('luStars', state.stars);
+    animateStat('luPlanets', state.planets);
+    animateStat('luSats', state.satellites);
+    animateStat('luWorms', state.wormholes);
+  }
+
+  function showLuToast(msg) {
+    const el = document.getElementById('luToast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  function speakDiscovery(msg) {
+    if (!window.speechSynthesis) return;
+    const u = new SpeechSynthesisUtterance(msg);
+    u.lang = 'en-US';
+    u.rate = .95;
+    u.pitch = 1.1;
+    u.volume = .7;
+    const voices = speechSynthesis.getVoices();
+    const v = voices.find(v => v.name.includes('Google US English'))
+           || voices.find(v => v.lang === 'en-US' && !v.localService)
+           || voices.find(v => v.lang.startsWith('en-'));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+
+  function unlockPlanet(id, toastMsg, voiceMsg) {
+    if (state.unlockedPlanets.has(id)) return;
+    state.unlockedPlanets.add(id);
+    state.planets++;
+    state.exploration = Math.min(100, state.exploration + 16);
+
+    const planet = PLANETS.find(p => p.id === id);
+    if (planet) {
+      state.satellites += planet.sats;
+      state.stars += 8 + Math.floor(Math.random() * 6);
+      spawnParticles(planet._x || CX, planet._y || CY, planet.color, 18);
+      nebulas[Math.floor(Math.random() * nebulas.length)].opacity = .18;
+    }
+
+    // Update planet list UI
+    const row = document.getElementById(`lup-${id}`);
+    const lock = document.getElementById(`luplock-${id}`);
+    if (row) row.classList.replace('locked', 'unlocked');
+    if (lock) lock.textContent = '✅';
+
+    showLuToast(toastMsg);
+    speakDiscovery(voiceMsg);
+    updateUI();
+    checkOmega();
+    updateStage();
+  }
+
+  function activateWormhole() {
+    const inactive = wormholes.filter(w => !w.active);
+    if (!inactive.length) return;
+    const w = inactive[Math.floor(Math.random() * inactive.length)];
+    w.active = true;
+    state.wormholes++;
+    showLuToast('🕳️ Wormhole connection established.');
+    speakDiscovery('Wormhole connection established.');
+    updateUI();
+  }
+
+  function updateStage() {
+    const size = state.unlockedPlanets.size;
+    if (size >= 1 && state.stage < 1) { state.stage = 1; initStars(60); }
+    if (size >= 2 && state.stage < 2) { state.stage = 2; initStars(100); activateWormhole(); }
+    if (size >= 3 && state.stage < 3) { state.stage = 3; initStars(150); activateWormhole(); nebulas.forEach(n => { if (n.opacity < .1) n.opacity = .12; }); }
+    if (size >= 4 && state.stage < 4) { state.stage = 4; initStars(200); activateWormhole(); }
+    if (size >= 5 && state.stage < 5) { state.stage = 5; initStars(260); activateWormhole(); showLuToast('🌌 Universe fully awakened!'); speakDiscovery('Universe fully awakened!'); }
+  }
+
+  function checkOmega() {
+    if (state.omegaShown) return;
+    if (state.exploration >= 90) {
+      setTimeout(() => {
+        unlockPlanet('omega', 'Ω Omega Sector located!', 'Omega Sector located. Hidden realm revealed.');
+        state.omegaShown = true;
+        const overlay = document.getElementById('luOmegaOverlay');
+        if (overlay) overlay.classList.add('open');
+      }, 1200);
+    }
+  }
+
+  /* ── Keyword detection ── */
+  const TRIGGERS = [
+    {
+      keys: ['skill','python','sql','java','power bi','excel','machine learning','pandas','tensorflow','html','css','javascript'],
+      planet: 'skills',
+      toast: '⭐ Skills Planet discovered!',
+      voice: 'Skills Planet discovered. New stars added to your universe.',
+    },
+    {
+      keys: ['project','sparms','inventoryiq','digit recognizer','netflix','attrition','zomato','candy','portfolio'],
+      planet: 'projects',
+      toast: '🚀 Projects Planet unlocked!',
+      voice: 'Projects Planet unlocked. Project satellites now in orbit.',
+    },
+    {
+      keys: ['career','internship','experience','interncall','job','hire','recruit','role','opportunity','work'],
+      planet: 'career',
+      toast: '🌍 Career Planet revealed!',
+      voice: 'Career Planet revealed. Career galaxy expanding.',
+    },
+    {
+      keys: ['ai','artificial intelligence','llm','groq','llama','neural','agent','automation','candy ai','machine learning'],
+      planet: 'ai',
+      toast: '🤖 AI Planet activated!',
+      voice: 'Neural nebula activated. AI Planet now online.',
+    },
+    {
+      keys: ['contact','email','linkedin','github','whatsapp','resume','reach','connect','social'],
+      planet: 'comms',
+      toast: '📡 Communication Planet online!',
+      voice: 'Communication satellite activated. All channels open.',
+    },
+  ];
+
+  function analyzeText(text) {
+    const lower = text.toLowerCase();
+    TRIGGERS.forEach(t => {
+      if (t.keys.some(k => lower.includes(k))) {
+        unlockPlanet(t.planet, t.toast, t.voice);
+      }
+    });
+    // Add a few stars for any message
+    state.stars += 2;
+    state.exploration = Math.min(100, state.exploration + 2);
+    updateUI();
+  }
+
+  /* ── Hook into Candy's message flow ── */
+  // We watch the msgs container for new user messages
+  const msgsEl = document.getElementById('msgs');
+  if (msgsEl) {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(m => {
+        m.addedNodes.forEach(node => {
+          if (node.nodeType !== 1) return;
+          // User message row
+          if (node.classList.contains('mrow') && node.classList.contains('mrow--u')) {
+            const txt = node.querySelector('.buser')?.textContent || '';
+            if (txt) analyzeText(txt);
+          }
+          // AI message row — also scan for context
+          if (node.classList.contains('mrow') && !node.classList.contains('mrow--u')) {
+            const txt = node.querySelector('.bai')?.textContent || '';
+            if (txt) analyzeText(txt);
+          }
+        });
+      });
+    });
+    observer.observe(msgsEl, { childList: true });
+  }
+
+  /* ── Omega close button ── */
+  const omegaClose = document.getElementById('luOmegaClose');
+  const omegaOverlay = document.getElementById('luOmegaOverlay');
+  if (omegaClose && omegaOverlay) {
+    omegaClose.addEventListener('click', () => omegaOverlay.classList.remove('open'));
+    omegaOverlay.addEventListener('click', e => { if (e.target === omegaOverlay) omegaOverlay.classList.remove('open'); });
+  }
+
+  /* ── Initial star grow on load ── */
+  setTimeout(() => {
+    state.stars = 12;
+    state.exploration = 5;
+    updateUI();
+    showLuToast('✦ Universe awakening…');
+  }, 800);
+
+  /* ── Expose for manual triggering from console if needed ── */
+  window.__LU__ = { state, unlockPlanet, analyzeText };
+
+})();
  
  
 
