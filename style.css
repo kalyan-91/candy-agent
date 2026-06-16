@@ -1380,6 +1380,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   opacity: 0;
 }
 
+ /* ══ SPACESHIP Z-INDEX FIX ══ */
 #ssStarCanvas {
   position: absolute !important;
   top: 0 !important;
@@ -1387,6 +1388,59 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   width: 100vw !important;
   height: 100vh !important;
   z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.ss-chat-panel {
+  z-index: 50 !important;
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+.ss-chat-panel.active {
+  opacity: 1 !important;
+  pointer-events: all !important;
+  display: flex !important;
+}
+
+.ss-chat-topbar {
+  z-index: 51 !important;
+  position: relative !important;
+}
+
+.ss-chat-messages {
+  z-index: 51 !important;
+  position: relative !important;
+}
+
+.ss-chat-input-area {
+  z-index: 51 !important;
+  position: relative !important;
+}
+
+/* Fix nebula not covering chat */
+.ss-nebula {
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+
+.ss-grid {
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+.ss-hud {
+  z-index: 100 !important;
+  position: relative !important;
+}
+
+.ss-status-bar {
+  z-index: 100 !important;
+  position: relative !important;
+}
+
+.ss-warp-overlay {
+  z-index: 200 !important;
 }
 
 /* Nebula clouds */
