@@ -777,6 +777,8 @@ function setMood(text) {
 
   /* ── ELEMENTS ── */
   const overlay        = document.getElementById('spaceshipOverlay');
+  // Escape sidebar stacking context
+  document.body.appendChild(overlay);
   const launchBtn      = document.getElementById('spaceshipLaunchBtn');
   const closeBtn       = document.getElementById('spaceshipCloseBtn');
   const ssMain         = document.getElementById('ssMain');
