@@ -779,6 +779,8 @@ function setMood(text) {
   const overlay        = document.getElementById('spaceshipOverlay');
   // Escape sidebar stacking context
   document.body.appendChild(overlay);
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
   const launchBtn      = document.getElementById('spaceshipLaunchBtn');
   const closeBtn       = document.getElementById('spaceshipCloseBtn');
   const ssMain         = document.getElementById('ssMain');
