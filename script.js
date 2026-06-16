@@ -811,9 +811,9 @@ function setMood(text) {
       const [r,g,b] = COLORS[ci % COLORS.length];
       return `rgba(${r},${g},${b},${a.toFixed(3)})`;
     }
-    function resize() {
-      W = ssStarCanvas.width  = ssStarCanvas.offsetWidth  || window.innerWidth;
-      H = ssStarCanvas.height = ssStarCanvas.offsetHeight || window.innerHeight;
+     function resize() {
+       W = ssStarCanvas.width  = window.innerWidth;
+       H = ssStarCanvas.height = window.innerHeight;
       stars = [];
       const n = Math.max(200, Math.floor((W * H) / 2800));
       for (let i = 0; i < n; i++) {
@@ -911,16 +911,23 @@ function setMood(text) {
   }, 2500);
 
   /* ── LAUNCH ── */
-  launchBtn && launchBtn.addEventListener('click', () => {
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    ssMain.style.display = 'flex';
-    ssChatPanel.classList.remove('active');
-    activeSector = null; ssHistory = [];
-    setTimeout(() => {
-      ssCandySpeak("Captain, where shall we travel next? Choose your sector and I will plot the course.");
-    }, 800);
-  });
+ launchBtn && launchBtn.addEventListener('click', () => {
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  ssMain.style.display = 'flex';
+  ssChatPanel.classList.remove('active');
+  activeSector = null; ssHistory = [];
+  // Force canvas to fill full screen after overlay opens
+  setTimeout(() => {
+    if (ssStarCanvas) {
+      ssStarCanvas.width  = window.innerWidth;
+      ssStarCanvas.height = window.innerHeight;
+      ssStarCanvas.style.width  = '100vw';
+      ssStarCanvas.style.height = '100vh';
+    }
+    ssCandySpeak("Captain, where shall we travel next? Choose your sector and I will plot the course.");
+  }, 100);
+});
 
   /* ── CLOSE ── */
   closeBtn && closeBtn.addEventListener('click', () => {
