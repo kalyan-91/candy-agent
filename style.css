@@ -1322,10 +1322,8 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
 /* Fix sidebar overflow clipping the overlay */
 .sidebar {
-  overflow: visible !important;
-}
-.app {
-  overflow: visible !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }
 
 /* Warp tunnel on enter */
