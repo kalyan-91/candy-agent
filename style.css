@@ -1228,7 +1228,8 @@ body.light .space-radio { background: rgba(255,255,255,0.6); }
 body.light .radio-btn { background: rgba(0,0,0,0.04); border-color: rgba(109,40,217,0.12); }
 body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
-DY SPACESHIP MODE — spaceship.css
+/* ═══════════════════════════════════════════════════
+   CANDY SPACESHIP MODE — spaceship.css
 ═══════════════════════════════════════════════════ */
  
 /* ── Launch Button (sits in sidebar) ── */
@@ -1725,6 +1726,15 @@ DY SPACESHIP MODE — spaceship.css
   background: rgba(1,2,10,0.85);
   backdrop-filter: blur(10px);
   flex-shrink: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+ 
+/* Hide status bar + HUD when chat is open so they don't bleed through */
+#spaceshipOverlay:has(.ss-chat-panel.active) .ss-status-bar,
+#spaceshipOverlay:has(.ss-chat-panel.active) .ss-hud {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 .ss-status-item {
   display: flex; align-items: center; gap: 6px;
@@ -1744,31 +1754,30 @@ DY SPACESHIP MODE — spaceship.css
 }
  
 /* ══════════════════════════════════════════
-   CHAT PANEL — vivid space colors + falling stars
+   CHAT PANEL — matches main spaceship screen exactly
 ══════════════════════════════════════════ */
  
-/* ── Chat panel sits ABOVE hud/status-bar ── */
 .ss-chat-panel {
   position: fixed !important;
   inset: 0 !important;
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
-  /* Deep space base — rich indigo/violet/teal, NOT black */
+  /* Same deep blue/indigo as the main spaceship screen */
   background:
-    radial-gradient(ellipse 90% 70% at 10% 5%,   rgba(0,180,255,0.28)  0%, transparent 50%),
-    radial-gradient(ellipse 75% 60% at 90% 15%,  rgba(120,60,255,0.22)  0%, transparent 50%),
-    radial-gradient(ellipse 60% 50% at 50% 50%,  rgba(60,0,160,0.30)   0%, transparent 55%),
-    radial-gradient(ellipse 80% 65% at 20% 85%,  rgba(0,212,255,0.18)  0%, transparent 50%),
-    radial-gradient(ellipse 70% 55% at 80% 75%,  rgba(167,100,255,0.22) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 40% at 60% 30%,  rgba(255,100,180,0.10) 0%, transparent 50%),
-    linear-gradient(160deg,
-      #03082e 0%,
-      #07053a 20%,
-      #0a0228 40%,
-      #050a35 60%,
-      #08042f 80%,
-      #030828 100%);
+    radial-gradient(ellipse 100% 80% at 50% 0%,   rgba(15,30,80,0.95)   0%, transparent 60%),
+    radial-gradient(ellipse 80%  60% at 10% 20%,  rgba(0,100,200,0.25)  0%, transparent 55%),
+    radial-gradient(ellipse 70%  55% at 90% 30%,  rgba(80,20,180,0.20)  0%, transparent 50%),
+    radial-gradient(ellipse 60%  50% at 30% 70%,  rgba(0,60,160,0.22)   0%, transparent 50%),
+    radial-gradient(ellipse 75%  60% at 75% 80%,  rgba(60,0,140,0.18)   0%, transparent 50%),
+    radial-gradient(ellipse 50%  40% at 50% 50%,  rgba(10,20,70,0.40)   0%, transparent 60%),
+    linear-gradient(180deg,
+      #04091f 0%,
+      #060d2a 20%,
+      #080f32 40%,
+      #060b26 60%,
+      #04091e 80%,
+      #030818 100%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -1781,117 +1790,91 @@ DY SPACESHIP MODE — spaceship.css
   display: flex !important;
 }
  
-/* ── Falling stars canvas injected by JS ── */
-.ss-chat-panel .ss-falling-canvas {
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  width: 100% !important;
-  height: 100% !important;
-}
- 
-/* ── Static star field via CSS (works without JS) ── */
+/* ── Star field — same density/colors as main screen canvas ── */
 .ss-chat-panel::before {
   content: '';
   position: absolute; inset: 0; z-index: 0;
   pointer-events: none;
-  /* 40 star dots spread across the panel */
   background-image:
-    radial-gradient(1.5px 1.5px at  5%  8%,  #fff 0%, transparent 100%),
-    radial-gradient(1px   1px   at 11% 23%,  rgba(0,212,255,0.9) 0%, transparent 100%),
-    radial-gradient(2px   2px   at 18%  5%,  #fff 0%, transparent 100%),
-    radial-gradient(1px   1px   at 24% 41%,  rgba(167,139,250,0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 30% 17%,  #fff 0%, transparent 100%),
-    radial-gradient(1px   1px   at 36% 62%,  rgba(0,212,255,0.8) 0%, transparent 100%),
-    radial-gradient(2px   2px   at 42%  3%,  rgba(251,191,36,0.9) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 48% 78%,  #fff 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 54% 32%,  rgba(167,139,250,0.9) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 60% 55%,  #fff 0%, transparent 100%),
-    radial-gradient(2px   2px   at 66%  9%,  rgba(0,212,255,0.8) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 72% 44%,  #fff 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 78% 68%,  rgba(251,191,36,0.8) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 84% 21%,  #fff 0%, transparent 100%),
-    radial-gradient(2px   2px   at 90% 82%,  rgba(167,139,250,0.9) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 96% 37%,  rgba(0,212,255,0.8) 0%, transparent 100%),
-    radial-gradient(1px   1px   at  8% 51%,  #fff 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 15% 73%,  rgba(0,212,255,0.7) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 22% 88%,  #fff 0%, transparent 100%),
-    radial-gradient(2px   2px   at 29%  95%,  rgba(251,191,36,0.7) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 35% 12%,  rgba(167,139,250,0.8) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 41% 49%,  #fff 0%, transparent 100%),
-    radial-gradient(1px   1px   at 47% 85%,  rgba(0,212,255,0.7) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 53% 67%,  #fff 0%, transparent 100%),
-    radial-gradient(2px   2px   at 59% 14%,  rgba(167,139,250,0.9) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 65% 93%,  #fff 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 71% 28%,  rgba(0,212,255,0.8) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 77% 57%,  rgba(251,191,36,0.7) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 83% 40%,  #fff 0%, transparent 100%),
-    radial-gradient(2px   2px   at 89%  6%,  rgba(167,139,250,0.8) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 95% 71%,  #fff 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at  3% 90%,  rgba(0,212,255,0.6) 0%, transparent 100%),
-    radial-gradient(1px   1px   at  9% 36%,  #fff 0%, transparent 100%),
-    radial-gradient(1px   1px   at 16% 59%,  rgba(167,139,250,0.7) 0%, transparent 100%),
-    radial-gradient(2px   2px   at 44% 25%,  rgba(255,150,220,0.6) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 69% 76%,  #fff 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 87% 52%,  rgba(0,212,255,0.7) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 92% 19%,  rgba(251,191,36,0.8) 0%, transparent 100%),
-    radial-gradient(1px   1px   at 38% 97%,  #fff 0%, transparent 100%),
-    radial-gradient(2px   2px   at 57% 46%,  rgba(167,139,250,0.6) 0%, transparent 100%);
-  animation: starTwinkle 4s ease-in-out infinite alternate;
-}
-@keyframes starTwinkle {
-  0%   { opacity: 0.5; }
-  50%  { opacity: 1;   }
-  100% { opacity: 0.65; }
+    /* white stars */
+    radial-gradient(1.5px 1.5px at  3%  7%,  rgba(255,255,255,0.85) 0%, transparent 100%),
+    radial-gradient(1px   1px   at  9% 23%,  rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 15%  2%,  rgba(255,255,255,0.90) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 21% 45%,  rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 27% 14%,  rgba(255,255,255,0.80) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 33% 67%,  rgba(255,255,255,0.60) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 39%  5%,  rgba(255,255,255,0.75) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 45% 82%,  rgba(255,255,255,0.85) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 51% 31%,  rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 57% 54%,  rgba(255,255,255,0.80) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 63% 11%,  rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 69% 76%,  rgba(255,255,255,0.75) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 75% 38%,  rgba(255,255,255,0.85) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 81% 92%,  rgba(255,255,255,0.60) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 87% 18%,  rgba(255,255,255,0.80) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 93% 59%,  rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(1px   1px   at  6% 88%,  rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 12% 51%,  rgba(255,255,255,0.75) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 18% 72%,  rgba(255,255,255,0.60) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 24% 95%,  rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 48% 18%,  rgba(255,255,255,0.65) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 54% 43%,  rgba(255,255,255,0.80) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 60% 87%,  rgba(255,255,255,0.70) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 72% 26%,  rgba(255,255,255,0.75) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 96% 83%,  rgba(255,255,255,0.60) 0%, transparent 100%),
+    /* cyan accent stars — like the dots in the main screen */
+    radial-gradient(2px   2px   at 10%  8%,  rgba(100,200,255,0.90) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 35% 52%,  rgba(0,212,255,0.85)   0%, transparent 100%),
+    radial-gradient(2px   2px   at 58%  3%,  rgba(100,200,255,0.80) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 78% 61%,  rgba(0,212,255,0.90)   0%, transparent 100%),
+    radial-gradient(2px   2px   at 91% 29%,  rgba(100,200,255,0.75) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 44% 77%,  rgba(0,212,255,0.80)   0%, transparent 100%),
+    /* gold/amber accent stars */
+    radial-gradient(2px   2px   at 22% 33%,  rgba(251,191,36,0.85)  0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 66% 49%,  rgba(251,191,36,0.75)  0%, transparent 100%),
+    radial-gradient(2px   2px   at 84% 72%,  rgba(251,191,36,0.80)  0%, transparent 100%),
+    /* violet accent stars */
+    radial-gradient(1.5px 1.5px at 30%  9%,  rgba(167,139,250,0.85) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 52% 63%,  rgba(167,139,250,0.80) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 88% 44%,  rgba(167,139,250,0.75) 0%, transparent 100%),
+    radial-gradient(2px   2px   at  7% 97%,  rgba(167,139,250,0.70) 0%, transparent 100%);
+  animation: starTwinkle 5s ease-in-out infinite alternate;
 }
  
-/* ── Falling / shooting stars (pure CSS) ── */
+/* ── Shooting stars ── */
 .ss-chat-panel::after {
   content: '';
   position: absolute; inset: 0; z-index: 0;
   pointer-events: none;
-  /* 6 shooting star streaks at different angles & timings */
   background-image:
-    linear-gradient(105deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.9) 50%, rgba(0,212,255,0.4) 55%, rgba(255,255,255,0) 60%),
-    linear-gradient(110deg, rgba(255,255,255,0) 40%, rgba(167,139,250,0.9) 50%, rgba(255,255,255,0.4) 55%, rgba(255,255,255,0) 60%),
-    linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.8) 50%, rgba(251,191,36,0.4) 55%, rgba(255,255,255,0) 60%),
-    linear-gradient(108deg, rgba(255,255,255,0) 40%, rgba(0,212,255,0.9) 50%, rgba(255,255,255,0.3) 55%, rgba(255,255,255,0) 60%),
-    linear-gradient(103deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.7) 50%, rgba(167,139,250,0.5) 55%, rgba(255,255,255,0) 60%),
-    linear-gradient(112deg, rgba(255,255,255,0) 40%, rgba(251,191,36,0.8) 50%, rgba(255,255,255,0.3) 55%, rgba(255,255,255,0) 60%);
+    linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.95) 50%, rgba(100,200,255,0.5) 55%, transparent 60%),
+    linear-gradient(108deg, transparent 40%, rgba(167,139,250,0.95) 50%, rgba(255,255,255,0.4) 55%, transparent 60%),
+    linear-gradient(102deg, transparent 40%, rgba(255,255,255,0.90) 50%, rgba(251,191,36,0.5) 55%, transparent 60%),
+    linear-gradient(106deg, transparent 40%, rgba(0,212,255,0.95)   50%, rgba(255,255,255,0.3) 55%, transparent 60%),
+    linear-gradient(104deg, transparent 40%, rgba(255,255,255,0.85) 50%, rgba(167,139,250,0.4) 55%, transparent 60%);
   background-size:
-    200px 1.5px,
-    160px 1px,
-    220px 1.5px,
-    180px 1px,
-    240px 1.5px,
-    170px 1px;
+    200px 1.5px, 160px 1px, 220px 1.5px, 180px 1px, 240px 1.5px;
   background-repeat: no-repeat;
   background-position:
-    -220px  8%,
-    -180px 25%,
-    -250px 45%,
-    -200px 63%,
-    -260px 78%,
-    -190px 91%;
-  animation: shootingStars 8s linear infinite;
+    -220px 12%, -180px 31%, -250px 52%, -200px 70%, -260px 86%;
+  animation: shootingStars 7s linear infinite;
 }
 @keyframes shootingStars {
-  0%   {
-    background-position:
-      -220px  8%,  -180px 25%,
-      -250px 45%,  -200px 63%,
-      -260px 78%,  -190px 91%;
-  }
+  0%   { background-position: -220px 12%, -180px 31%, -250px 52%, -200px 70%, -260px 86%; }
   100% {
     background-position:
-      calc(100vw + 220px)  8%,
-      calc(100vw + 180px) 25%,
-      calc(100vw + 250px) 45%,
-      calc(100vw + 200px) 63%,
-      calc(100vw + 260px) 78%,
-      calc(100vw + 190px) 91%;
+      calc(100vw + 220px) 12%,
+      calc(100vw + 180px) 31%,
+      calc(100vw + 250px) 52%,
+      calc(100vw + 200px) 70%,
+      calc(100vw + 260px) 86%;
   }
+}
+ 
+@keyframes starTwinkle {
+  0%   { opacity: 0.55; }
+  50%  { opacity: 1;    }
+  100% { opacity: 0.70; }
 }
  
 /* Grid pattern inside chat */
@@ -2185,6 +2168,7 @@ DY SPACESHIP MODE — spaceship.css
   .ss-chat-input-area { padding: 10px 16px 16px; }
   .ss-chat-topbar { padding: 12px 16px; }
 }
+ 
 /* ══ MOBILE ══ */
 @media(max-width:700px){
   .app{padding:0;gap:0;flex-direction:column;}
