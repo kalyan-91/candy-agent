@@ -1227,6 +1227,372 @@ body.light .story-row:hover   { background: rgba(109,40,217,0.05); }
 body.light .space-radio { background: rgba(255,255,255,0.6); }
 body.light .radio-btn { background: rgba(0,0,0,0.04); border-color: rgba(109,40,217,0.12); }
 body.light .radio-volume { background: rgba(109,40,217,0.15); }
+
+
+/* ═══════════════════════════════════════
+   LIVING UNIVERSE — style.css additions
+   Paste at the bottom of your style.css
+═══════════════════════════════════════ */
+
+/* ── Section wrapper ── */
+.lu-sec { padding: 14px 18px 20px; }
+
+.lu-live-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: .48rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  background: rgba(52,211,153,.15);
+  border: 1px solid rgba(52,211,153,.40);
+  color: #34d399;
+  vertical-align: middle;
+  animation: luLivePulse 2s ease-in-out infinite;
+}
+@keyframes luLivePulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .45; }
+}
+
+/* ── Canvas wrap ── */
+.lu-canvas-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 10px;
+}
+#luCanvas {
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    rgba(30,8,80,.90) 0%,
+    rgba(6,2,30,.95) 60%,
+    rgba(2,0,12,.98) 100%);
+  border: 1px solid rgba(139,92,246,.25);
+  box-shadow:
+    0 0 40px rgba(109,40,217,.25),
+    0 0 80px rgba(6,182,212,.10),
+    inset 0 0 40px rgba(109,40,217,.08);
+  display: block;
+  max-width: 100%;
+}
+
+/* Core label overlay */
+.lu-core-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+.lu-core-icon {
+  font-size: .7rem;
+  color: #c4b5fd;
+  animation: luCoreSpin 8s linear infinite;
+  display: block;
+}
+@keyframes luCoreSpin {
+  to { transform: rotate(360deg); }
+}
+.lu-core-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .48rem;
+  color: rgba(196,181,253,.70);
+  letter-spacing: .1em;
+}
+
+/* ── Discovery toast ── */
+.lu-toast {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: rgba(6,2,30,.92);
+  border: 1px solid rgba(139,92,246,.50);
+  color: #c4b5fd;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .58rem;
+  padding: 5px 14px;
+  border-radius: 99px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .35s, transform .35s;
+  pointer-events: none;
+  box-shadow: 0 0 16px rgba(139,92,246,.35);
+}
+.lu-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Exploration bar ── */
+.lu-explore-bar { margin-bottom: 10px; }
+.lu-explore-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.lu-explore-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .58rem;
+  color: var(--muted);
+}
+.lu-explore-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .62rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.lu-bar-track {
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(139,92,246,.12);
+  overflow: hidden;
+}
+.lu-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #7c3aed, #06b6d4, #a78bfa);
+  background-size: 200% 100%;
+  transition: width .8s cubic-bezier(.34,1.56,.64,1);
+  animation: luBarShift 3s linear infinite;
+}
+@keyframes luBarShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* ── Stats ── */
+.lu-stats {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.lu-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: rgba(139,92,246,.06);
+  border: 1px solid rgba(139,92,246,.14);
+  border-radius: 10px;
+  padding: 7px 4px;
+}
+.lu-stat-icon { font-size: .75rem; }
+.lu-stat-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text);
+  transition: all .4s;
+}
+.lu-stat-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .44rem;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+/* ── Planet list ── */
+.lu-planets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.lu-planet-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.018);
+  border: 1px solid rgba(139,92,246,.10);
+  transition: all .4s;
+}
+.lu-planet-row.unlocked {
+  background: rgba(139,92,246,.08);
+  border-color: rgba(139,92,246,.28);
+}
+.lu-planet-row.omega {
+  border-color: rgba(255,107,53,.15);
+}
+.lu-planet-row.omega.unlocked {
+  background: rgba(255,107,53,.10);
+  border-color: rgba(255,107,53,.45);
+  animation: luOmegaPulse 2s ease-in-out infinite;
+}
+@keyframes luOmegaPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,107,53,0); }
+  50%      { box-shadow: 0 0 12px 2px rgba(255,107,53,.35); }
+}
+.lu-planet-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+.lu-planet-name {
+  font-size: .68rem;
+  color: var(--muted);
+  flex: 1;
+  transition: color .4s;
+}
+.lu-planet-row.unlocked .lu-planet-name {
+  color: var(--text2);
+}
+.lu-planet-lock {
+  font-size: .72rem;
+  transition: all .4s;
+}
+
+/* ── Omega overlay ── */
+.lu-omega-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s;
+}
+.lu-omega-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.lu-omega-card {
+  position: relative;
+  max-width: 420px;
+  width: 90%;
+  background: linear-gradient(160deg,rgba(30,8,80,.95),rgba(6,2,30,.98));
+  border: 1px solid rgba(255,107,53,.45);
+  border-radius: 24px;
+  padding: 36px 28px;
+  text-align: center;
+  overflow: hidden;
+  box-shadow:
+    0 0 60px rgba(255,107,53,.25),
+    0 0 120px rgba(109,40,217,.20);
+  animation: luCardIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes luCardIn {
+  from { transform: scale(.85) translateY(20px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+.lu-omega-glow {
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle,rgba(255,107,53,.35),transparent 65%);
+  filter: blur(30px);
+  animation: luGlowPulse 3s ease-in-out infinite;
+}
+@keyframes luGlowPulse {
+  0%,100% { opacity: .6; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 1;  transform: translateX(-50%) scale(1.2); }
+}
+.lu-omega-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 12px;
+  animation: luIconFloat 3s ease-in-out infinite;
+}
+@keyframes luIconFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.lu-omega-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: linear-gradient(90deg,#ff6b35,#fbbf24,#f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+.lu-omega-desc {
+  font-size: .78rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.lu-omega-secrets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.lu-secret {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .68rem;
+  color: #fbbf24;
+  background: rgba(251,191,36,.06);
+  border: 1px solid rgba(251,191,36,.18);
+  border-radius: 10px;
+  padding: 8px 14px;
+  text-align: left;
+}
+.lu-omega-close {
+  padding: 10px 28px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,107,53,.45);
+  background: rgba(255,107,53,.12);
+  color: #ff6b35;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .05em;
+}
+.lu-omega-close:hover {
+  background: rgba(255,107,53,.24);
+  box-shadow: 0 0 20px rgba(255,107,53,.30);
+}
+
+/* ── Spawn animation for stat values ── */
+@keyframes luStatPop {
+  0%   { transform: scale(1.6); color: #a78bfa; }
+  100% { transform: scale(1);   color: var(--text); }
+}
+.lu-stat-val.pop { animation: luStatPop .4s cubic-bezier(.34,1.56,.64,1); }
+
+/* Light mode overrides */
+body.light .lu-canvas-wrap #luCanvas {
+  background: radial-gradient(ellipse at center,
+    rgba(225,215,255,.92) 0%,
+    rgba(210,200,255,.96) 60%,
+    rgba(200,190,255,.99) 100%);
+  border-color: rgba(109,40,217,.20);
+}
+body.light .lu-planet-name { color: var(--muted); }
+body.light .lu-planet-row.unlocked .lu-planet-name { color: var(--text2); }
+body.light .lu-omega-card {
+  background: linear-gradient(160deg,rgba(240,235,255,.97),rgba(220,210,255,.99));
+  border-color: rgba(255,107,53,.50);
+}
+body.light .lu-secret { color: #92400e; background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.22); }
+
   
 /* ══ MOBILE ══ */
 @media(max-width:700px){
