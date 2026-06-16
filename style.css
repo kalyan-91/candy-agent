@@ -1262,7 +1262,7 @@ html, body {
 .ap-hlbl{font-family:'JetBrains Mono',monospace;font-size:.45rem;color:var(--muted2);}
 .ap-peak{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:6px;}
 
-* ══════════════════════════════
+/* ══════════════════════════════
    PORTFOLIO TOUR
 ══════════════════════════════ */
 .tour-start-btn {
