@@ -1292,10 +1292,73 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   50%      { box-shadow: 0 0 0 4px rgba(0,212,255,0); }
 }
 
+/* ═══════════════════════════════════════════════════
+   CANDY SPACESHIP MODE — spaceship.css
+═══════════════════════════════════════════════════ */
+
+/* ── Launch Button (sits in sidebar) ── */
+.spaceship-launch-wrap {
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(0,212,255,0.05);
+}
+.spaceship-launch-btn {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 12px;
+  background: linear-gradient(135deg,
+    rgba(0,212,255,0.06) 0%,
+    rgba(167,139,250,0.08) 100%);
+  border: 1px solid rgba(0,212,255,0.2);
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: all 0.25s;
+}
+.spaceship-launch-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(0,212,255,0.06) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: launchSweep 3s linear infinite;
+}
+@keyframes launchSweep { to { transform: translateX(200%); } }
+.spaceship-launch-btn:hover {
+  border-color: rgba(0,212,255,0.45);
+  box-shadow: 0 0 24px rgba(0,212,255,0.12);
+  transform: translateY(-1px);
+}
+.spaceship-launch-btn:hover .slb-icon { transform: rotate(-12deg) scale(1.1); }
+.slb-icon {
+  font-size: 1.3rem; flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  filter: drop-shadow(0 0 6px rgba(0,212,255,0.6));
+}
+.slb-text { flex: 1; text-align: left; }
+.slb-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem; font-weight: 700; color: #e2e8f0;
+}
+.slb-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; color: #64748b;
+  letter-spacing: 0.08em; margin-top: 2px;
+}
+.slb-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52rem; letter-spacing: 0.1em;
+  padding: 3px 8px; border-radius: 100px;
+  background: rgba(0,212,255,0.08);
+  border: 1px solid rgba(0,212,255,0.22);
+  color: #00d4ff;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.3); }
+  50%      { box-shadow: 0 0 0 4px rgba(0,212,255,0); }
+}
+
 /* ══════════════════════════════════════════
    SPACESHIP OVERLAY — full screen takeover
 ══════════════════════════════════════════ */
- /* ══ SPACESHIP OVERLAY NUCLEAR FIX ══ */
 .spaceship-overlay {
   position: fixed !important;
   top: 0 !important;
@@ -1324,7 +1387,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   background: #01020a !important;
   isolation: isolate !important;
 }
-
 #spaceshipOverlay.active {
   opacity: 1 !important;
   pointer-events: all !important;
@@ -1380,7 +1442,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   opacity: 0;
 }
 
- /* ══ SPACESHIP Z-INDEX FIX ══ */
 #ssStarCanvas {
   position: absolute !important;
   top: 0 !important;
@@ -1389,58 +1450,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   height: 100vh !important;
   z-index: 0 !important;
   pointer-events: none !important;
-}
-
-.ss-chat-panel {
-  z-index: 50 !important;
-  position: absolute !important;
-  inset: 0 !important;
-}
-
-.ss-chat-panel.active {
-  opacity: 1 !important;
-  pointer-events: all !important;
-  display: flex !important;
-}
-
-.ss-chat-topbar {
-  z-index: 51 !important;
-  position: relative !important;
-}
-
-.ss-chat-messages {
-  z-index: 51 !important;
-  position: relative !important;
-}
-
-.ss-chat-input-area {
-  z-index: 51 !important;
-  position: relative !important;
-}
-
-/* Fix nebula not covering chat */
-.ss-nebula {
-  z-index: 1 !important;
-  pointer-events: none !important;
-}
-
-.ss-grid {
-  z-index: 2 !important;
-  pointer-events: none !important;
-}
-
-.ss-hud {
-  z-index: 100 !important;
-  position: relative !important;
-}
-
-.ss-status-bar {
-  z-index: 100 !important;
-  position: relative !important;
-}
-
-.ss-warp-overlay {
-  z-index: 200 !important;
 }
 
 /* Nebula clouds */
@@ -1471,7 +1480,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
 /* Grid overlay inside spaceship */
 .ss-grid {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
   background-image:
     linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
@@ -1480,7 +1489,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
 /* ── HUD Header ── */
 .ss-hud {
-  position: relative; z-index: 10;
+  position: relative; z-index: 100;
   width: 100%; padding: 18px 40px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid rgba(0,212,255,0.08);
@@ -1715,7 +1724,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   transform: rotate(-8deg) scale(1.18);
   filter: drop-shadow(0 0 10px var(--sector-color,#00d4ff));
 }
-
 .ss-sector-icon {
   font-size: 1.8rem; flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
@@ -1745,7 +1753,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
 /* ── Warp sequence animation ── */
 .ss-warp-overlay {
-  position: absolute; inset: 0; z-index: 20;
+  position: absolute; inset: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center;
   pointer-events: none; opacity: 0;
   background: radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 70%);
@@ -1760,7 +1768,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   animation: warpTextPulse 0.5s ease-in-out infinite alternate;
 }
 @keyframes warpTextPulse { 0%{opacity:0.5} 100%{opacity:1} }
-
 .ss-warp-line {
   position: absolute; height: 1px;
   background: linear-gradient(90deg, transparent, var(--wl-color, #00d4ff), transparent);
@@ -1774,38 +1781,68 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   100% { opacity: 0;   transform: scaleX(1) rotate(var(--wl-angle,0deg)); }
 }
 
-/* ── Chat window inside spaceship ── */
+/* ── Status bar at bottom ── */
+.ss-status-bar {
+  position: relative; z-index: 100;
+  width: 100%; padding: 10px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid rgba(0,212,255,0.06);
+  background: rgba(1,2,10,0.85);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+.ss-status-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  color: #64748b; letter-spacing: 0.08em;
+}
+.ss-status-led {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #4ade80;
+  animation: statusGlow 2s infinite;
+}
+.ss-status-led--amber { background: #fbbf24; animation-delay: 0.5s; }
+.ss-status-led--violet { background: #a78bfa; animation-delay: 1s; }
+@keyframes statusGlow {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
 /* ══════════════════════════════════════════
-   SPACESHIP CHAT PANEL — FULL UPDATED SECTION
-   Fixes: space nebula bg, wider bubbles, suggestion chips
+   CHAT PANEL — space nebula bg, full-width bubbles
 ══════════════════════════════════════════ */
 
-/* ── Chat window inside spaceship ── */
+/* ── Chat panel sits ABOVE hud/status-bar (z-index 100) ── */
 .ss-chat-panel {
-  position: absolute; inset: 0; z-index: 15;
-  display: flex; flex-direction: column;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  display: flex;
+  flex-direction: column;
   background:
     radial-gradient(ellipse 80% 60% at 15% 10%,  rgba(0,212,255,0.11) 0%,  transparent 55%),
     radial-gradient(ellipse 70% 55% at 85% 80%,  rgba(167,139,250,0.13) 0%, transparent 50%),
     radial-gradient(ellipse 50% 40% at 50% 45%,  rgba(251,191,36,0.05) 0%,  transparent 50%),
     radial-gradient(ellipse 60% 50% at 70% 20%,  rgba(99,102,241,0.08) 0%,  transparent 55%),
     radial-gradient(ellipse 55% 45% at 20% 75%,  rgba(0,212,255,0.07) 0%,  transparent 50%),
-    linear-gradient(160deg,
-      #010818 0%,
-      #02051a 25%,
-      #060114 55%,
-      #010a1e 80%,
-      #02061a 100%);
-  backdrop-filter: blur(20px);
-  opacity: 0; pointer-events: none;
+    linear-gradient(160deg, #010818 0%, #02051a 25%, #060114 55%, #010a1e 80%, #02061a 100%);
+  opacity: 0;
+  pointer-events: none;
   transition: opacity 0.4s ease;
   overflow: hidden;
+}
+
+.ss-chat-panel.active {
+  opacity: 1 !important;
+  pointer-events: all !important;
+  display: flex !important;
 }
 
 /* Star-dot texture layer */
 .ss-chat-panel::after {
   content: '';
   position: absolute; inset: 0; z-index: 0;
+  pointer-events: none;
   background-image:
     radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.55) 0%, transparent 100%),
     radial-gradient(1px 1px at 28% 72%, rgba(255,255,255,0.35) 0%, transparent 100%),
@@ -1822,12 +1859,11 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
     radial-gradient(1px 1px at 95% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
     radial-gradient(1px 1px at 22% 48%, rgba(0,212,255,0.4) 0%, transparent 100%),
     radial-gradient(1px 1px at 88% 91%, rgba(167,139,250,0.4) 0%, transparent 100%);
-  pointer-events: none;
   animation: starTwinkle 6s ease-in-out infinite alternate;
 }
 @keyframes starTwinkle {
   0%   { opacity: 0.6; }
-  50%  { opacity: 1; }
+  50%  { opacity: 1;   }
   100% { opacity: 0.7; }
 }
 
@@ -1836,9 +1872,11 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   display: block !important;
   opacity: 0.25 !important;
   z-index: 1 !important;
+  position: absolute !important;
+  pointer-events: none !important;
 }
 
-/* All direct children sit above the bg layers */
+/* All direct children above bg */
 .ss-chat-panel > * { position: relative; z-index: 2; }
 
 /* ── Chat Top Bar ── */
@@ -1849,7 +1887,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   background: rgba(1,4,18,0.75);
   backdrop-filter: blur(18px);
   flex-shrink: 0;
-  z-index: 10 !important;
+  position: relative; z-index: 10;
 }
 .ss-chat-back {
   display: flex; align-items: center; gap: 6px;
@@ -1861,7 +1899,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   letter-spacing: 0.06em; transition: all 0.2s;
 }
 .ss-chat-back:hover { border-color: rgba(0,212,255,0.3); color: #00d4ff; }
-
 .ss-chat-sector-badge {
   display: flex; align-items: center; gap: 8px;
   flex: 1;
@@ -1885,12 +1922,11 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 /* ── Messages Area ── */
 .ss-chat-messages {
   flex: 1; overflow-y: auto;
-  padding: 28px 6%;          /* ← wider padding = more bubble space */
+  padding: 28px 24px;
   display: flex; flex-direction: column; gap: 20px;
   scroll-behavior: smooth;
-  max-width: 100%; width: 100%;
-  margin: 0; box-sizing: border-box;
-  z-index: 10 !important;
+  width: 100%; box-sizing: border-box;
+  position: relative; z-index: 10;
 }
 .ss-chat-messages::-webkit-scrollbar { width: 3px; }
 .ss-chat-messages::-webkit-scrollbar-thumb {
@@ -1904,6 +1940,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 }
 .ss-msg-row {
   display: flex; gap: 12px; align-items: flex-end;
+  width: 100%;
   animation: msgIn 0.3s ease both;
 }
 .ss-msg-row--user { flex-direction: row-reverse; }
@@ -1917,12 +1954,23 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   box-shadow: 0 0 12px rgba(0,212,255,0.25);
 }
 
-/* ── Bubbles — KEY FIX: max-width raised to 85% ── */
+/* ── Bubbles ── */
 .ss-bubble {
-  max-width: 85%;            /* was 75% — now fills more width */
   padding: 14px 18px; border-radius: 18px;
   font-size: 0.9rem; line-height: 1.75;
   word-break: break-word;
+  box-sizing: border-box;
+}
+
+/* AI bubble fills all remaining row width */
+.ss-msg-row:not(.ss-msg-row--user) .ss-bubble {
+  flex: 1;
+  max-width: calc(100% - 46px);
+}
+
+/* User bubble stays capped */
+.ss-msg-row--user .ss-bubble {
+  max-width: 80%;
 }
 
 .ss-bubble--ai {
@@ -1935,14 +1983,12 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
     inset 0 0 40px rgba(0,212,255,0.03),
     0 4px 24px rgba(0,0,0,0.4);
 }
-/* Cyan top-accent line */
 .ss-bubble--ai::before {
   content: '';
   position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
   background: linear-gradient(90deg,
     var(--active-sector-color, rgba(0,212,255,0.7)), transparent 70%);
 }
-/* Subtle left glow strip */
 .ss-bubble--ai::after {
   content: '';
   position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
@@ -1966,7 +2012,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
     0 4px 16px rgba(0,0,0,0.35);
 }
 
-/* ── Suggestion chips inside AI bubble ── */
+/* ── Suggestion chips ── */
 .ss-suggestion-chips {
   display: flex; flex-wrap: wrap; gap: 8px;
   margin-top: 14px;
@@ -2019,7 +2065,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   background: rgba(1,4,18,0.8);
   backdrop-filter: blur(18px);
   flex-shrink: 0;
-  z-index: 10 !important;
+  position: relative; z-index: 10;
 }
 .ss-input-row {
   display: flex; align-items: flex-end; gap: 10px;
@@ -2048,7 +2094,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   70%  { box-shadow: 0 0 0 10px rgba(244,63,94,0); }
   100% { box-shadow: 0 0 0 0   rgba(244,63,94,0); }
 }
-
 .ss-textarea {
   flex: 1;
   background: rgba(0,212,255,0.03);
@@ -2066,7 +2111,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   box-shadow: 0 0 0 3px rgba(0,212,255,0.07), 0 0 20px rgba(0,212,255,0.08);
 }
 .ss-textarea::placeholder { color: rgba(125,211,252,0.22); }
-
 .ss-send-btn {
   width: 46px; height: 46px; border-radius: 13px; border: none;
   background: linear-gradient(135deg, #00d4ff, #7b4fd4);
@@ -2080,7 +2124,6 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   box-shadow: 0 6px 26px rgba(0,212,255,0.5);
 }
 .ss-send-btn:active { transform: scale(0.94); }
-
 .ss-input-hint {
   margin-top: 8px; text-align: center;
   font-family: 'JetBrains Mono', monospace; font-size: 0.56rem;
@@ -2089,17 +2132,32 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
 /* ── Mobile ── */
 @media (max-width: 900px) {
-  .ss-chat-messages  { padding: 20px 4%; }
-  .ss-bubble         { max-width: 90%; }
-  .ss-chat-input-area{ padding: 10px 16px 16px; }
-  .ss-chat-topbar    { padding: 12px 16px; }
+  .ss-sectors { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .ss-main { padding: 24px 24px; }
+  .ss-hud { padding: 14px 24px; }
+  .ss-status-bar { padding: 8px 24px; }
+  .ss-chat-messages  { padding: 20px 16px; }
+  .ss-msg-row:not(.ss-msg-row--user) .ss-bubble { max-width: calc(100% - 46px); }
+  .ss-msg-row--user .ss-bubble { max-width: 85%; }
+  .ss-chat-input-area { padding: 10px 16px 16px; }
+  .ss-chat-topbar { padding: 12px 16px; }
 }
 @media (max-width: 600px) {
-  .ss-chat-messages  { padding: 16px; gap: 14px; }
-  .ss-bubble         { max-width: 92%; font-size: 0.85rem; }
-  .ss-chip           { font-size: 0.7rem; padding: 5px 10px; }
+  .ss-sectors { grid-template-columns: 1fr; gap: 8px; }
+  .ss-sector-btn { padding: 14px 16px; }
+  .ss-candy-msg { font-size: 1.1rem; }
+  .ss-hud-center { display: none; }
+  .ss-orbital { width: 110px; height: 110px; }
+  .ss-orb-core { width: 52px; height: 52px; }
+  .ss-orb-letter { font-size: 1.4rem; }
+  .ss-main { padding: 20px 16px; }
+  .ss-chat-messages { padding: 16px; gap: 14px; }
+  .ss-bubble { font-size: 0.85rem; }
+  .ss-msg-row--user .ss-bubble { max-width: 90%; }
+  .ss-chip { font-size: 0.7rem; padding: 5px 10px; }
+  .ss-chat-input-area { padding: 10px 16px 16px; }
+  .ss-chat-topbar { padding: 12px 16px; }
 }
-
 /* ══ MOBILE ══ */
 @media(max-width:700px){
   .app{padding:0;gap:0;flex-direction:column;}
