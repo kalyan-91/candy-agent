@@ -1724,12 +1724,29 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 .ss-chat-panel {
   position: absolute; inset: 0; z-index: 15;
   display: flex; flex-direction: column;
-  background: rgba(1,2,10,0.92);
+  background: linear-gradient(160deg,
+    rgba(0,8,32,0.96) 0%,
+    rgba(1,4,20,0.97) 40%,
+    rgba(4,0,24,0.96) 70%,
+    rgba(0,6,28,0.97) 100%) !important;
   backdrop-filter: blur(20px);
   opacity: 0; pointer-events: none;
   transition: opacity 0.4s ease;
 }
-.ss-chat-panel.active { opacity: 1; pointer-events: all; }
+/* Nebula glow inside chat */
+.ss-chat-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(0,212,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 80% 70%, rgba(167,139,250,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(251,191,36,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ss-chat-panel > * { position: relative; z-index: 1; }
 
 .ss-chat-topbar {
   display: flex; align-items: center; gap: 12px;
@@ -1774,12 +1791,20 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
 .ss-chat-messages {
   flex: 1; overflow-y: auto;
-  padding: 24px 32px; display: flex; flex-direction: column; gap: 16px;
+  padding: 24px 10%;
+  display: flex; flex-direction: column; gap: 16px;
   scroll-behavior: smooth;
-  max-width: 900px; width: 100%; margin: 0 auto; box-sizing: border-box;
+  max-width: 100%; width: 100%;
+  margin: 0; box-sizing: border-box;
 }
 .ss-chat-messages::-webkit-scrollbar { width: 3px; }
 .ss-chat-messages::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.15); border-radius:3px; }
+
+/* Grid pattern on chat bg */
+.ss-chat-panel .ss-grid {
+  display: block !important;
+  opacity: 0.4 !important;
+}
 
 @keyframes msgIn {
   from { opacity: 0; transform: translateY(10px); }
