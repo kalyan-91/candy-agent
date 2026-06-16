@@ -188,15 +188,128 @@
   </div>
 </div>
 
+    <!-- ═══════════════════════════════════════════════
+     LIVING UNIVERSE — Candy AI Feature
+     Add this block inside your sidebar, after the
+     Connect section and before </aside>
+═══════════════════════════════════════════════ -->
+
+<div class="div"></div>
+<div class="sec lu-sec">
+  <div class="lbl">
+    Living Universe
+    <span class="lu-live-badge">LIVE</span>
+  </div>
+
+  <!-- Universe Canvas -->
+  <div class="lu-canvas-wrap" id="luCanvasWrap">
+    <canvas id="luCanvas" width="260" height="260"></canvas>
+
+    <!-- Center core label -->
+    <div class="lu-core-label">
+      <span class="lu-core-icon">✦</span>
+      <span class="lu-core-text">Candy AI</span>
+    </div>
+
+    <!-- Discovery toast -->
+    <div class="lu-toast" id="luToast"></div>
+  </div>
+
+  <!-- Exploration bar -->
+  <div class="lu-explore-bar">
+    <div class="lu-explore-top">
+      <span class="lu-explore-lbl">🌌 Universe Exploration</span>
+      <span class="lu-explore-pct" id="luPct">0%</span>
+    </div>
+    <div class="lu-bar-track">
+      <div class="lu-bar-fill" id="luBarFill"></div>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="lu-stats">
+    <div class="lu-stat">
+      <span class="lu-stat-icon">⭐</span>
+      <span class="lu-stat-val" id="luStars">0</span>
+      <span class="lu-stat-lbl">Stars</span>
+    </div>
+    <div class="lu-stat">
+      <span class="lu-stat-icon">🪐</span>
+      <span class="lu-stat-val" id="luPlanets">0</span>
+      <span class="lu-stat-lbl">Planets</span>
+    </div>
+    <div class="lu-stat">
+      <span class="lu-stat-icon">🛰️</span>
+      <span class="lu-stat-val" id="luSats">0</span>
+      <span class="lu-stat-lbl">Satellites</span>
+    </div>
+    <div class="lu-stat">
+      <span class="lu-stat-icon">🕳️</span>
+      <span class="lu-stat-val" id="luWorms">0</span>
+      <span class="lu-stat-lbl">Wormholes</span>
+    </div>
+  </div>
+
+  <!-- Planet unlock list -->
+  <div class="lu-planets-list" id="luPlanetsList">
+    <div class="lu-planet-row locked" id="lup-skills">
+      <span class="lu-planet-dot" style="background:#a78bfa"></span>
+      <span class="lu-planet-name">Skills Planet</span>
+      <span class="lu-planet-lock" id="luplock-skills">🔒</span>
+    </div>
+    <div class="lu-planet-row locked" id="lup-projects">
+      <span class="lu-planet-dot" style="background:#22d3ee"></span>
+      <span class="lu-planet-name">Projects Planet</span>
+      <span class="lu-planet-lock" id="luplock-projects">🔒</span>
+    </div>
+    <div class="lu-planet-row locked" id="lup-career">
+      <span class="lu-planet-dot" style="background:#fbbf24"></span>
+      <span class="lu-planet-name">Career Planet</span>
+      <span class="lu-planet-lock" id="luplock-career">🔒</span>
+    </div>
+    <div class="lu-planet-row locked" id="lup-ai">
+      <span class="lu-planet-dot" style="background:#f472b6"></span>
+      <span class="lu-planet-name">AI Planet</span>
+      <span class="lu-planet-lock" id="luplock-ai">🔒</span>
+    </div>
+    <div class="lu-planet-row locked" id="lup-comms">
+      <span class="lu-planet-dot" style="background:#34d399"></span>
+      <span class="lu-planet-name">Communication Planet</span>
+      <span class="lu-planet-lock" id="luplock-comms">🔒</span>
+    </div>
+    <div class="lu-planet-row locked omega" id="lup-omega">
+      <span class="lu-planet-dot" style="background:#ff6b35"></span>
+      <span class="lu-planet-name">Ω Omega Planet</span>
+      <span class="lu-planet-lock" id="luplock-omega">🔒</span>
+    </div>
+  </div>
+</div>
+
+<!-- Omega unlock overlay (full screen) -->
+<div class="lu-omega-overlay" id="luOmegaOverlay">
+  <div class="lu-omega-card">
+    <div class="lu-omega-glow"></div>
+    <div class="lu-omega-icon">🌌</div>
+    <h2 class="lu-omega-title">Ω Omega Sector Unlocked</h2>
+    <p class="lu-omega-desc">You have explored the entire universe around Pavan Kalyan. A hidden realm of future goals, experimental ideas, and cosmic secrets has been revealed.</p>
+    <div class="lu-omega-secrets">
+      <div class="lu-secret">⚡ Building autonomous AI agents for industries</div>
+      <div class="lu-secret">🔭 Exploring RAG systems and multi-agent frameworks</div>
+      <div class="lu-secret">🚀 Launching a SaaS data analytics product</div>
+      <div class="lu-secret">🌐 Full-stack AI application development</div>
+      <div class="lu-secret">🏆 Targeting top Data Science roles by 2026</div>
+    </div>
+    <button class="lu-omega-close" id="luOmegaClose">Close Omega Sector</button>
+  </div>
+</div>
+
 <div class="clock-widget" id="kurnoolTime">
   <canvas id="clockCanvas" width="80" height="80"></canvas>
   <div class="clock-info">
     <div id="ktime" class="clock-digital">--:-- --</div>
     <div class="clock-label">India · IST</div>
   </div>
-</div>
-    
-   
+</div> 
 
     <!-- Personality -->
     <div class="div"></div>
