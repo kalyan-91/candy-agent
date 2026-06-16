@@ -473,24 +473,33 @@ body.light .react-btn{background:rgba(109,40,217,0.05);border-color:rgba(109,40,
 body.light .galaxy-info{background:rgba(109,40,217,0.06);border-color:rgba(109,40,217,0.18);}
 body.light .gi-projects{color:var(--muted2);}
 
-/* ══════════ AI ACTIVITY MONITOR ══════════ */
-.aim-wrap{display:flex;flex-direction:column;gap:6px;}
-.aim-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,0.018);border:1px solid rgba(139,92,246,0.10);transition:all .22s;}
-.aim-row:hover{background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.25);}
-.aim-icon{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.aim-icon svg{width:14px;height:14px;}
-.aim-info{flex:1;min-width:0;}
-.aim-label{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;}
-.aim-value{font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.aim-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.aim-pulse{animation:hdot 2s ease-in-out infinite;}
-.aim-terminal{margin-top:6px;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,0.35);border:1px solid rgba(139,92,246,0.20);font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#34d399;min-height:36px;line-height:1.6;}
-.aim-cursor{display:inline-block;animation:blink 1s step-end infinite;color:#a78bfa;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-body.light .aim-row{background:rgba(109,40,217,0.03);border-color:rgba(109,40,217,0.10);}
-body.light .aim-row:hover{background:rgba(109,40,217,0.07);}
-body.light .aim-terminal{background:rgba(240,235,255,0.80);color:#059669;}
-body.light .aim-value{color:var(--text2);}
+
+/* ── AI ACTIVITY MONITOR ── */
+.aim-wrap { display: flex; flex-direction: column; gap: 6px; }
+.aim-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: 9px;
+  background: rgba(8,8,42,0.5);
+  border: 1px solid rgba(124,58,237,0.07);
+  transition: all 0.2s;
+}
+.aim-row:hover { background: rgba(124,58,237,0.07); border-color: rgba(124,58,237,0.15); }
+.aim-icon { width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.aim-icon svg { width: 14px; height: 14px; }
+.aim-info { flex: 1; min-width: 0; }
+.aim-label { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--text4); letter-spacing: 0.06em; text-transform: uppercase; }
+.aim-value { font-size: 0.72rem; font-weight: 500; color: var(--text); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aim-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.aim-pulse { animation: dotPulse 2s ease-in-out infinite; }
+.aim-terminal {
+  padding: 8px 10px; border-radius: 8px;
+  background: rgba(4,4,15,0.8); border: 1px solid rgba(124,58,237,0.12);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  color: var(--emerald3); min-height: 30px; line-height: 1.5;
+  overflow: hidden; word-break: break-all;
+}
+.aim-cursor { animation: blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
 /* ══════════════════════════════
    PORTFOLIO TOUR
