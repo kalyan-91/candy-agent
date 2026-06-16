@@ -1311,6 +1311,36 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   transform: none !important;
   will-change: opacity;
 }
+
+#spaceshipOverlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 999999 !important;
+  background: #01020a !important;
+  isolation: isolate !important;
+}
+
+#spaceshipOverlay.active {
+  opacity: 1 !important;
+  pointer-events: all !important;
+}
+
+/* Ensure all children render above background */
+#spaceshipOverlay .ss-star-canvas,
+#spaceshipOverlay .ss-nebula,
+#spaceshipOverlay .ss-grid,
+#spaceshipOverlay .ss-hud,
+#spaceshipOverlay .ss-main,
+#spaceshipOverlay .ss-status-bar,
+#spaceshipOverlay .ss-chat-panel,
+#spaceshipOverlay .ss-warp-overlay {
+  z-index: auto !important;
+}
+
 .spaceship-overlay.active {
   opacity: 1 !important;
   pointer-events: all !important;
@@ -1579,9 +1609,9 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 /* ── Sector Navigation ── */
 .ss-sectors {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 14px;
-  width: 100%; max-width: 860px;
+  width: 100%; max-width: 760px !important;
   margin-top: 32px;
 }
 .ss-sector-btn {
