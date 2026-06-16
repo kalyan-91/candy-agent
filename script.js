@@ -2228,3 +2228,77 @@ function showToast(msg) { const el = document.getElementById('toast'); el.textCo
     if (e.key === 'Escape')     closeStory();
   });
 })();
+
+   function initFallingStars() {
+     const panel = document.querySelector('.ss-chat-panel');
+     if (!panel || panel.querySelector('.ss-falling-canvas')) return;
+     const canvas = document.createElement('canvas');
+     canvas.className = 'ss-falling-canvas';
+     panel.prepend(canvas);
+     const ctx = canvas.getContext('2d');
+     const stars = [];
+     function resize() {
+       canvas.width  = panel.offsetWidth;
+       canvas.height = panel.offsetHeight;
+     }
+     resize();
+     new ResizeObserver(resize).observe(panel);
+     const COLORS = ['#ffffff','#00d4ff','#a78bfa','#fbbf24','#7dd3fc','#f0abfc'];
+     for (let i = 0; i < 120; i++) {
+       stars.push({
+         x: Math.random() * canvas.width,
+         y: Math.random() * canvas.height,
+         r: Math.random() * 1.4 + 0.3,
+         a: Math.random(),
+         da: (Math.random() * 0.008 + 0.003) * (Math.random() < 0.5 ? 1 : -1),
+         c: COLORS[Math.floor(Math.random() * COLORS.length)],
+         falling: Math.random() < 0.08
+       });
+     }
+     const meteors = [];
+     function spawnMeteor() {
+       meteors.push({
+         x: Math.random() * canvas.width * 0.6,
+         y: Math.random() * canvas.height * 0.4,
+         vx: 4 + Math.random() * 5,
+         vy: 1.5 + Math.random() * 2.5,
+         len: 80 + Math.random() * 120,
+         a: 1,
+         c: COLORS[Math.floor(Math.random() * COLORS.length)]
+       });
+     }
+     spawnMeteor();
+     setInterval(spawnMeteor, 2200);
+     function draw() {
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
+       stars.forEach(s => {
+         s.a += s.da;
+         if (s.a > 1 || s.a < 0.1) s.da *= -1;
+         if (s.falling) { s.y += 0.3; s.x += 0.1; if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; } }
+         ctx.beginPath();
+         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+         ctx.fillStyle = s.c;
+         ctx.globalAlpha = s.a;
+         ctx.fill();
+       });
+       ctx.globalAlpha = 1;
+       for (let i = meteors.length - 1; i >= 0; i--) {
+         const m = meteors[i];
+         const grad = ctx.createLinearGradient(m.x, m.y, m.x - m.len * 0.7, m.y - m.len * 0.3);
+         grad.addColorStop(0, m.c);
+         grad.addColorStop(1, 'transparent');
+         ctx.beginPath();
+         ctx.moveTo(m.x, m.y);
+         ctx.lineTo(m.x - m.len * 0.7, m.y - m.len * 0.3);
+         ctx.strokeStyle = grad;
+         ctx.lineWidth = 1.5;
+         ctx.globalAlpha = m.a;
+         ctx.stroke();
+         m.x += m.vx; m.y += m.vy; m.a -= 0.018;
+         if (m.a <= 0) meteors.splice(i, 1);
+       }
+       ctx.globalAlpha = 1;
+       requestAnimationFrame(draw);
+     }
+     draw();
+   }
