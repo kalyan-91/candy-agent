@@ -1228,10 +1228,9 @@ body.light .space-radio { background: rgba(255,255,255,0.6); }
 body.light .radio-btn { background: rgba(0,0,0,0.04); border-color: rgba(109,40,217,0.12); }
 body.light .radio-volume { background: rgba(109,40,217,0.15); }
 
-/* ═══════════════════════════════════════════════════
-   CANDY SPACESHIP MODE — spaceship.css
+DY SPACESHIP MODE — spaceship.css
 ═══════════════════════════════════════════════════ */
-
+ 
 /* ── Launch Button (sits in sidebar) ── */
 .spaceship-launch-wrap {
   padding: 16px 18px;
@@ -1291,71 +1290,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.3); }
   50%      { box-shadow: 0 0 0 4px rgba(0,212,255,0); }
 }
-
-/* ═══════════════════════════════════════════════════
-   CANDY SPACESHIP MODE — spaceship.css
-═══════════════════════════════════════════════════ */
-
-/* ── Launch Button (sits in sidebar) ── */
-.spaceship-launch-wrap {
-  padding: 16px 18px;
-  border-bottom: 1px solid rgba(0,212,255,0.05);
-}
-.spaceship-launch-btn {
-  width: 100%;
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 16px; border-radius: 12px;
-  background: linear-gradient(135deg,
-    rgba(0,212,255,0.06) 0%,
-    rgba(167,139,250,0.08) 100%);
-  border: 1px solid rgba(0,212,255,0.2);
-  cursor: pointer; position: relative; overflow: hidden;
-  transition: all 0.25s;
-}
-.spaceship-launch-btn::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg,
-    transparent 0%, rgba(0,212,255,0.06) 50%, transparent 100%);
-  transform: translateX(-100%);
-  animation: launchSweep 3s linear infinite;
-}
-@keyframes launchSweep { to { transform: translateX(200%); } }
-.spaceship-launch-btn:hover {
-  border-color: rgba(0,212,255,0.45);
-  box-shadow: 0 0 24px rgba(0,212,255,0.12);
-  transform: translateY(-1px);
-}
-.spaceship-launch-btn:hover .slb-icon { transform: rotate(-12deg) scale(1.1); }
-.slb-icon {
-  font-size: 1.3rem; flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  filter: drop-shadow(0 0 6px rgba(0,212,255,0.6));
-}
-.slb-text { flex: 1; text-align: left; }
-.slb-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.8rem; font-weight: 700; color: #e2e8f0;
-}
-.slb-sub {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.58rem; color: #64748b;
-  letter-spacing: 0.08em; margin-top: 2px;
-}
-.slb-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.52rem; letter-spacing: 0.1em;
-  padding: 3px 8px; border-radius: 100px;
-  background: rgba(0,212,255,0.08);
-  border: 1px solid rgba(0,212,255,0.22);
-  color: #00d4ff;
-  animation: badgePulse 2s ease-in-out infinite;
-}
-@keyframes badgePulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.3); }
-  50%      { box-shadow: 0 0 0 4px rgba(0,212,255,0); }
-}
-
+ 
 /* ══════════════════════════════════════════
    SPACESHIP OVERLAY — full screen takeover
 ══════════════════════════════════════════ */
@@ -1391,7 +1326,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   opacity: 1 !important;
   pointer-events: all !important;
 }
-
+ 
 /* Ensure all children render above background */
 #spaceshipOverlay .ss-star-canvas,
 #spaceshipOverlay .ss-nebula,
@@ -1403,18 +1338,18 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 #spaceshipOverlay .ss-warp-overlay {
   z-index: auto !important;
 }
-
+ 
 .spaceship-overlay.active {
   opacity: 1 !important;
   pointer-events: all !important;
 }
-
+ 
 /* Fix sidebar overflow clipping the overlay */
 .sidebar {
   overflow-y: auto !important;
   overflow-x: hidden !important;
 }
-
+ 
 /* Warp tunnel on enter */
 .spaceship-overlay.warping .ss-warp-ring {
   animation: warpPulse 0.6s ease-out forwards;
@@ -1423,12 +1358,12 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   0%   { transform: scale(0.1); opacity: 1; }
   100% { transform: scale(8);   opacity: 0; }
 }
-
+ 
 /* Star canvas behind overlay */
 .ss-star-canvas {
   position: absolute; inset: 0; z-index: 0;
 }
-
+ 
 /* Warp rings */
 .ss-warp-rings {
   position: absolute; inset: 0; z-index: 1;
@@ -1441,7 +1376,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   border: 1px solid;
   opacity: 0;
 }
-
+ 
 #ssStarCanvas {
   position: absolute !important;
   top: 0 !important;
@@ -1451,7 +1386,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   z-index: 0 !important;
   pointer-events: none !important;
 }
-
+ 
 /* Nebula clouds */
 .ss-nebula {
   position: absolute; z-index: 1; border-radius: 50%;
@@ -1477,7 +1412,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   33%      { transform: translate(25px,-18px) scale(1.05); }
   66%      { transform: translate(-18px,14px) scale(0.97); }
 }
-
+ 
 /* Grid overlay inside spaceship */
 .ss-grid {
   position: absolute; inset: 0; z-index: 2; pointer-events: none;
@@ -1486,7 +1421,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
     linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
   background-size: 44px 44px;
 }
-
+ 
 /* ── HUD Header ── */
 .ss-hud {
   position: relative; z-index: 100;
@@ -1561,7 +1496,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   border-color: rgba(244,63,94,0.5);
   box-shadow: 0 0 14px rgba(244,63,94,0.2);
 }
-
+ 
 /* ── Main Content Area ── */
 .ss-main {
   position: relative; z-index: 10;
@@ -1572,7 +1507,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   gap: 0;
   overflow-y: auto;
 }
-
+ 
 /* Candy ship core display */
 .ss-ship-core {
   display: flex; flex-direction: column; align-items: center;
@@ -1609,12 +1544,12 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   --spd: 14s; --dir: reverse;
 }
 @keyframes ssRingSpin { to { transform: rotate(360deg); } }
-
+ 
 .ss-orb-ring--1::after { content:''; position:absolute; top:-5px; left:50%; transform:translateX(-50%); width:10px; height:10px; border-radius:50%; background:#00d4ff; box-shadow:0 0 14px #00d4ff, 0 0 28px rgba(0,212,255,0.5); }
 .ss-orb-ring--2::after { content:''; position:absolute; bottom:-5px; right:-5px; width:8px; height:8px; border-radius:50%; background:#a78bfa; box-shadow:0 0 14px #a78bfa, 0 0 28px rgba(167,139,250,0.5); }
 .ss-orb-ring--3::after { content:''; position:absolute; top:50%; left:-5px; transform:translateY(-50%); width:7px; height:7px; border-radius:50%; background:#fbbf24; box-shadow:0 0 12px #fbbf24; }
 .ss-orb-ring--4::after { content:''; position:absolute; bottom:-4px; left:20%; width:6px; height:6px; border-radius:50%; background:#7dd3fc; box-shadow:0 0 10px #7dd3fc; }
-
+ 
 .ss-orb-core {
   position: relative; z-index: 2;
   width: 72px; height: 72px; border-radius: 50%;
@@ -1642,7 +1577,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   background-clip: text;
   position: relative; z-index: 1;
 }
-
+ 
 /* Captain greeting */
 .ss-greeting {
   text-align: center; max-width: 600px;
@@ -1678,7 +1613,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   font-family: 'Inter', sans-serif;
   font-size: 0.88rem; color: #64748b; line-height: 1.6;
 }
-
+ 
 /* ── Sector Navigation ── */
 .ss-sectors {
   display: grid;
@@ -1750,7 +1685,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   opacity: 0.4; transition: all 0.25s;
 }
 .ss-sector-btn:hover .ss-sector-arrow { opacity: 1; transform: translateX(4px); }
-
+ 
 /* ── Warp sequence animation ── */
 .ss-warp-overlay {
   position: absolute; inset: 0; z-index: 200;
@@ -1780,7 +1715,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   30%  { opacity: 0.8; }
   100% { opacity: 0;   transform: scaleX(1) rotate(var(--wl-angle,0deg)); }
 }
-
+ 
 /* ── Status bar at bottom ── */
 .ss-status-bar {
   position: relative; z-index: 100;
@@ -1807,78 +1742,170 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   0%,100% { opacity: 1; }
   50%      { opacity: 0.4; }
 }
-
+ 
 /* ══════════════════════════════════════════
-   CHAT PANEL — space nebula bg, full-width bubbles
+   CHAT PANEL — vivid space colors + falling stars
 ══════════════════════════════════════════ */
-
-/* ── Chat panel sits ABOVE hud/status-bar (z-index 100) ── */
+ 
+/* ── Chat panel sits ABOVE hud/status-bar ── */
 .ss-chat-panel {
   position: fixed !important;
   inset: 0 !important;
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
+  /* Deep space base — rich indigo/violet/teal, NOT black */
   background:
-    radial-gradient(ellipse 80% 60% at 15% 10%,  rgba(0,212,255,0.11) 0%,  transparent 55%),
-    radial-gradient(ellipse 70% 55% at 85% 80%,  rgba(167,139,250,0.13) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 40% at 50% 45%,  rgba(251,191,36,0.05) 0%,  transparent 50%),
-    radial-gradient(ellipse 60% 50% at 70% 20%,  rgba(99,102,241,0.08) 0%,  transparent 55%),
-    radial-gradient(ellipse 55% 45% at 20% 75%,  rgba(0,212,255,0.07) 0%,  transparent 50%),
-    linear-gradient(160deg, #010818 0%, #02051a 25%, #060114 55%, #010a1e 80%, #02061a 100%);
+    radial-gradient(ellipse 90% 70% at 10% 5%,   rgba(0,180,255,0.28)  0%, transparent 50%),
+    radial-gradient(ellipse 75% 60% at 90% 15%,  rgba(120,60,255,0.22)  0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 50% 50%,  rgba(60,0,160,0.30)   0%, transparent 55%),
+    radial-gradient(ellipse 80% 65% at 20% 85%,  rgba(0,212,255,0.18)  0%, transparent 50%),
+    radial-gradient(ellipse 70% 55% at 80% 75%,  rgba(167,100,255,0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 60% 30%,  rgba(255,100,180,0.10) 0%, transparent 50%),
+    linear-gradient(160deg,
+      #03082e 0%,
+      #07053a 20%,
+      #0a0228 40%,
+      #050a35 60%,
+      #08042f 80%,
+      #030828 100%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
   overflow: hidden;
 }
-
+ 
 .ss-chat-panel.active {
   opacity: 1 !important;
   pointer-events: all !important;
   display: flex !important;
 }
-
-/* Star-dot texture layer */
+ 
+/* ── Falling stars canvas injected by JS ── */
+.ss-chat-panel .ss-falling-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+ 
+/* ── Static star field via CSS (works without JS) ── */
+.ss-chat-panel::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  pointer-events: none;
+  /* 40 star dots spread across the panel */
+  background-image:
+    radial-gradient(1.5px 1.5px at  5%  8%,  #fff 0%, transparent 100%),
+    radial-gradient(1px   1px   at 11% 23%,  rgba(0,212,255,0.9) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 18%  5%,  #fff 0%, transparent 100%),
+    radial-gradient(1px   1px   at 24% 41%,  rgba(167,139,250,0.9) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 30% 17%,  #fff 0%, transparent 100%),
+    radial-gradient(1px   1px   at 36% 62%,  rgba(0,212,255,0.8) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 42%  3%,  rgba(251,191,36,0.9) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 48% 78%,  #fff 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 54% 32%,  rgba(167,139,250,0.9) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 60% 55%,  #fff 0%, transparent 100%),
+    radial-gradient(2px   2px   at 66%  9%,  rgba(0,212,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 72% 44%,  #fff 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 78% 68%,  rgba(251,191,36,0.8) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 84% 21%,  #fff 0%, transparent 100%),
+    radial-gradient(2px   2px   at 90% 82%,  rgba(167,139,250,0.9) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 96% 37%,  rgba(0,212,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px   1px   at  8% 51%,  #fff 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 15% 73%,  rgba(0,212,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 22% 88%,  #fff 0%, transparent 100%),
+    radial-gradient(2px   2px   at 29%  95%,  rgba(251,191,36,0.7) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 35% 12%,  rgba(167,139,250,0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 41% 49%,  #fff 0%, transparent 100%),
+    radial-gradient(1px   1px   at 47% 85%,  rgba(0,212,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 53% 67%,  #fff 0%, transparent 100%),
+    radial-gradient(2px   2px   at 59% 14%,  rgba(167,139,250,0.9) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 65% 93%,  #fff 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 71% 28%,  rgba(0,212,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 77% 57%,  rgba(251,191,36,0.7) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 83% 40%,  #fff 0%, transparent 100%),
+    radial-gradient(2px   2px   at 89%  6%,  rgba(167,139,250,0.8) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 95% 71%,  #fff 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at  3% 90%,  rgba(0,212,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px   1px   at  9% 36%,  #fff 0%, transparent 100%),
+    radial-gradient(1px   1px   at 16% 59%,  rgba(167,139,250,0.7) 0%, transparent 100%),
+    radial-gradient(2px   2px   at 44% 25%,  rgba(255,150,220,0.6) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 69% 76%,  #fff 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 87% 52%,  rgba(0,212,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 92% 19%,  rgba(251,191,36,0.8) 0%, transparent 100%),
+    radial-gradient(1px   1px   at 38% 97%,  #fff 0%, transparent 100%),
+    radial-gradient(2px   2px   at 57% 46%,  rgba(167,139,250,0.6) 0%, transparent 100%);
+  animation: starTwinkle 4s ease-in-out infinite alternate;
+}
+@keyframes starTwinkle {
+  0%   { opacity: 0.5; }
+  50%  { opacity: 1;   }
+  100% { opacity: 0.65; }
+}
+ 
+/* ── Falling / shooting stars (pure CSS) ── */
 .ss-chat-panel::after {
   content: '';
   position: absolute; inset: 0; z-index: 0;
   pointer-events: none;
+  /* 6 shooting star streaks at different angles & timings */
   background-image:
-    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.55) 0%, transparent 100%),
-    radial-gradient(1px 1px at 28% 72%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 45% 33%, rgba(0,212,255,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 60% 55%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 73% 14%, rgba(167,139,250,0.65) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 82% 68%, rgba(255,255,255,0.45) 0%, transparent 100%),
-    radial-gradient(1px 1px at 91% 40%, rgba(0,212,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 5%  88%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 38% 92%, rgba(167,139,250,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 8%,  rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 67% 82%, rgba(255,255,255,0.35) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 78% 27%, rgba(251,191,36,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 95% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 22% 48%, rgba(0,212,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 88% 91%, rgba(167,139,250,0.4) 0%, transparent 100%);
-  animation: starTwinkle 6s ease-in-out infinite alternate;
+    linear-gradient(105deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.9) 50%, rgba(0,212,255,0.4) 55%, rgba(255,255,255,0) 60%),
+    linear-gradient(110deg, rgba(255,255,255,0) 40%, rgba(167,139,250,0.9) 50%, rgba(255,255,255,0.4) 55%, rgba(255,255,255,0) 60%),
+    linear-gradient(100deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.8) 50%, rgba(251,191,36,0.4) 55%, rgba(255,255,255,0) 60%),
+    linear-gradient(108deg, rgba(255,255,255,0) 40%, rgba(0,212,255,0.9) 50%, rgba(255,255,255,0.3) 55%, rgba(255,255,255,0) 60%),
+    linear-gradient(103deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.7) 50%, rgba(167,139,250,0.5) 55%, rgba(255,255,255,0) 60%),
+    linear-gradient(112deg, rgba(255,255,255,0) 40%, rgba(251,191,36,0.8) 50%, rgba(255,255,255,0.3) 55%, rgba(255,255,255,0) 60%);
+  background-size:
+    200px 1.5px,
+    160px 1px,
+    220px 1.5px,
+    180px 1px,
+    240px 1.5px,
+    170px 1px;
+  background-repeat: no-repeat;
+  background-position:
+    -220px  8%,
+    -180px 25%,
+    -250px 45%,
+    -200px 63%,
+    -260px 78%,
+    -190px 91%;
+  animation: shootingStars 8s linear infinite;
 }
-@keyframes starTwinkle {
-  0%   { opacity: 0.6; }
-  50%  { opacity: 1;   }
-  100% { opacity: 0.7; }
+@keyframes shootingStars {
+  0%   {
+    background-position:
+      -220px  8%,  -180px 25%,
+      -250px 45%,  -200px 63%,
+      -260px 78%,  -190px 91%;
+  }
+  100% {
+    background-position:
+      calc(100vw + 220px)  8%,
+      calc(100vw + 180px) 25%,
+      calc(100vw + 250px) 45%,
+      calc(100vw + 200px) 63%,
+      calc(100vw + 260px) 78%,
+      calc(100vw + 190px) 91%;
+  }
 }
-
+ 
 /* Grid pattern inside chat */
 .ss-chat-panel .ss-grid {
   display: block !important;
-  opacity: 0.25 !important;
-  z-index: 1 !important;
+  opacity: 0.18 !important;
+  z-index: 2 !important;
   position: absolute !important;
   pointer-events: none !important;
 }
-
-/* All direct children above bg */
-.ss-chat-panel > * { position: relative; z-index: 2; }
-
+ 
+/* All direct children above bg layers */
+.ss-chat-panel > * { position: relative; z-index: 3; }
+ 
 /* ── Chat Top Bar ── */
 .ss-chat-topbar {
   display: flex; align-items: center; gap: 12px;
@@ -1918,7 +1945,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   font-size: 0.58rem; color: #64748b;
   letter-spacing: 0.08em; margin-top: 1px;
 }
-
+ 
 /* ── Messages Area ── */
 .ss-chat-messages {
   flex: 1; overflow-y: auto;
@@ -1932,7 +1959,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 .ss-chat-messages::-webkit-scrollbar-thumb {
   background: rgba(0,212,255,0.18); border-radius: 3px;
 }
-
+ 
 /* ── Message rows ── */
 @keyframes msgIn {
   from { opacity: 0; transform: translateY(12px); }
@@ -1944,7 +1971,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   animation: msgIn 0.3s ease both;
 }
 .ss-msg-row--user { flex-direction: row-reverse; }
-
+ 
 .ss-msg-avatar {
   width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0;
   background: linear-gradient(135deg, #00d4ff, #a78bfa);
@@ -1953,7 +1980,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   color: #01020a;
   box-shadow: 0 0 12px rgba(0,212,255,0.25);
 }
-
+ 
 /* ── Bubbles ── */
 .ss-bubble {
   padding: 14px 18px; border-radius: 18px;
@@ -1961,18 +1988,18 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   word-break: break-word;
   box-sizing: border-box;
 }
-
+ 
 /* AI bubble fills all remaining row width */
 .ss-msg-row:not(.ss-msg-row--user) .ss-bubble {
   flex: 1;
   max-width: calc(100% - 46px);
 }
-
+ 
 /* User bubble stays capped */
 .ss-msg-row--user .ss-bubble {
   max-width: 80%;
 }
-
+ 
 .ss-bubble--ai {
   background: rgba(0,212,255,0.04);
   border: 1px solid rgba(0,212,255,0.12);
@@ -1999,7 +2026,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 }
 .ss-bubble--ai strong { color: var(--active-sector-color, #7dd3fc); }
 .ss-bubble--ai a      { color: #00d4ff; text-underline-offset: 3px; }
-
+ 
 .ss-bubble--user {
   background: linear-gradient(135deg,
     rgba(0,212,255,0.12) 0%,
@@ -2011,7 +2038,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
     0 0 20px rgba(0,212,255,0.08),
     0 4px 16px rgba(0,0,0,0.35);
 }
-
+ 
 /* ── Suggestion chips ── */
 .ss-suggestion-chips {
   display: flex; flex-wrap: wrap; gap: 8px;
@@ -2034,14 +2061,14 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   box-shadow: 0 0 12px rgba(0,212,255,0.15);
   transform: translateY(-1px);
 }
-
+ 
 /* ── Timestamps ── */
 .ss-msg-time {
   font-family: 'JetBrains Mono', monospace; font-size: 0.54rem;
   color: #334155; margin-top: 5px;
 }
 .ss-msg-time--user { text-align: right; }
-
+ 
 /* ── Typing indicator ── */
 .ss-typing-dots {
   display: flex; align-items: center; gap: 5px; padding: 4px 2px;
@@ -2057,7 +2084,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
 }
 .ss-typing-dots span:nth-child(2) { animation-delay: .2s; }
 .ss-typing-dots span:nth-child(3) { animation-delay: .4s; }
-
+ 
 /* ── Input Area ── */
 .ss-chat-input-area {
   padding: 14px 28px 20px;
@@ -2129,7 +2156,7 @@ body.light .radio-volume { background: rgba(109,40,217,0.15); }
   font-family: 'JetBrains Mono', monospace; font-size: 0.56rem;
   color: #1e2a45; letter-spacing: 0.06em;
 }
-
+ 
 /* ── Mobile ── */
 @media (max-width: 900px) {
   .ss-sectors { grid-template-columns: repeat(2, 1fr); gap: 10px; }
