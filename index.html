@@ -127,6 +127,66 @@
   </div>
 </div>
 
+    <!-- ══ SPACE RADIO ══ -->
+<div class="space-radio" id="spaceRadio">
+  <div class="radio-header">
+    <div class="radio-icon-wrap" id="radioToggle">
+      <div class="radio-waves" id="radioWaves">
+        <span></span><span></span><span></span>
+      </div>
+      <svg class="radio-icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18V5l12-2v13"/>
+        <circle cx="6" cy="18" r="3"/>
+        <circle cx="18" cy="16" r="3"/>
+      </svg>
+    </div>
+    <div class="radio-info">
+      <div class="radio-title" id="radioTitle">Space Radio</div>
+      <div class="radio-status" id="radioStatus">Click to tune in</div>
+    </div>
+    <div class="radio-controls">
+      <button class="radio-btn" id="radioPrev" title="Previous">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+      <button class="radio-btn radio-btn--play" id="radioPlay" title="Play/Pause">
+        <svg id="radioPlayIcon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </button>
+      <button class="radio-btn" id="radioNext" title="Next">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Visualizer bars -->
+  <div class="radio-visualizer" id="radioVisualizer">
+    <div class="radio-viz-bars" id="radioVizBars"></div>
+    <div class="radio-track-info">
+      <span class="radio-track-name" id="radioTrackName">— Select a station —</span>
+    </div>
+  </div>
+
+  <!-- Volume -->
+  <div class="radio-volume-row">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+    </svg>
+    <input type="range" class="radio-volume" id="radioVolume" min="0" max="100" value="40">
+    <span class="radio-vol-num" id="radioVolNum">40</span>
+  </div>
+
+  <!-- Update broadcast -->
+  <div class="radio-broadcast" id="radioBroadcast" style="display:none">
+    <div class="broadcast-dot"></div>
+    <span class="broadcast-text" id="broadcastText"></span>
+  </div>
+</div>
 
 <div class="clock-widget" id="kurnoolTime">
   <canvas id="clockCanvas" width="80" height="80"></canvas>
