@@ -478,10 +478,242 @@ function setMood(text) {
   addEventListener('resize', resize); resize(); draw();
 })();
 
-/* ══════════════════════════════════════════
-   SPACE FREQUENCY SCANNER JS
-   (with Web Speech API)
-══════════════════════════════════════════ */
+/* ══════════════════════════════
+   SPACE RADIO
+══════════════════════════════ */
+(function () {
+
+  // ── Stations using free streamable URLs ──
+  const STATIONS = [
+    {
+      name:  'Deep Space Ambient',
+      url:   'https://ice2.somafm.com/deepspaceone-128-mp3',
+      color: '#8b5cf6',
+      genre: 'Ambient · Space',
+    },
+    {
+      name:  'Lo-Fi Study Beats',
+      url:   'https://ice2.somafm.com/groovesalad-128-mp3',
+      color: '#06b6d4',
+      genre: 'Lo-Fi · Chill',
+    },
+    {
+      name:  'Cosmic Jazz',
+      url:   'https://ice2.somafm.com/illstreet-128-mp3',
+      color: '#fbbf24',
+      genre: 'Jazz · Smooth',
+    },
+    {
+      name:  'Space Drone',
+      url:   'https://ice2.somafm.com/dronezone-128-mp3',
+      color: '#f472b6',
+      genre: 'Drone · Dark Ambient',
+    },
+  ];
+
+  // ── Pavan update broadcasts ──
+  const BROADCASTS = [
+    'Pavan is currently building AI agents with Groq and LLaMA',
+    'Open to internships and entry-level Data Analyst roles',
+    'Pursuing MCA at JNTUA Anantapur — focused on Data Analytics',
+    'Latest project: Candy AI — a full featured portfolio agent',
+    'Skills spotlight: SQL 90% · Python 85% · Power BI 85%',
+    'Portfolio live at kalyanfinity-portfolio.netlify.app',
+    'Pavan believes: Learn by building — not just by watching',
+    '6 projects built · 1 internship completed · always growing',
+    'Currently exploring: LLMs · RAG · AI Agents · Full Stack Dev',
+    'Motto: Learn by building — Pavan lives this every day',
+  ];
+
+  let currentStation = 0;
+  let isPlaying      = false;
+  let audio          = null;
+  let vizInterval    = null;
+  let broadcastTimer = null;
+  let broadcastIdx   = 0;
+
+  const playBtn      = document.getElementById('radioPlay');
+  const playIcon     = document.getElementById('radioPlayIcon');
+  const prevBtn      = document.getElementById('radioPrev');
+  const nextBtn      = document.getElementById('radioNext');
+  const statusEl     = document.getElementById('radioStatus');
+  const trackEl      = document.getElementById('radioTrackName');
+  const vizEl        = document.getElementById('radioVisualizer');
+  const barsWrap     = document.getElementById('radioVizBars');
+  const volumeEl     = document.getElementById('radioVolume');
+  const volNumEl     = document.getElementById('radioVolNum');
+  const wavesEl      = document.getElementById('radioWaves');
+  const broadcastEl  = document.getElementById('radioBroadcast');
+  const broadcastTxt = document.getElementById('broadcastText');
+
+  if (!playBtn) return;
+
+  // Build visualizer bars
+  const BAR_COUNT = 24;
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'viz-bar';
+    bar.style.setProperty('--h', Math.random() * 22 + 4 + 'px');
+    bar.style.setProperty('--spd', (Math.random() * 0.4 + 0.3) + 's');
+    barsWrap.appendChild(bar);
+  }
+  const bars = barsWrap.querySelectorAll('.viz-bar');
+
+  function updateStation() {
+    const s = STATIONS[currentStation];
+    if (trackEl) trackEl.textContent = s.name;
+    if (trackEl) trackEl.style.color = s.color;
+    // Update viz bar colors
+    bars.forEach(b => {
+      b.style.background = `linear-gradient(to top, ${s.color}88, ${s.color})`;
+    });
+  }
+
+  function startViz() {
+    bars.forEach(b => {
+      b.classList.add('active');
+      b.style.setProperty('--h', Math.random() * 22 + 4 + 'px');
+      b.style.setProperty('--spd', (Math.random() * 0.4 + 0.3) + 's');
+    });
+    // Randomize heights periodically
+    vizInterval = setInterval(() => {
+      bars.forEach(b => {
+        b.style.setProperty('--h', Math.random() * 22 + 4 + 'px');
+        b.style.setProperty('--spd', (Math.random() * 0.4 + 0.3) + 's');
+      });
+    }, 1200);
+  }
+
+  function stopViz() {
+    bars.forEach(b => {
+      b.classList.remove('active');
+      b.style.height = '3px';
+    });
+    clearInterval(vizInterval);
+  }
+
+  function startBroadcasts() {
+    // First broadcast after 10 seconds
+    broadcastTimer = setTimeout(showBroadcast, 10000);
+  }
+
+  function showBroadcast() {
+    const msg = BROADCASTS[broadcastIdx % BROADCASTS.length];
+    broadcastIdx++;
+
+    // Show broadcast
+    if (broadcastTxt) broadcastTxt.textContent = msg;
+    if (broadcastEl)  broadcastEl.style.display = 'flex';
+
+    // Speak it
+    if (window.speechSynthesis && voiceOn) {
+      const utt = new SpeechSynthesisUtterance('Radio update. ' + msg);
+      utt.lang   = 'en-US';
+      utt.rate   = 0.95;
+      utt.pitch  = 1.0;
+      utt.volume = 0.7;
+      const vv   = speechSynthesis.getVoices();
+      const v    = vv.find(v => v.name.includes('Google US English'))
+                || vv.find(v => v.lang === 'en-US');
+      if (v) utt.voice = v;
+
+      // Fade music down while speaking
+      if (audio) audio.volume = Math.max(0, (parseInt(volumeEl.value) / 100) * 0.25);
+      utt.onend = () => {
+        if (audio && isPlaying) audio.volume = parseInt(volumeEl.value) / 100;
+        // Hide broadcast after 2s
+        setTimeout(() => {
+          if (broadcastEl) broadcastEl.style.display = 'none';
+        }, 2000);
+      };
+      setTimeout(() => speechSynthesis.speak(utt), 300);
+    } else {
+      // No speech — just hide after 4s
+      setTimeout(() => {
+        if (broadcastEl) broadcastEl.style.display = 'none';
+      }, 4000);
+    }
+
+    // Next broadcast in 35-50 seconds
+    if (isPlaying) {
+      broadcastTimer = setTimeout(showBroadcast, 35000 + Math.random() * 15000);
+    }
+  }
+
+  function stopBroadcasts() {
+    clearTimeout(broadcastTimer);
+    if (broadcastEl) broadcastEl.style.display = 'none';
+    if (window.speechSynthesis) speechSynthesis.cancel();
+  }
+
+  function play() {
+    const s = STATIONS[currentStation];
+    if (!audio) {
+      audio = new Audio();
+      audio.crossOrigin = 'anonymous';
+    }
+    audio.src    = s.url;
+    audio.volume = parseInt(volumeEl?.value || 40) / 100;
+    audio.play().then(() => {
+      isPlaying = true;
+      updatePlayUI(true);
+      startViz();
+      startBroadcasts();
+    }).catch(err => {
+      console.warn('Radio error:', err);
+      if (statusEl) statusEl.textContent = 'Stream unavailable';
+    });
+  }
+
+  function pause() {
+    if (audio) { audio.pause(); }
+    isPlaying = false;
+    updatePlayUI(false);
+    stopViz();
+    stopBroadcasts();
+  }
+
+  function updatePlayUI(playing) {
+    if (playing) {
+      playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      if (statusEl) { statusEl.textContent = STATIONS[currentStation].genre; statusEl.className = 'radio-status playing'; }
+      if (vizEl)    vizEl.classList.add('show');
+      if (wavesEl)  wavesEl.classList.add('active');
+    } else {
+      playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+      if (statusEl) { statusEl.textContent = 'Paused'; statusEl.className = 'radio-status'; }
+      if (wavesEl)  wavesEl.classList.remove('active');
+    }
+    updateStation();
+  }
+
+  // Play/Pause
+  playBtn.addEventListener('click', () => {
+    if (isPlaying) pause();
+    else play();
+  });
+
+  // Prev/Next
+  prevBtn?.addEventListener('click', () => {
+    currentStation = (currentStation - 1 + STATIONS.length) % STATIONS.length;
+    if (isPlaying) { pause(); setTimeout(play, 300); }
+    else updateStation();
+  });
+  nextBtn?.addEventListener('click', () => {
+    currentStation = (currentStation + 1) % STATIONS.length;
+    if (isPlaying) { pause(); setTimeout(play, 300); }
+    else updateStation();
+  });
+
+  // Volume
+  volumeEl?.addEventListener('input', () => {
+    const v = parseInt(volumeEl.value);
+    if (volNumEl) volNumEl.textContent = v;
+    if (audio && isPlaying) audio.volume = v / 100;
+  });
+
+  updateStation();
+})();
  
  
 
