@@ -188,6 +188,232 @@
   </div>
 </div>
 
+    <!-- ╔══════════════════════════════════════════════════════════╗
+     CANDY SPACESHIP MODE — spaceship.html
+     ══════════════════════════════════════════════════════════
+     PASTE (A) inside your <aside> sidebar (any position)
+     PASTE (B) just before </body>
+     ╚══════════════════════════════════════════════════════════╝ -->
+
+
+<!-- ══════════════════════════════════════════════════════════
+  (A)  SIDEBAR LAUNCH BUTTON — paste inside <aside>
+       anywhere you like (after a .sb-divider block)
+═══════════════════════════════════════════════════════════ -->
+<div class="sb-divider"></div>
+<div class="spaceship-launch-wrap">
+  <button class="spaceship-launch-btn" id="spaceshipLaunchBtn">
+    <span class="slb-icon">🚀</span>
+    <div class="slb-text">
+      <div class="slb-title">Candy's Spaceship</div>
+      <div class="slb-sub">CAPTAIN MODE AVAILABLE</div>
+    </div>
+    <div class="slb-badge">LAUNCH</div>
+  </button>
+</div>
+
+<div class="spaceship-overlay" id="spaceshipOverlay">
+
+  <!-- Background layers -->
+  <canvas class="ss-star-canvas" id="ssStarCanvas"></canvas>
+  <div class="ss-nebula ss-nebula-1"></div>
+  <div class="ss-nebula ss-nebula-2"></div>
+  <div class="ss-nebula ss-nebula-3"></div>
+  <div class="ss-grid"></div>
+  <div class="ss-warp-rings" id="ssWarpRings"></div>
+
+  <!-- HUD Header -->
+  <div class="ss-hud">
+    <div class="ss-hud-left">
+      <div class="ss-ship-avatar">C</div>
+      <div>
+        <div class="ss-ship-name"><span>Candy</span> AI Ship</div>
+        <div class="ss-ship-sub">DEEP SPACE NAVIGATOR · v2.0</div>
+      </div>
+    </div>
+    <div class="ss-hud-center">
+      <div class="ss-hud-stat">
+        <div class="ss-hud-stat-val" id="ssCoordX">48°22'N</div>
+        <div class="ss-hud-stat-lbl">COORD-X</div>
+      </div>
+      <div class="ss-hud-stat">
+        <div class="ss-hud-stat-val" id="ssCoordY">16°22'E</div>
+        <div class="ss-hud-stat-lbl">COORD-Y</div>
+      </div>
+      <div class="ss-hud-stat">
+        <div class="ss-hud-stat-val" id="ssSpeed">WARP 7</div>
+        <div class="ss-hud-stat-lbl">VELOCITY</div>
+      </div>
+    </div>
+    <div class="ss-hud-right">
+      <button class="ss-close-btn" id="spaceshipCloseBtn">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        EXIT SHIP
+      </button>
+    </div>
+  </div>
+
+  <!-- Main navigation screen -->
+  <div class="ss-main" id="ssMain">
+
+    <!-- Candy orbital avatar -->
+    <div class="ss-ship-core">
+      <div class="ss-orbital">
+        <div class="ss-orb-ring ss-orb-ring--1"></div>
+        <div class="ss-orb-ring ss-orb-ring--2"></div>
+        <div class="ss-orb-ring ss-orb-ring--3"></div>
+        <div class="ss-orb-ring ss-orb-ring--4"></div>
+        <div class="ss-orb-core">
+          <span class="ss-orb-letter">C</span>
+        </div>
+      </div>
+
+      <div class="ss-greeting">
+        <div class="ss-captain-tag">INCOMING TRANSMISSION</div>
+        <div class="ss-candy-msg" id="ssCandyMsg">
+          Captain, where shall we <span class="highlight">travel</span> next?
+        </div>
+        <div class="ss-candy-sub" id="ssCandySub">
+          Select a sector to begin your voyage. I'll be your guide.
+        </div>
+      </div>
+    </div>
+
+    <!-- Sector buttons -->
+    <div class="ss-sectors">
+
+      <button class="ss-sector-btn" data-sector="projects"
+        style="--sector-color:#00d4ff;--sector-border:rgba(0,212,255,0.18);--sector-glow:rgba(0,212,255,0.07);--sector-shadow:rgba(0,212,255,0.18)">
+        <div class="ss-sector-icon">🛰️</div>
+        <div class="ss-sector-info">
+          <div class="ss-sector-code">SECTOR α · PROJECTS</div>
+          <div class="ss-sector-name">Projects Sector</div>
+          <div class="ss-sector-desc">6 live missions deployed</div>
+        </div>
+        <div class="ss-sector-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </button>
+
+      <button class="ss-sector-btn" data-sector="skills"
+        style="--sector-color:#a78bfa;--sector-border:rgba(167,139,250,0.18);--sector-glow:rgba(167,139,250,0.07);--sector-shadow:rgba(167,139,250,0.18)">
+        <div class="ss-sector-icon">⚡</div>
+        <div class="ss-sector-info">
+          <div class="ss-sector-code">SECTOR β · SKILLS</div>
+          <div class="ss-sector-name">Skills Sector</div>
+          <div class="ss-sector-desc">Weapon systems &amp; capabilities</div>
+        </div>
+        <div class="ss-sector-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </button>
+
+      <button class="ss-sector-btn" data-sector="ai"
+        style="--sector-color:#7dd3fc;--sector-border:rgba(125,211,252,0.18);--sector-glow:rgba(125,211,252,0.07);--sector-shadow:rgba(125,211,252,0.18)">
+        <div class="ss-sector-icon">🤖</div>
+        <div class="ss-sector-info">
+          <div class="ss-sector-code">SECTOR δ · AI</div>
+          <div class="ss-sector-name">AI Sector</div>
+          <div class="ss-sector-desc">Neural networks &amp; intelligence</div>
+        </div>
+        <div class="ss-sector-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </button>
+
+      <button class="ss-sector-btn" data-sector="future"
+        style="--sector-color:#fbbf24;--sector-border:rgba(251,191,36,0.18);--sector-glow:rgba(251,191,36,0.07);--sector-shadow:rgba(251,191,36,0.18)">
+        <div class="ss-sector-icon">🌌</div>
+        <div class="ss-sector-info">
+          <div class="ss-sector-code">SECTOR Ω · FUTURE</div>
+          <div class="ss-sector-name">Future Sector</div>
+          <div class="ss-sector-desc">Uncharted territory ahead</div>
+        </div>
+        <div class="ss-sector-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- Warp flash overlay -->
+    <div class="ss-warp-overlay" id="ssWarpOverlay">
+      <div class="ss-warp-text" id="ssWarpText">INITIATING WARP SEQUENCE...</div>
+    </div>
+
+  </div><!-- /ss-main -->
+
+  <!-- Chat panel (shown after sector selected) -->
+  <div class="ss-chat-panel" id="ssChatPanel">
+    <div class="ss-chat-topbar">
+      <button class="ss-chat-back" id="ssChatBack">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        BRIDGE
+      </button>
+      <div class="ss-chat-sector-badge">
+        <div class="ss-chat-sector-dot" id="ssSectorDot"></div>
+        <div>
+          <div class="ss-chat-sector-name" id="ssSectorName">Projects Sector</div>
+          <div class="ss-chat-sector-code" id="ssSectorCode">SECTOR α · NAVIGATING</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ss-chat-messages" id="ssChatMessages"></div>
+
+    <div class="ss-chat-input-area">
+      <div class="ss-input-row">
+        <button class="ss-mic-btn" id="ssMicBtn" title="Speak, Captain">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <textarea class="ss-textarea" id="ssTextarea"
+          placeholder="Captain, issue your command..." rows="1" maxlength="500"></textarea>
+        <button class="ss-send-btn" id="ssSendBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="ss-input-hint">Enter to transmit &nbsp;·&nbsp; Shift+Enter for new line</div>
+    </div>
+  </div><!-- /ss-chat-panel -->
+
+  <!-- Bottom status bar -->
+  <div class="ss-status-bar">
+    <div class="ss-status-item">
+      <div class="ss-status-led"></div>
+      SYSTEMS NOMINAL
+    </div>
+    <div class="ss-status-item">
+      <div class="ss-status-led ss-status-led--amber"></div>
+      <span id="ssStatusCenter">AWAITING CAPTAIN'S ORDER</span>
+    </div>
+    <div class="ss-status-item">
+      <div class="ss-status-led ss-status-led--violet"></div>
+      CANDY AI ONLINE
+    </div>
+  </div>
+
+</div><!-- /spaceship-overlay -->
+
 <div class="clock-widget" id="kurnoolTime">
   <canvas id="clockCanvas" width="80" height="80"></canvas>
   <div class="clock-info">
