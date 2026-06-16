@@ -715,6 +715,485 @@ function setMood(text) {
   updateStation();
 })();
 
+
+/* ═══════════════════════════════════════════════════════════
+   CANDY SPACESHIP MODE — spaceship.js
+   Paste entire contents inside your <script> block,
+   or load as <script src="spaceship.js"></script> before </body>
+   Requires: speak(), stopSpeaking(), voiceEnabled from candy-ai.js
+═══════════════════════════════════════════════════════════ */
+
+(function initSpaceship() {
+
+  /* ── SECTOR CONFIG ── */
+  const SECTORS = {
+    projects: {
+      name: 'Projects Sector',
+      code: 'SECTOR α · NAVIGATING',
+      color: '#00d4ff',
+      warpMsg: 'WARPING TO PROJECTS SECTOR...',
+      arrivalMsg: 'Captain, we have arrived at the <strong>Projects Sector</strong>. Six missions are deployed and active. What would you like to explore?',
+      arrivalSpeak: "Captain, we have arrived at the Projects Sector. Six missions are deployed and active. What would you like to explore?",
+      systemPrompt: `You are Candy, the AI of a spaceship. The captain (user) has navigated to the PROJECTS SECTOR. Speak like a ship AI — confident, immersive, space-themed. Use terms like "Captain", "mission", "deployed", "sector", "coordinates". Never use emojis. Keep responses under 5 sentences unless detail is requested. You know all about Pavan's projects: SPARMS (Java desktop app), InventoryIQ (Streamlit dashboard, live at inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app), Digit Recognizer (CNN, live at hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app), Netflix Dashboard (Power BI), Employee Attrition Analysis (ML + Power BI), Zomato Analysis (predictive ML).`,
+      chips: ['Tell me about SPARMS', 'Show live missions', 'What tech was used?', 'Most impressive project?'],
+    },
+    skills: {
+      name: 'Skills Sector',
+      code: 'SECTOR β · NAVIGATING',
+      color: '#a78bfa',
+      warpMsg: 'WARPING TO SKILLS SECTOR...',
+      arrivalMsg: 'Captain, the <strong>Skills Sector</strong> is online. All weapon systems and capabilities are ready for inspection. What shall we review?',
+      arrivalSpeak: "Captain, the Skills Sector is online. All weapon systems and capabilities are ready for inspection. What shall we review?",
+      systemPrompt: `You are Candy, the AI of a spaceship. The captain has navigated to the SKILLS SECTOR. Speak like a ship AI — call skills "weapon systems", "capabilities", "modules". Use space/ship metaphors naturally. Never use emojis. Keep under 5 sentences unless detail wanted. Pavan's skills: SQL 90%, Excel 88%, Python 85%, Power BI 85%, Pandas 85%, NumPy 80%, Matplotlib 80%, Seaborn 80%, Plotly 75%, Scikit-learn 75%, TensorFlow 70%, Java 70%, HTML 85%, CSS 80%, JavaScript 70%. Tools: Streamlit, OpenCV, JDBC, Maven, GitHub.`,
+      chips: ['Primary weapon systems', 'Data analytics modules', 'ML capabilities', 'Frontend systems'],
+    },
+    ai: {
+      name: 'AI Sector',
+      code: 'SECTOR δ · NAVIGATING',
+      color: '#7dd3fc',
+      warpMsg: 'WARPING TO AI SECTOR...',
+      arrivalMsg: 'Captain, neural networks online. We have entered the <strong>AI Sector</strong> — deep intelligence territory. All AI modules are active.',
+      arrivalSpeak: "Captain, neural networks online. We have entered the AI Sector, deep intelligence territory. All AI modules are active.",
+      systemPrompt: `You are Candy, the AI of a spaceship. The captain is in the AI SECTOR. Speak with technical confidence, use space metaphors. Call AI models "neural cores", frameworks "systems". Never use emojis. Max 5 sentences unless asked. Pavan's AI journey: built Candy AI assistant (Groq + LLaMA 3.3 70B), Digit Recognizer CNN (TensorFlow), interested in AI agents, automation, SaaS. Uses tools like Streamlit, Hugging Face, OpenAI APIs, Groq. Wants to build AI-driven products.`,
+      chips: ['Neural core architecture', 'How was Candy built?', 'AI tools in use', 'Future AI missions'],
+    },
+    future: {
+      name: 'Future Sector',
+      code: 'SECTOR Ω · NAVIGATING',
+      color: '#fbbf24',
+      warpMsg: 'PLOTTING COURSE TO FUTURE SECTOR...',
+      arrivalMsg: 'Captain, we are now in <strong>uncharted territory</strong> — the Future Sector. Scanning long-range ambitions and mission objectives.',
+      arrivalSpeak: "Captain, we are now in uncharted territory, the Future Sector. Scanning long-range ambitions and mission objectives.",
+      systemPrompt: `You are Candy, the AI of a spaceship. The captain is exploring the FUTURE SECTOR — Pavan's goals, ambitions and vision. Speak with inspiration and forward-looking energy. Use space metaphors: "long-range scan", "mission objective", "trajectory". Never use emojis. Max 5 sentences. Pavan's future: become a skilled Data Analyst, build AI-powered products people use daily, advance in ML and AI, create SaaS and automation products, combine analytics + AI + software into real tools. Open to internships and entry-level Data Analyst roles now.`,
+      chips: ["Captain's mission objectives", 'Long-range career trajectory', 'Open to crew recruitment?', 'What missions are next?'],
+    },
+  };
+
+  /* ── STATE ── */
+  let activeSector = null;
+  let ssHistory    = [];
+  let ssListening  = false;
+  let ssRecog      = null;
+
+  /* ── ELEMENTS ── */
+  const overlay        = document.getElementById('spaceshipOverlay');
+  const launchBtn      = document.getElementById('spaceshipLaunchBtn');
+  const closeBtn       = document.getElementById('spaceshipCloseBtn');
+  const ssMain         = document.getElementById('ssMain');
+  const ssChatPanel    = document.getElementById('ssChatPanel');
+  const ssChatBack     = document.getElementById('ssChatBack');
+  const ssMessages     = document.getElementById('ssChatMessages');
+  const ssTextarea     = document.getElementById('ssTextarea');
+  const ssSendBtn      = document.getElementById('ssSendBtn');
+  const ssMicBtn       = document.getElementById('ssMicBtn');
+  const ssSectorDot    = document.getElementById('ssSectorDot');
+  const ssSectorName   = document.getElementById('ssSectorName');
+  const ssSectorCode   = document.getElementById('ssSectorCode');
+  const ssWarpOverlay  = document.getElementById('ssWarpOverlay');
+  const ssWarpText     = document.getElementById('ssWarpText');
+  const ssStatusCenter = document.getElementById('ssStatusCenter');
+  const ssStarCanvas   = document.getElementById('ssStarCanvas');
+
+  if (!overlay || !launchBtn) return; // elements not in DOM
+
+  /* ── SPACESHIP STAR CANVAS (warp-speed stars) ── */
+  (function buildSSStars() {
+    const ctx = ssStarCanvas.getContext('2d');
+    let W, H, stars = [];
+    const COLORS = [
+      [255,255,255],[0,212,255],[167,139,250],[125,211,252],[251,191,36],[199,210,254]
+    ];
+    function col(ci, a) {
+      const [r,g,b] = COLORS[ci % COLORS.length];
+      return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+    }
+    function resize() {
+      W = ssStarCanvas.width  = ssStarCanvas.offsetWidth  || window.innerWidth;
+      H = ssStarCanvas.height = ssStarCanvas.offsetHeight || window.innerHeight;
+      stars = [];
+      const n = Math.max(200, Math.floor((W * H) / 2800));
+      for (let i = 0; i < n; i++) {
+        stars.push({
+          x: Math.random() * W, y: Math.random() * H,
+          r: Math.random() * 1.8 + 0.2,
+          a: Math.random() * 0.5 + 0.1,
+          da: (Math.random() - 0.5) * 0.012,
+          ci: Math.floor(Math.random() * COLORS.length),
+          vx: 0, vy: 0,
+        });
+      }
+    }
+    let warpMode = false;
+    let frame = 0;
+    let meteors = [];
+    function spawnMeteor() {
+      const ci = Math.floor(Math.random() * COLORS.length);
+      const ang = Math.PI / 6 + Math.random() * Math.PI / 7;
+      const spd = 10 + Math.random() * 16;
+      meteors.push({
+        x: Math.random() * W * 1.3, y: -30,
+        vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+        len: 100 + Math.random() * 200,
+        a: 1, fade: 0.01 + Math.random() * 0.01,
+        w: 1 + Math.random() * 1.5, ci,
+      });
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      frame++;
+      // Stars
+      for (const s of stars) {
+        s.a += s.da;
+        if (s.a <= 0.06 || s.a >= 0.72) s.da *= -1;
+        if (warpMode) { s.x += s.vx; s.y += s.vy; if (s.y > H + 10) { s.y = -5; s.x = Math.random() * W; } }
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = col(s.ci, s.a);
+        ctx.fill();
+        if (s.r > 1.3 && s.a > 0.45) {
+          ctx.strokeStyle = col(s.ci, s.a * 0.28);
+          ctx.lineWidth = 0.3;
+          const e = s.r * 2.8;
+          ctx.beginPath();
+          ctx.moveTo(s.x - e, s.y); ctx.lineTo(s.x + e, s.y);
+          ctx.moveTo(s.x, s.y - e); ctx.lineTo(s.x, s.y + e);
+          ctx.stroke();
+        }
+      }
+      // Meteors
+      if (frame % 60 === 0 && Math.random() < 0.7)  spawnMeteor();
+      if (frame % 95 === 0 && Math.random() < 0.5)  spawnMeteor();
+      if (frame % 180 === 0 && Math.random() < 0.4) { spawnMeteor(); spawnMeteor(); }
+      for (let i = meteors.length - 1; i >= 0; i--) {
+        const m = meteors[i];
+        m.x += m.vx; m.y += m.vy; m.a -= m.fade;
+        if (m.a <= 0 || m.y > H + 40) { meteors.splice(i, 1); continue; }
+        const ang = Math.atan2(m.vy, m.vx);
+        const tx = m.x - Math.cos(ang) * m.len, ty = m.y - Math.sin(ang) * m.len;
+        const g = ctx.createLinearGradient(tx, ty, m.x, m.y);
+        g.addColorStop(0, col(m.ci, 0));
+        g.addColorStop(0.5, col(m.ci, m.a * 0.25));
+        g.addColorStop(1,   col(m.ci, m.a * 0.9));
+        ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(m.x, m.y);
+        ctx.strokeStyle = g; ctx.lineWidth = m.w; ctx.lineCap = 'round'; ctx.stroke();
+        ctx.beginPath(); ctx.arc(m.x, m.y, m.w * 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = col(m.ci, m.a * 0.9); ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', () => { if (overlay.classList.contains('active')) resize(); });
+    overlay.addEventListener('transitionend', () => { if (overlay.classList.contains('active')) resize(); });
+    resize(); draw();
+
+    // expose warp control
+    window._ssSetWarp = (on) => {
+      warpMode = on;
+      const spd = on ? 18 : 0;
+      stars.forEach(s => { s.vx = (Math.random() - 0.5) * spd; s.vy = spd * 0.6 + Math.random() * spd * 0.4; });
+    };
+  })();
+
+  /* ── HUD tick coords ── */
+  setInterval(() => {
+    if (!overlay.classList.contains('active')) return;
+    const now = new Date();
+    const cx = document.getElementById('ssCoordX');
+    const cy = document.getElementById('ssCoordY');
+    const cs = document.getElementById('ssSpeed');
+    if (cx) cx.textContent = (Math.random() * 90).toFixed(2) + '°N';
+    if (cy) cy.textContent = (Math.random() * 180).toFixed(2) + '°E';
+    const warps = ['WARP 5','WARP 6','WARP 7','WARP 8','WARP 9'];
+    if (cs) cs.textContent = warps[Math.floor(Math.random() * warps.length)];
+  }, 2500);
+
+  /* ── LAUNCH ── */
+  launchBtn && launchBtn.addEventListener('click', () => {
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    ssMain.style.display = 'flex';
+    ssChatPanel.classList.remove('active');
+    activeSector = null; ssHistory = [];
+    setTimeout(() => {
+      ssCandySpeak("Captain, where shall we travel next? Choose your sector and I will plot the course.");
+    }, 800);
+  });
+
+  /* ── CLOSE ── */
+  closeBtn && closeBtn.addEventListener('click', () => {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    if (window._ssSetWarp) window._ssSetWarp(false);
+    ssStopSpeaking();
+  });
+
+  /* ── SECTOR BUTTONS ── */
+  overlay.addEventListener('click', e => {
+    const btn = e.target.closest('.ss-sector-btn');
+    if (!btn) return;
+    const sector = btn.dataset.sector;
+    if (sector) enterSector(sector);
+  });
+
+  /* ── BACK TO BRIDGE ── */
+  ssChatBack && ssChatBack.addEventListener('click', () => {
+    ssChatPanel.classList.remove('active');
+    ssMain.style.display = 'flex';
+    activeSector = null; ssHistory = [];
+    if (window._ssSetWarp) window._ssSetWarp(false);
+    ssStopSpeaking();
+    setTimeout(() => {
+      ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
+    }, 400);
+  });
+
+  /* ── ENTER SECTOR ── */
+  function enterSector(sectorKey) {
+    const s = SECTORS[sectorKey];
+    if (!s) return;
+    activeSector = sectorKey;
+    ssHistory = [];
+
+    // Update CSS color var
+    ssChatPanel.style.setProperty('--active-sector-color', s.color);
+    if (ssSectorDot)  { ssSectorDot.style.background = s.color; ssSectorDot.style.boxShadow = `0 0 8px ${s.color}`; }
+    if (ssSectorName) ssSectorName.textContent = s.name;
+    if (ssSectorCode) ssSectorCode.textContent  = s.code;
+
+    // Status
+    if (ssStatusCenter) ssStatusCenter.textContent = `NAVIGATING TO ${s.name.toUpperCase()}`;
+
+    // Warp sequence
+    ssWarp(s.warpMsg, () => {
+      // Show chat
+      ssMain.style.display = 'none';
+      ssMessages.innerHTML = '';
+      ssChatPanel.classList.add('active');
+      if (ssStatusCenter) ssStatusCenter.textContent = s.name.toUpperCase() + ' · ARRIVED';
+
+      // Arrival message with chips
+      const chips = s.chips.map(c => `<button class="ss-chip" data-q="${c}">${c}</button>`).join('');
+      addSSMsg('ai', `${s.arrivalMsg}<div class="ss-chips-row">${chips}</div>`);
+      ssCandySpeak(s.arrivalSpeak);
+    });
+  }
+
+  /* ── WARP ANIMATION ── */
+  function ssWarp(msg, callback) {
+    if (ssWarpText) ssWarpText.textContent = msg;
+    ssWarpOverlay.classList.add('active');
+    if (window._ssSetWarp) window._ssSetWarp(true);
+
+    // Build streaking lines
+    const warpRings = document.getElementById('ssWarpRings');
+    if (warpRings) {
+      warpRings.innerHTML = '';
+      const WARP_COLORS = ['#00d4ff','#a78bfa','#fbbf24','#7dd3fc','#f43f5e'];
+      for (let i = 0; i < 24; i++) {
+        const line = document.createElement('div');
+        line.className = 'ss-warp-line';
+        const angle = Math.random() * 360;
+        const w = 80 + Math.random() * 200;
+        line.style.cssText = `
+          width:${w}px; left:${Math.random()*100}%; top:${Math.random()*100}%;
+          --wl-color:${WARP_COLORS[i % WARP_COLORS.length]};
+          --wl-angle:${angle}deg;
+          --wl-dur:${0.3 + Math.random() * 0.4}s;
+          --wl-delay:${Math.random() * 0.3}s;
+        `;
+        warpRings.appendChild(line);
+      }
+    }
+
+    setTimeout(() => {
+      ssWarpOverlay.classList.remove('active');
+      if (window._ssSetWarp) window._ssSetWarp(false);
+      if (warpRings) warpRings.innerHTML = '';
+      if (callback) callback();
+    }, 1800);
+  }
+
+  /* ── SEND MESSAGE ── */
+  ssSendBtn && ssSendBtn.addEventListener('click', ssSend);
+  ssTextarea && ssTextarea.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ssSend(); }
+  });
+  ssTextarea && ssTextarea.addEventListener('input', () => {
+    ssTextarea.style.height = 'auto';
+    ssTextarea.style.height = Math.min(ssTextarea.scrollHeight, 120) + 'px';
+  });
+
+  // Chip clicks in chat
+  ssMessages && ssMessages.addEventListener('click', e => {
+    const chip = e.target.closest('.ss-chip');
+    if (chip) { ssTextarea.value = chip.dataset.q || chip.textContent; ssSend(); }
+  });
+
+  async function ssSend() {
+    if (!activeSector) return;
+    const text = ssTextarea.value.trim();
+    if (!text) return;
+    ssTextarea.value = '';
+    ssTextarea.style.height = 'auto';
+    ssStopSpeaking();
+
+    addSSMsg('user', escHtmlSS(text));
+    ssHistory.push({ role: 'user', content: text });
+    if (ssStatusCenter) ssStatusCenter.textContent = 'CANDY PROCESSING TRANSMISSION...';
+
+    const tid = addSSTyping();
+    try {
+      const sector = SECTORS[activeSector];
+      const res = await fetch('https://pk-groq-proxy.daroorpavankalyan.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: sector.systemPrompt },
+            ...ssHistory,
+          ],
+          max_tokens: 500, temperature: 0.82, stream: false,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data  = await res.json();
+      const reply = data.choices?.[0]?.message?.content?.trim() || 'No signal received, Captain. Please try again.';
+      removeSSTyping(tid);
+      await typeSSMsg(reply);
+      ssHistory.push({ role: 'assistant', content: reply });
+      if (ssHistory.length > 30) ssHistory = ssHistory.slice(-30);
+      if (ssStatusCenter) ssStatusCenter.textContent = sector.name.toUpperCase() + ' · NAVIGATING';
+      ssCandySpeak(reply);
+    } catch (err) {
+      removeSSTyping(tid);
+      addSSMsg('ai', `Signal lost, Captain. Error: ${escHtmlSS(err.message)}`);
+    }
+  }
+
+  /* ── VOICE / SPEAK ── */
+  function ssCandySpeak(text) {
+    // Use the main speak() from candy-ai.js if available
+    if (typeof speak === 'function') {
+      speak(text);
+    } else if (window.speechSynthesis) {
+      const clean = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!clean) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(clean);
+      utter.lang  = 'en-US'; utter.rate = 1.0; utter.pitch = 1.05; utter.volume = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      const pref = voices.find(v => v.name === 'Google US English')
+        || voices.find(v => v.lang === 'en-US' && !v.localService)
+        || voices.find(v => v.lang.startsWith('en-'));
+      if (pref) utter.voice = pref;
+      setTimeout(() => window.speechSynthesis.speak(utter), 150);
+    }
+  }
+
+  function ssStopSpeaking() {
+    if (typeof stopSpeaking === 'function') stopSpeaking();
+    else if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  /* ── MIC / RECOGNITION ── */
+  (function setupSSMic() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR || !ssMicBtn) return;
+    ssRecog = new SR();
+    ssRecog.continuous = false; ssRecog.interimResults = true; ssRecog.lang = 'en-IN';
+    ssRecog.onstart  = () => { ssListening = true;  ssMicBtn.classList.add('listening'); };
+    ssRecog.onend    = () => { ssListening = false; ssMicBtn.classList.remove('listening'); };
+    ssRecog.onerror  = () => { ssListening = false; ssMicBtn.classList.remove('listening'); };
+    ssRecog.onresult = e => {
+      const t = Array.from(e.results).map(r => r[0].transcript).join('');
+      if (ssTextarea) { ssTextarea.value = t; }
+      if (e.results[e.results.length - 1].isFinal) setTimeout(ssSend, 400);
+    };
+    ssMicBtn.addEventListener('click', () => {
+      if (ssListening) { ssRecog.stop(); }
+      else {
+        ssStopSpeaking();
+        try { ssRecog.start(); } catch(e) {}
+      }
+    });
+  })();
+
+  /* ── DOM HELPERS ── */
+  function addSSMsg(role, html) {
+    const time = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
+    const row = document.createElement('div');
+    row.className = `ss-msg-row ss-msg-row--${role === 'user' ? 'user' : 'ai'}`;
+    if (role === 'user') {
+      row.innerHTML = `<div><div class="ss-bubble ss-bubble--user">${html}</div><div class="ss-msg-time ss-msg-time--user">${time}</div></div>`;
+    } else {
+      row.innerHTML = `<div class="ss-msg-avatar">C</div><div><div class="ss-bubble ss-bubble--ai">${html}</div><div class="ss-msg-time">${time}</div></div>`;
+    }
+    ssMessages.appendChild(row);
+    ssMessages.scrollTop = ssMessages.scrollHeight;
+    return row;
+  }
+
+  function addSSTyping() {
+    const id = 'sstyp-' + Date.now();
+    const row = document.createElement('div');
+    row.id = id; row.className = 'ss-msg-row';
+    row.innerHTML = `<div class="ss-msg-avatar">C</div><div class="ss-bubble ss-bubble--ai"><div class="ss-typing-dots"><span></span><span></span><span></span></div></div>`;
+    ssMessages.appendChild(row);
+    ssMessages.scrollTop = ssMessages.scrollHeight;
+    return id;
+  }
+  function removeSSTyping(id) { document.getElementById(id)?.remove(); }
+
+  async function typeSSMsg(rawText) {
+    // Format bold and links before typing
+    const html = rawText
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,'<em>$1</em>')
+      .replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
+      .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+
+    const time = new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kolkata' });
+    const row  = document.createElement('div');
+    row.className = 'ss-msg-row';
+    row.innerHTML = `<div class="ss-msg-avatar">C</div><div><div class="ss-bubble ss-bubble--ai" id="ss_tb"></div><div class="ss-msg-time">${time}</div></div>`;
+    ssMessages.appendChild(row);
+    const bbl = row.querySelector('#ss_tb'); bbl.removeAttribute('id');
+    const words = rawText.replace(/<[^>]+>/g,'').split(' ');
+    let built = '';
+    for (let i = 0; i < words.length; i++) {
+      built += (i === 0 ? '' : ' ') + words[i];
+      bbl.textContent = built;
+      ssMessages.scrollTop = ssMessages.scrollHeight;
+      await new Promise(r => setTimeout(r, 48));
+    }
+    bbl.innerHTML = html;
+    ssMessages.scrollTop = ssMessages.scrollHeight;
+  }
+
+  function escHtmlSS(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── CSS for chips inside ss chat ── */
+  const chipStyle = document.createElement('style');
+  chipStyle.textContent = `
+    .ss-chips-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .ss-chip {
+      padding:5px 12px; border-radius:100px;
+      background:rgba(0,212,255,0.05); border:1px solid rgba(0,212,255,0.18);
+      font-family:'DM Sans',sans-serif; font-size:0.68rem; font-weight:500;
+      color:#7dd3fc; cursor:pointer; transition:all 0.2s; white-space:nowrap;
+    }
+    .ss-chip:hover {
+      background:rgba(0,212,255,0.12); border-color:rgba(0,212,255,0.4);
+      transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,212,255,0.12);
+    }
+  `;
+  document.head.appendChild(chipStyle);
+
+})();
+
  
 
 /* ══════════ COSMOS SHOOTING STARS ══════════ */
