@@ -2585,7 +2585,10 @@ async function launchCinematicInChat(projectKey) {
   document.getElementById('cinFooter').style.opacity = '1';
 
   // ── 3D DRAG on card ──
-  const innerCard = cardEl.querySelector('div > div');
+  const innerCard = cardEl.querySelector('div[style*="background:linear-gradient"]');
+  if (!innerCard) return;
+  innerCard.style.transformStyle = 'preserve-3d';
+  innerCard.style.cursor = 'grab';
   let isDragging = false, startX = 0, startY = 0, rotX = 0, rotY = 0;
   innerCard.style.transition = 'box-shadow 0.3s';
   innerCard.addEventListener('mousedown', e => {
@@ -2603,11 +2606,20 @@ async function launchCinematicInChat(projectKey) {
   window.addEventListener('mouseup', () => { isDragging = false; innerCard.style.cursor = 'default'; });
 
   // 3D VIEW button — spin
+  let isSpinning = false;
   document.getElementById('cinDragBtn').addEventListener('click', () => {
+    if (isSpinning) return;
+    isSpinning = true;
     rotY += 360;
-    innerCard.style.transition = 'transform 1s cubic-bezier(.23,1,.32,1)';
-    innerCard.style.transform = `perspective(1000px) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
-    setTimeout(() => innerCard.style.transition = '', 1000);
+    innerCard.style.transition = 'transform 1.2s cubic-bezier(.23,1,.32,1)';
+    innerCard.style.transform = `perspective(1200px) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+    setTimeout(() => {
+      innerCard.style.transition = '';
+      // Normalize rotY to avoid huge numbers
+      rotY = rotY % 360;
+      innerCard.style.transform = `perspective(1200px) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+      isSpinning = false;
+    }, 1200);
   });
 
   // ── CLOSE ──
