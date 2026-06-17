@@ -518,3 +518,7 @@
   }
 
 })();
+
+// Expose functions globally so script.js can use them
+window.detectProjectFromText = detectProjectFromText;
+window.launchCinematic = launchCinematic;
