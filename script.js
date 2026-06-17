@@ -2074,8 +2074,8 @@ async function go() {
     if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e?.error?.message || `HTTP ${r.status}`); }
     const d   = await r.json();
     const rep = d.choices?.[0]?.message?.content?.trim() || 'Empty response. Please try again.';
-    const cinProject = detectProjectFromText(txt) || detectProjectFromText(rep);
-    if (cinProject) setTimeout(() => launchCinematic(cinProject), 800);
+    const cinProject = window.detectProjectFromText && (window.detectProjectFromText(txt) || window.detectProjectFromText(rep));
+    if (cinProject) setTimeout(() => window.launchCinematic(cinProject), 800);
     removeTyping(tid);
     await typeMsg(fmt(rep));
     hist.push({ role: 'assistant', content: rep });
