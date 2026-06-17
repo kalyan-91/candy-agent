@@ -2156,14 +2156,26 @@ function detectCinematicProject(text) {
   return null;
 }
 
- async function launchCinematicInChat(projectKey) {
+async function launchCinematicInChat(projectKey) {
   const p = CINEMATIC_DB[projectKey];
   if (!p) return;
 
+  // ── PHASE 1: BLACKOUT FLASH ──
+  const flash = document.createElement('div');
+  flash.style.cssText = `
+    position:fixed;inset:0;z-index:999999;
+    background:#000;opacity:0;
+    transition:opacity 0.3s ease;pointer-events:none;
+  `;
+  document.body.appendChild(flash);
+  requestAnimationFrame(() => { flash.style.opacity = '1'; });
+  await new Promise(r => setTimeout(r, 350));
+
+  // ── PHASE 2: VOICE ──
   if (voiceOn && window.speechSynthesis) {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(`Mission briefing initiated. Project: ${p.name}. All systems nominal.`);
-    u.lang = 'en-US'; u.rate = 0.92; u.pitch = 0.85;
+    const u = new SpeechSynthesisUtterance(`Mission briefing initiated. Project ${p.name}. All systems nominal. Stand by.`);
+    u.lang = 'en-US'; u.rate = 0.88; u.pitch = 0.75;
     const voices = speechSynthesis.getVoices();
     const v = voices.find(v => v.name.includes('Google US English'))
            || voices.find(v => v.lang === 'en-US' && !v.localService)
@@ -2172,269 +2184,452 @@ function detectCinematicProject(text) {
     setTimeout(() => speechSynthesis.speak(u), 200);
   }
 
-  // Boot sequence
-  const bootRow = document.createElement('div');
-  bootRow.className = 'mrow cin-boot-row';
-  bootRow.innerHTML = `
-    <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa);font-size:.7rem">🎬</div>
-    <div class="cin-boot-bubble">
-      <div class="cin-boot-label">🚨 PROJECT DETECTED — MISSION CONTROL ACTIVATED</div>
-      <div class="cin-boot-title">Initializing Cinematic Briefing...</div>
-      <div class="cin-boot-steps">
-        <div class="cin-step" id="cs0">▸ Scanning Knowledge Database...</div>
-        <div class="cin-step" id="cs1">▸ Loading Mission Intel...</div>
-        <div class="cin-step" id="cs2">▸ Rendering Holographic Interface...</div>
-        <div class="cin-step" id="cs3">▸ Decrypting Classified Records...</div>
-      </div>
-      <div class="cin-boot-bar"><div class="cin-boot-fill" id="cinFill"></div></div>
-    </div>`;
-  msgsEl.appendChild(bootRow);
-  msgsEl.scrollTop = msgsEl.scrollHeight;
-
-  for (let i = 0; i < 4; i++) {
-    await new Promise(r => setTimeout(r, 500));
-    const step = document.getElementById(`cs${i}`);
-    if (step) { step.classList.add('cin-step-done'); step.textContent = '✓ ' + step.textContent.slice(2); }
-    const fill = document.getElementById('cinFill');
-    if (fill) fill.style.width = ((i + 1) / 4 * 100) + '%';
-  }
-  await new Promise(r => setTimeout(r, 400));
-  bootRow.remove();
-
-  // ── HOLOGRAM OVERLAY ──
-  const holoOverlay = document.createElement('div');
-  holoOverlay.id = 'holoOverlay';
-  holoOverlay.style.cssText = `
-    position:fixed;inset:0;z-index:99999;
-    background:rgba(0,4,20,0.92);
-    display:flex;align-items:center;justify-content:center;
-    opacity:0;transition:opacity .5s;
-    perspective:1200px;
+  // ── PHASE 3: BUILD CINEMATIC OVERLAY ──
+  const cin = document.createElement('div');
+  cin.id = 'cinematicOverlay';
+  cin.style.cssText = `
+    position:fixed;inset:0;z-index:99998;
+    background:#000;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    overflow:hidden;
   `;
 
-  const techBadgesH = p.tech.map(t =>
-    `<span style="padding:3px 10px;border-radius:100px;border:1px solid ${p.typeColor}55;
-      color:${p.typeColor};font-size:.68rem;background:${p.typeColor}11">${t}</span>`
-  ).join('');
+  // Particle canvas
+  cin.innerHTML = `
+    <canvas id="cinParticles" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
 
-  const featuresH = p.features.map(f =>
-    `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:.75rem;color:#94a3b8">
-      <span style="color:${p.typeColor};margin-top:1px">▸</span>${f}
-    </div>`
-  ).join('');
-
-  const liveBtnH = p.live
-    ? `<a href="${p.live}" target="_blank" style="
-        display:inline-flex;align-items:center;gap:6px;
-        padding:8px 18px;border-radius:8px;font-size:.75rem;font-weight:600;
-        background:${p.typeColor};color:#000;text-decoration:none;
-        box-shadow:0 0 20px ${p.typeColor}66">🚀 Launch Live Mission</a>`
-    : '';
-
-  holoOverlay.innerHTML = `
-    <div id="holoScene" style="
-      width:min(680px,94vw);
-      transform-style:preserve-3d;
-      transform:rotateY(-30deg) rotateX(8deg) scale(0.7);
-      transition:transform 1.2s cubic-bezier(.23,1,.32,1), opacity .5s;
-      opacity:0;
+    <!-- Top bar -->
+    <div id="cinTopBar" style="
+      position:absolute;top:0;left:0;right:0;
+      padding:16px 28px;
+      display:flex;justify-content:space-between;align-items:center;
+      border-bottom:1px solid ${p.typeColor}22;
+      background:linear-gradient(180deg,rgba(0,0,0,0.8),transparent);
+      opacity:0;transition:opacity 0.6s;
     ">
-      <!-- Glow rings -->
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:8px;height:8px;border-radius:50%;
+          background:${p.typeColor};box-shadow:0 0 12px ${p.typeColor};
+          animation:cinPulse 1s ease-in-out infinite"></div>
+        <span style="color:${p.typeColor};font-size:.65rem;letter-spacing:3px">CANDY AI · MISSION CONTROL</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px">
+        <span style="color:#334155;font-size:.6rem;letter-spacing:2px" id="cinClock"></span>
+        <button id="cinSkipBtn" style="
+          padding:5px 14px;border-radius:6px;cursor:pointer;
+          background:transparent;border:1px solid #ffffff22;
+          color:#475569;font-size:.62rem;letter-spacing:1px;
+          font-family:'JetBrains Mono',monospace;
+          transition:all 0.2s;
+        "
+        onmouseover="this.style.borderColor='#ffffff44';this.style.color='#94a3b8'"
+        onmouseout="this.style.borderColor='#ffffff22';this.style.color='#475569'"
+        >✕ SKIP</button>
+      </div>
+    </div>
+
+    <!-- Boot terminal -->
+    <div id="cinBoot" style="
+      width:min(560px,90vw);
+      opacity:1;transition:opacity 0.5s;
+    ">
       <div style="
-        position:absolute;inset:-40px;border-radius:24px;
-        border:1px solid ${p.typeColor}22;
-        box-shadow:0 0 60px ${p.typeColor}22, inset 0 0 60px ${p.typeColor}11;
-        pointer-events:none;transform:translateZ(-20px);
-      "></div>
+        border:1px solid ${p.typeColor}33;border-radius:12px;
+        background:rgba(0,0,0,0.8);overflow:hidden;
+      ">
+        <div style="
+          padding:10px 16px;
+          background:${p.typeColor}11;
+          border-bottom:1px solid ${p.typeColor}22;
+          display:flex;align-items:center;gap:8px;
+        ">
+          <div style="width:10px;height:10px;border-radius:50%;background:#ef4444"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:#fbbf24"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:#22c55e"></div>
+          <span style="color:${p.typeColor};font-size:.62rem;letter-spacing:2px;margin-left:8px">CANDY_OS · MISSION_BOOT</span>
+        </div>
+        <div style="padding:20px;min-height:140px" id="cinBootLines"></div>
+        <div style="padding:0 20px 16px">
+          <div style="height:3px;border-radius:2px;background:rgba(255,255,255,0.06);overflow:hidden">
+            <div id="cinBootBar" style="height:100%;width:0%;background:${p.typeColor};transition:width 0.4s ease;border-radius:2px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main card (hidden initially) -->
+    <div id="cinCard" style="
+      width:min(700px,94vw);max-height:90vh;overflow-y:auto;
+      opacity:0;transform:translateY(40px) scale(0.96);
+      transition:opacity 0.7s ease, transform 0.7s cubic-bezier(.23,1,.32,1);
+      display:none;position:relative;
+    ">
+      <!-- Glow behind card -->
       <div style="
-        position:absolute;inset:-80px;border-radius:32px;
-        border:1px solid ${p.typeColor}11;
-        pointer-events:none;transform:translateZ(-40px);
+        position:absolute;inset:-60px;border-radius:40px;
+        background:radial-gradient(ellipse,${p.typeColor}18 0%,transparent 70%);
+        pointer-events:none;filter:blur(20px);
       "></div>
 
-      <!-- Main card -->
-      <div id="holoCard" style="
-        background:linear-gradient(135deg,rgba(8,4,40,0.97),rgba(2,10,40,0.97));
-        border:1px solid ${p.typeColor}44;
-        border-radius:20px;padding:28px;
-        box-shadow:0 0 80px ${p.typeColor}33, 0 0 160px ${p.typeColor}11;
-        position:relative;overflow:hidden;cursor:grab;
-        transform-style:preserve-3d;
+      <div style="
+        position:relative;
+        background:linear-gradient(135deg,rgba(4,2,20,0.98),rgba(2,6,28,0.98));
+        border:1px solid ${p.typeColor}55;border-radius:20px;padding:32px;
+        box-shadow:0 0 100px ${p.typeColor}22, 0 0 40px ${p.typeColor}11;
+        overflow:hidden;
       ">
-        <!-- Scan line animation -->
-        <div id="holoScan" style="
-          position:absolute;left:0;right:0;height:2px;top:0;
-          background:linear-gradient(90deg,transparent,${p.typeColor}88,transparent);
-          animation:holoScanAnim 3s linear infinite;pointer-events:none;
+        <!-- Animated scan line -->
+        <div style="
+          position:absolute;left:0;right:0;height:1px;
+          background:linear-gradient(90deg,transparent,${p.typeColor},transparent);
+          animation:cinScan 4s linear infinite;pointer-events:none;top:0;
         "></div>
 
         <!-- Corner brackets -->
-        <div style="position:absolute;top:12px;left:12px;width:20px;height:20px;
-          border-top:2px solid ${p.typeColor};border-left:2px solid ${p.typeColor};border-radius:4px 0 0 0;pointer-events:none"></div>
-        <div style="position:absolute;top:12px;right:12px;width:20px;height:20px;
-          border-top:2px solid ${p.typeColor};border-right:2px solid ${p.typeColor};border-radius:0 4px 0 0;pointer-events:none"></div>
-        <div style="position:absolute;bottom:12px;left:12px;width:20px;height:20px;
-          border-bottom:2px solid ${p.typeColor};border-left:2px solid ${p.typeColor};border-radius:0 0 0 4px;pointer-events:none"></div>
-        <div style="position:absolute;bottom:12px;right:12px;width:20px;height:20px;
-          border-bottom:2px solid ${p.typeColor};border-right:2px solid ${p.typeColor};border-radius:0 0 4px 0;pointer-events:none"></div>
+        <div style="position:absolute;top:14px;left:14px;width:22px;height:22px;border-top:2px solid ${p.typeColor};border-left:2px solid ${p.typeColor};border-radius:4px 0 0 0"></div>
+        <div style="position:absolute;top:14px;right:14px;width:22px;height:22px;border-top:2px solid ${p.typeColor};border-right:2px solid ${p.typeColor};border-radius:0 4px 0 0"></div>
+        <div style="position:absolute;bottom:14px;left:14px;width:22px;height:22px;border-bottom:2px solid ${p.typeColor};border-left:2px solid ${p.typeColor};border-radius:0 0 0 4px"></div>
+        <div style="position:absolute;bottom:14px;right:14px;width:22px;height:22px;border-bottom:2px solid ${p.typeColor};border-right:2px solid ${p.typeColor};border-radius:0 0 4px 0"></div>
 
         <!-- Header -->
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
-          <div>
-            <div style="display:inline-flex;align-items:center;gap:6px;
-              padding:3px 10px;border-radius:100px;margin-bottom:8px;
-              border:1px solid ${p.typeColor}44;background:${p.typeColor}11">
-              <span style="width:6px;height:6px;border-radius:50%;
-                background:${p.typeColor};box-shadow:0 0 8px ${p.typeColor};
-                animation:holoPulse 1.5s ease-in-out infinite"></span>
-              <span style="color:${p.typeColor};font-size:.65rem;letter-spacing:2px;font-family:monospace">${p.type}</span>
+        <div id="cinHeader" style="opacity:0;transition:opacity 0.5s;margin-bottom:24px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="
+                display:inline-flex;align-items:center;gap:6px;
+                padding:3px 12px;border-radius:100px;margin-bottom:10px;
+                border:1px solid ${p.typeColor}44;background:${p.typeColor}11;
+              ">
+                <span style="width:6px;height:6px;border-radius:50%;
+                  background:${p.typeColor};box-shadow:0 0 8px ${p.typeColor};
+                  animation:cinPulse 1.5s ease-in-out infinite"></span>
+                <span style="color:${p.typeColor};font-size:.62rem;letter-spacing:3px">${p.type}</span>
+              </div>
+              <div style="font-size:2rem;font-weight:800;color:#f0e6ff;letter-spacing:1px;line-height:1">${p.name}</div>
+              <div style="color:#475569;font-size:.65rem;letter-spacing:2px;margin-top:6px">${p.id} · MISSION BRIEFING</div>
             </div>
-            <div style="font-size:1.5rem;font-weight:700;color:#f0e6ff;letter-spacing:.5px">${p.name}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="display:inline-flex;align-items:center;gap:5px;
-              padding:3px 10px;border-radius:100px;margin-bottom:6px;
-              border:1px solid ${p.statusColor}44;background:${p.statusColor}11">
-              <span style="width:6px;height:6px;border-radius:50%;
-                background:${p.statusColor};box-shadow:0 0 8px ${p.statusColor};
-                animation:holoPulse 1s ease-in-out infinite"></span>
-              <span style="color:${p.statusColor};font-size:.65rem;letter-spacing:1px;font-family:monospace">${p.status}</span>
+            <div style="text-align:right">
+              <div style="
+                display:inline-flex;align-items:center;gap:6px;
+                padding:4px 12px;border-radius:100px;
+                border:1px solid ${p.statusColor}44;background:${p.statusColor}11;
+              ">
+                <span style="width:6px;height:6px;border-radius:50%;
+                  background:${p.statusColor};box-shadow:0 0 10px ${p.statusColor};
+                  animation:cinPulse 1s ease-in-out infinite"></span>
+                <span style="color:${p.statusColor};font-size:.62rem;letter-spacing:2px">${p.status}</span>
+              </div>
             </div>
-            <div style="color:#475569;font-size:.65rem;font-family:monospace">${p.id}</div>
+          </div>
+          <div style="height:1px;background:linear-gradient(90deg,transparent,${p.typeColor}44,transparent);margin-top:20px"></div>
+        </div>
+
+        <!-- Sections revealed one by one -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+          <div id="cinS1" style="opacity:0;transform:translateY(12px);transition:all 0.5s">
+            <div style="color:#334155;font-size:.58rem;letter-spacing:3px;margin-bottom:10px">TECH STACK</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${p.tech.map(t => `<span style="
+                padding:4px 10px;border-radius:100px;
+                border:1px solid ${p.typeColor}44;background:${p.typeColor}0d;
+                color:${p.typeColor};font-size:.68rem;
+              ">${t}</span>`).join('')}
+            </div>
+          </div>
+          <div id="cinS2" style="opacity:0;transform:translateY(12px);transition:all 0.5s">
+            <div style="color:#334155;font-size:.58rem;letter-spacing:3px;margin-bottom:10px">KEY SYSTEMS</div>
+            ${p.features.map(f => `
+              <div style="display:flex;gap:8px;margin-bottom:6px;font-size:.72rem;color:#64748b">
+                <span style="color:${p.typeColor}">▸</span>${f}
+              </div>`).join('')}
           </div>
         </div>
 
-        <!-- Divider -->
-        <div style="height:1px;background:linear-gradient(90deg,transparent,${p.typeColor}44,transparent);margin-bottom:20px"></div>
-
-        <!-- Grid -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-          <div>
-            <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:8px">TECH STACK</div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px">${techBadgesH}</div>
-          </div>
-          <div>
-            <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:8px">KEY FEATURES</div>
-            ${featuresH}
-          </div>
+        <div id="cinS3" style="opacity:0;transform:translateY(12px);transition:all 0.5s;margin-bottom:16px">
+          <div style="color:#334155;font-size:.58rem;letter-spacing:3px;margin-bottom:8px">MISSION OBJECTIVE</div>
+          <div style="
+            background:${p.typeColor}08;border:1px solid ${p.typeColor}22;
+            border-radius:10px;padding:14px;
+            color:#94a3b8;font-size:.78rem;line-height:1.7;
+          " id="cinObjText"></div>
         </div>
 
-        <!-- Objective -->
-        <div style="background:${p.typeColor}0a;border:1px solid ${p.typeColor}22;border-radius:10px;padding:12px;margin-bottom:16px">
-          <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:6px">MISSION OBJECTIVE</div>
-          <div style="color:#cbd5e1;font-size:.78rem;line-height:1.6">${p.objective}</div>
-        </div>
-
-        <!-- Result -->
-        <div style="background:rgba(0,255,150,0.04);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:12px;margin-bottom:20px">
-          <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:6px">MISSION RESULT</div>
-          <div style="color:#34d399;font-size:.78rem;line-height:1.6">${p.result}</div>
+        <div id="cinS4" style="opacity:0;transform:translateY(12px);transition:all 0.5s;margin-bottom:24px">
+          <div style="color:#334155;font-size:.58rem;letter-spacing:3px;margin-bottom:8px">MISSION RESULT</div>
+          <div style="
+            background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.2);
+            border-radius:10px;padding:14px;
+            color:#34d399;font-size:.78rem;line-height:1.7;
+          " id="cinResText"></div>
         </div>
 
         <!-- Footer -->
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          ${liveBtnH}
+        <div id="cinFooter" style="
+          opacity:0;transition:opacity 0.5s;
+          display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+          padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);
+        ">
+          ${p.live ? `<a href="${p.live}" target="_blank" style="
+            display:inline-flex;align-items:center;gap:8px;
+            padding:10px 20px;border-radius:10px;font-size:.75rem;font-weight:700;
+            background:${p.typeColor};color:#000;text-decoration:none;
+            box-shadow:0 0 24px ${p.typeColor}55;
+            transition:all 0.3s;letter-spacing:.5px;
+          "
+          onmouseover="this.style.boxShadow='0 0 40px ${p.typeColor}88';this.style.transform='translateY(-2px)'"
+          onmouseout="this.style.boxShadow='0 0 24px ${p.typeColor}55';this.style.transform='translateY(0)'"
+          >🚀 Launch Live Mission</a>` : ''}
           <div style="display:flex;gap:10px;margin-left:auto">
-            <button id="holoFlipBtn" style="
-              padding:7px 16px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;
-              background:${p.typeColor}18;border:1px solid ${p.typeColor}44;color:${p.typeColor};
-              font-family:monospace;letter-spacing:1px">⟳ FLIP</button>
-            <button id="holoCloseBtn" style="
-              padding:7px 16px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;
-              background:rgba(255,255,255,0.05);border:1px solid #ffffff22;color:#64748b;
-              font-family:monospace;letter-spacing:1px">✕ CLOSE</button>
+            <button id="cinDragBtn" style="
+              padding:8px 18px;border-radius:8px;cursor:pointer;font-size:.7rem;
+              background:${p.typeColor}15;border:1px solid ${p.typeColor}44;color:${p.typeColor};
+              font-family:'JetBrains Mono',monospace;letter-spacing:1px;transition:all 0.2s;
+            "
+            onmouseover="this.style.background='${p.typeColor}28'"
+            onmouseout="this.style.background='${p.typeColor}15'"
+            >⟳ 3D VIEW</button>
+            <button id="cinCloseBtn" style="
+              padding:8px 18px;border-radius:8px;cursor:pointer;font-size:.7rem;
+              background:rgba(255,255,255,0.04);border:1px solid #ffffff18;color:#475569;
+              font-family:'JetBrains Mono',monospace;letter-spacing:1px;transition:all 0.2s;
+            "
+            onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.color='#94a3b8'"
+            onmouseout="this.style.background='rgba(255,255,255,0.04)';this.style.color='#475569'"
+            >✕ CLOSE</button>
           </div>
         </div>
       </div>
 
-      <!-- Drag hint -->
-      <div style="text-align:center;margin-top:12px;color:#334155;font-size:.65rem;font-family:monospace;letter-spacing:1px">
-        DRAG TO ROTATE · SCROLL TO ZOOM
+      <!-- 3D drag hint -->
+      <div style="text-align:center;margin-top:10px;color:#1e293b;font-size:.6rem;letter-spacing:2px">
+        DRAG CARD TO ROTATE IN 3D
       </div>
     </div>
 
     <style>
-      @keyframes holoScanAnim { from{top:0} to{top:100%} }
-      @keyframes holoPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+      @keyframes cinScan { from{top:0%} to{top:100%} }
+      @keyframes cinPulse { 0%,100%{opacity:1;} 50%{opacity:.25;} }
+      @keyframes cinFloat {
+        0%,100%{transform:translateY(0px);}
+        50%{transform:translateY(-8px);}
+      }
+      #cinCard::-webkit-scrollbar{width:4px;}
+      #cinCard::-webkit-scrollbar-track{background:transparent;}
+      #cinCard::-webkit-scrollbar-thumb{background:${p.typeColor}44;border-radius:2px;}
     </style>
   `;
 
-  document.body.appendChild(holoOverlay);
+  document.body.appendChild(cin);
+
+  // Fade out black flash, reveal overlay
+  await new Promise(r => setTimeout(r, 100));
+  flash.style.opacity = '0';
+  setTimeout(() => flash.remove(), 400);
+
+  // Show top bar
+  setTimeout(() => {
+    document.getElementById('cinTopBar').style.opacity = '1';
+  }, 200);
+
+  // Live clock
+  const clockEl = document.getElementById('cinClock');
+  const clockInterval = setInterval(() => {
+    const now = new Date();
+    const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const h = String(ist.getHours()).padStart(2,'0');
+    const m = String(ist.getMinutes()).padStart(2,'0');
+    const s = String(ist.getSeconds()).padStart(2,'0');
+    if (clockEl) clockEl.textContent = `IST ${h}:${m}:${s}`;
+  }, 1000);
+
+  // ── PARTICLE CANVAS ──
+  const canvas = document.getElementById('cinParticles');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const particles = [];
+  for (let i = 0; i < 180; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.2,
+      a: Math.random() * 0.6 + 0.1,
+      da: (Math.random() - 0.5) * 0.01,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+    });
+  }
+  // Burst particles from center
+  const bursts = [];
+  for (let i = 0; i < 60; i++) {
+    const angle = (i / 60) * Math.PI * 2;
+    const speed = 2 + Math.random() * 6;
+    bursts.push({
+      x: canvas.width / 2, y: canvas.height / 2,
+      vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+      r: Math.random() * 3 + 1, a: 1, life: 1,
+    });
+  }
+  let animRunning = true;
+  function drawParticles() {
+    if (!animRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Background stars
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      p.a += p.da;
+      if (p.a > 0.7 || p.a < 0.05) p.da *= -1;
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${p.a})`; ctx.fill();
+    });
+    // Burst particles
+    bursts.forEach(b => {
+      b.x += b.vx; b.y += b.vy;
+      b.vx *= 0.96; b.vy *= 0.96;
+      b.life -= 0.018; b.a = b.life;
+      if (b.life > 0) {
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r * b.life, 0, Math.PI * 2);
+        ctx.fillStyle = `${p.typeColor}${Math.floor(b.a * 255).toString(16).padStart(2,'0')}`;
+        ctx.fill();
+      }
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // ── BOOT SEQUENCE ──
+  const bootLines = [
+    `> CANDY_OS v2.0 — MISSION CONTROL ACTIVATED`,
+    `> Authenticating operator credentials... OK`,
+    `> Loading mission file: ${p.id} — ${p.name.toUpperCase()}`,
+    `> Decrypting classified intel... DONE`,
+    `> Rendering holographic interface...`,
+    `> ALL SYSTEMS GO — LAUNCHING BRIEFING`,
+  ];
+  const bootEl = document.getElementById('cinBootLines');
+  const bootBar = document.getElementById('cinBootBar');
+
+  for (let i = 0; i < bootLines.length; i++) {
+    await new Promise(r => setTimeout(r, 380));
+    const line = document.createElement('div');
+    line.style.cssText = `
+      font-size:.72rem;margin-bottom:6px;
+      color:${i === bootLines.length - 1 ? p.typeColor : '#475569'};
+      opacity:0;transition:opacity 0.3s;
+    `;
+    line.textContent = bootLines[i];
+    bootEl.appendChild(line);
+    requestAnimationFrame(() => { line.style.opacity = '1'; });
+    bootBar.style.width = ((i + 1) / bootLines.length * 100) + '%';
+  }
+
+  await new Promise(r => setTimeout(r, 500));
+
+  // ── TRANSITION: hide boot, show card ──
+  const bootDiv = document.getElementById('cinBoot');
+  bootDiv.style.opacity = '0';
+  await new Promise(r => setTimeout(r, 500));
+  bootDiv.style.display = 'none';
+
+  const cardEl = document.getElementById('cinCard');
+  cardEl.style.display = 'block';
   requestAnimationFrame(() => {
-    holoOverlay.style.opacity = '1';
-    const scene = document.getElementById('holoScene');
-    setTimeout(() => {
-      scene.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
-      scene.style.opacity = '1';
-    }, 80);
+    cardEl.style.opacity = '1';
+    cardEl.style.transform = 'translateY(0) scale(1)';
   });
 
-  // ── 3D Mouse drag rotation ──
-  const card = document.getElementById('holoCard');
-  let isDragging = false, startX = 0, startY = 0, rotX = 0, rotY = 0;
-  let flipped = false;
+  // Reveal header
+  await new Promise(r => setTimeout(r, 300));
+  document.getElementById('cinHeader').style.opacity = '1';
 
-  card.addEventListener('mousedown', e => {
+  // Typewriter for objective
+  await new Promise(r => setTimeout(r, 400));
+  document.getElementById('cinS1').style.opacity = '1';
+  document.getElementById('cinS1').style.transform = 'translateY(0)';
+
+  await new Promise(r => setTimeout(r, 200));
+  document.getElementById('cinS2').style.opacity = '1';
+  document.getElementById('cinS2').style.transform = 'translateY(0)';
+
+  await new Promise(r => setTimeout(r, 200));
+  document.getElementById('cinS3').style.opacity = '1';
+  document.getElementById('cinS3').style.transform = 'translateY(0)';
+
+  // Typewriter objective
+  const objEl = document.getElementById('cinObjText');
+  const objWords = p.objective.split(' ');
+  for (let i = 0; i < objWords.length; i++) {
+    objEl.textContent += (i ? ' ' : '') + objWords[i];
+    await new Promise(r => setTimeout(r, 28));
+  }
+
+  await new Promise(r => setTimeout(r, 200));
+  document.getElementById('cinS4').style.opacity = '1';
+  document.getElementById('cinS4').style.transform = 'translateY(0)';
+
+  // Typewriter result
+  const resEl = document.getElementById('cinResText');
+  const resWords = p.result.split(' ');
+  for (let i = 0; i < resWords.length; i++) {
+    resEl.textContent += (i ? ' ' : '') + resWords[i];
+    await new Promise(r => setTimeout(r, 28));
+  }
+
+  await new Promise(r => setTimeout(r, 300));
+  document.getElementById('cinFooter').style.opacity = '1';
+
+  // ── 3D DRAG on card ──
+  const innerCard = cardEl.querySelector('div > div');
+  let isDragging = false, startX = 0, startY = 0, rotX = 0, rotY = 0;
+  innerCard.style.transition = 'box-shadow 0.3s';
+  innerCard.addEventListener('mousedown', e => {
     isDragging = true; startX = e.clientX; startY = e.clientY;
-    card.style.cursor = 'grabbing'; e.preventDefault();
+    innerCard.style.cursor = 'grabbing'; e.preventDefault();
   });
   window.addEventListener('mousemove', e => {
     if (!isDragging) return;
-    const dx = e.clientX - startX, dy = e.clientY - startY;
-    rotY += dx * 0.4; rotX -= dy * 0.4;
-    rotX = Math.max(-35, Math.min(35, rotX));
-    card.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+    rotY += (e.clientX - startX) * 0.35;
+    rotX -= (e.clientY - startY) * 0.35;
+    rotX = Math.max(-30, Math.min(30, rotX));
+    innerCard.style.transform = `perspective(1000px) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
     startX = e.clientX; startY = e.clientY;
   });
-  window.addEventListener('mouseup', () => { isDragging = false; card.style.cursor = 'grab'; });
+  window.addEventListener('mouseup', () => { isDragging = false; innerCard.style.cursor = 'default'; });
 
-  // Touch support
-  card.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-  }, { passive: true });
-  card.addEventListener('touchmove', e => {
-    const dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
-    rotY += dx * 0.4; rotX -= dy * 0.4;
-    rotX = Math.max(-35, Math.min(35, rotX));
-    card.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
-    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-  }, { passive: true });
-
-  // Scroll to zoom
-  holoOverlay.addEventListener('wheel', e => {
-    const scene = document.getElementById('holoScene');
-    const cur = parseFloat(scene.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1);
-    const next = Math.max(0.5, Math.min(1.4, cur - e.deltaY * 0.001));
-    scene.style.transform = `rotateY(0deg) rotateX(0deg) scale(${next})`;
-    e.preventDefault();
-  }, { passive: false });
-
-  // Flip button — auto-spin 360°
-  document.getElementById('holoFlipBtn').addEventListener('click', () => {
-    flipped = !flipped;
+  // 3D VIEW button — spin
+  document.getElementById('cinDragBtn').addEventListener('click', () => {
     rotY += 360;
-    card.style.transition = 'transform 0.9s cubic-bezier(.23,1,.32,1)';
-    card.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
-    setTimeout(() => card.style.transition = '', 900);
+    innerCard.style.transition = 'transform 1s cubic-bezier(.23,1,.32,1)';
+    innerCard.style.transform = `perspective(1000px) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+    setTimeout(() => innerCard.style.transition = '', 1000);
   });
 
-  // Close
-  function closeHolo() {
-    holoOverlay.style.opacity = '0';
-    setTimeout(() => holoOverlay.remove(), 500);
+  // ── CLOSE ──
+  function closeCin() {
+    animRunning = false;
+    clearInterval(clockInterval);
+    cin.style.opacity = '0';
+    cin.style.transition = 'opacity 0.5s';
+    setTimeout(() => cin.remove(), 500);
   }
-  document.getElementById('holoCloseBtn').addEventListener('click', closeHolo);
-  holoOverlay.addEventListener('click', e => { if (e.target === holoOverlay) closeHolo(); });
-  document.addEventListener('keydown', function escHolo(e) {
-    if (e.key === 'Escape') { closeHolo(); document.removeEventListener('keydown', escHolo); }
+  document.getElementById('cinCloseBtn').addEventListener('click', closeCin);
+  document.getElementById('cinSkipBtn').addEventListener('click', closeCin);
+  cin.addEventListener('click', e => { if (e.target === cin) closeCin(); });
+  document.addEventListener('keydown', function escCin(e) {
+    if (e.key === 'Escape') { closeCin(); document.removeEventListener('keydown', escCin); }
   });
 
-  // Also add mission card in chat as before
+  // Also drop mission card in chat
   const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const techBadges = p.tech.map(t => `<span class="cin-tech">${t}</span>`).join('');
   const features = p.features.map(f => `<div class="cin-feat"><span class="cin-feat-dot"></span>${f}</div>`).join('');
   const liveBtn = p.live ? `<a href="${p.live}" target="_blank" class="cin-live-btn">🚀 Launch Live Mission</a>` : '';
-
   const chatCard = document.createElement('div');
   chatCard.className = 'mrow cin-card-row';
   chatCard.innerHTML = `
@@ -2459,31 +2654,13 @@ function detectCinematicProject(text) {
           </div>
         </div>
         <div class="cin-grid">
-          <div class="cin-section cin-revealed">
-            <div class="cin-section-label">TECH STACK</div>
-            <div class="cin-tech-row">${techBadges}</div>
-          </div>
-          <div class="cin-section cin-revealed">
-            <div class="cin-section-label">MISSION OBJECTIVE</div>
-            <div class="cin-section-value">${p.objective}</div>
-          </div>
-          <div class="cin-section cin-revealed">
-            <div class="cin-section-label">KEY FEATURES</div>
-            <div class="cin-features">${features}</div>
-          </div>
-          <div class="cin-section cin-revealed">
-            <div class="cin-section-label">MISSION RESULT</div>
-            <div class="cin-callout">${p.result}</div>
-          </div>
-          <div class="cin-section cin-revealed">
-            <div class="cin-section-label">CURRENT STATUS</div>
-            <div class="cin-section-value">${p.status_note}</div>
-          </div>
+          <div class="cin-section cin-revealed"><div class="cin-section-label">TECH STACK</div><div class="cin-tech-row">${techBadges}</div></div>
+          <div class="cin-section cin-revealed"><div class="cin-section-label">MISSION OBJECTIVE</div><div class="cin-section-value">${p.objective}</div></div>
+          <div class="cin-section cin-revealed"><div class="cin-section-label">KEY FEATURES</div><div class="cin-features">${features}</div></div>
+          <div class="cin-section cin-revealed"><div class="cin-section-label">MISSION RESULT</div><div class="cin-callout">${p.result}</div></div>
+          <div class="cin-section cin-revealed"><div class="cin-section-label">CURRENT STATUS</div><div class="cin-section-value">${p.status_note}</div></div>
         </div>
-        <div class="cin-card-footer">
-          ${liveBtn}
-          <div class="cin-footer-meta">CANDY AI · MISSION CONTROL · ${new Date().toLocaleDateString('en-IN')}</div>
-        </div>
+        <div class="cin-card-footer">${liveBtn}<div class="cin-footer-meta">CANDY AI · MISSION CONTROL · ${new Date().toLocaleDateString('en-IN')}</div></div>
       </div>
       <div class="cin-mt">${t}</div>
     </div>`;
