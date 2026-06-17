@@ -517,7 +517,7 @@ function setMood(text) {
     'Open to internships and entry-level Data Analyst roles',
     'Pursuing MCA at JNTUA Anantapur — focused on Data Analytics',
     'Latest project: Candy AI — a full featured portfolio agent',
-    'Skills spotlight: SQL 90% · Python 85% · Power BI 85%',
+    'Skills spotlight: SQL · Excel · Python · Power BI · Java · HTML · CSS · JavaScript',
     'Portfolio live at kalyanfinity-portfolio.netlify.app',
     'Pavan believes: Learn by building — not just by watching',
     '6 projects built · 1 internship completed · always growing',
@@ -936,7 +936,7 @@ runLaunch();
       warpMsg: 'WARPING TO SKILLS SECTOR...',
       arrivalMsg: 'Captain, the <strong>Skills Sector</strong> is online. All weapon systems and capabilities are ready for inspection. What shall we review?',
       arrivalSpeak: "Captain, the Skills Sector is online. All weapon systems and capabilities are ready for inspection. What shall we review?",
-      systemPrompt: `You are Candy, the AI of a spaceship. The captain has navigated to the SKILLS SECTOR. Speak like a ship AI — call skills "weapon systems", "capabilities", "modules". Use space/ship metaphors naturally. Never use emojis. Keep under 5 sentences unless detail wanted. Pavan's skills: SQL 90%, Excel 88%, Python 85%, Power BI 85%, Pandas 85%, NumPy 80%, Matplotlib 80%, Seaborn 80%, Plotly 75%, Scikit-learn 75%, TensorFlow 70%, Java 70%, HTML 85%, CSS 80%, JavaScript 70%. Tools: Streamlit, OpenCV, JDBC, Maven, GitHub.`,
+      systemPrompt: `You are Candy, the AI of a spaceship. The captain has navigated to the SKILLS SECTOR. Speak like a ship AI — call skills "weapon systems", "capabilities", "modules". Use space/ship metaphors naturally. Never use emojis. Keep under 5 sentences unless detail wanted. Pavan's skills: SQL, Excel, Python, Power BI, Pandas, NumPy, Matplotlib, Seaborn, Plotly, Scikit-learn, TensorFlow, Java, HTML, CSS, JavaScript.`,
       chips: ['Primary weapon systems', 'Data analytics modules', 'ML capabilities', 'Frontend systems'],
     },
     ai: {
@@ -2053,8 +2053,8 @@ window.addEventListener('beforeunload', () => {
 
 /* ══════════ AI CINEMATIC MODE ══════════ */
 const CINEMATIC_DB = {
-  sparms: {
-    name: 'SPARMS',
+  studentmanagement: {
+    name: 'Student Management System',
     id: 'MSN-001',
     type: 'DATABASE SYSTEM',
     typeColor: '#fb7185',
@@ -2062,11 +2062,17 @@ const CINEMATIC_DB = {
     statusColor: '#34d399',
     tech: ['Java Swing', 'MySQL', 'JDBC', 'Maven', 'iText PDF', 'ZXing'],
     objective: 'Build a full-featured academic result management system with role-based access, OMR scanning, and automated PDF reporting.',
-    features: ['Role-based dashboards for Admin, Faculty & Students', 'OMR sheet scanning via OpenCV', 'Automated grade computation', 'PDF marksheet export', 'MySQL backend with JDBC'],
+    features: [
+        'Role-based dashboards for Admin, Faculty & Students',
+        'OMR sheet scanning via OpenCV',
+        'Automated grade computation',
+        'PDF marksheet export',
+        'MySQL backend with JDBC'
+    ],
     result: 'Fully functional standalone desktop system managing entire academic cycles from exam scanning to result publication.',
     status_note: 'Completed & available on GitHub.',
     live: null,
-  },
+},
   inventoryiq: {
     name: 'InventoryIQ',
     id: 'MSN-002',
@@ -2104,7 +2110,7 @@ const CINEMATIC_DB = {
     statusColor: '#34d399',
     tech: ['Power BI', 'DAX', 'Power Query', 'Excel', 'Data Modeling'],
     objective: 'Transform 5000+ Netflix titles into a fully interactive BI dashboard revealing content strategy, genre distribution, and release trends.',
-    features: ['Interactive slicers for genre, year, country', 'Top director and cast frequency analysis', 'Movies vs TV Shows ratio over time', 'Geographic production heatmap', 'DAX measures for ratings analytics'],
+    features: ['Interactive slicers for genre, year, country', 'Movies vs TV Shows ratio over time', 'Geographic production heatmap', 'DAX measures for ratings analytics'],
     result: 'Polished executive-level BI report turning a flat CSV into a navigable content intelligence tool.',
     status_note: 'Completed. Part of Pavan\'s data analytics portfolio.',
     live: null,
@@ -2123,20 +2129,26 @@ const CINEMATIC_DB = {
     status_note: 'Completed. Showcased as a data science portfolio project.',
     live: null,
   },
-  zomato: {
-    name: 'Zomato Analysis',
-    id: 'MSN-006',
-    type: 'DATA ANALYSIS',
-    typeColor: '#fbbf24',
-    status: 'COMPLETED',
-    statusColor: '#34d399',
-    tech: ['Python', 'Pandas', 'Seaborn', 'Matplotlib', 'Scikit-learn', 'NumPy'],
-    objective: 'Analyse Zomato restaurant data to uncover rating patterns, cuisine popularity, and build a predictive model for restaurant success.',
-    features: ['City-level restaurant density analysis', 'Price vs rating correlation study', 'Online delivery vs dine-in comparison', 'Cuisine popularity index', 'Rating prediction regression model'],
-    result: 'Mid-priced restaurants with online delivery consistently outperform premium dine-in in aggregate rating — key insight delivered.',
-    status_note: 'Completed. Part of Pavan\'s analytics portfolio.',
-    live: null,
-  },
+ candy: {
+  name: 'Candy AI',
+  id: 'MSN-006',
+  type: 'AI PORTFOLIO ASSISTANT',
+  typeColor: '#8b5cf6',
+  status: 'LIVE ONLINE',
+  statusColor: '#22d3ee',
+  tech: ['HTML', 'CSS', 'JavaScript', 'AI APIs', 'Netlify'],
+  objective: 'Build a space-themed AI assistant that acts as Pavan’s digital representative, answering questions about his projects, skills, achievements, journey, and portfolio.',
+  features: [
+    'Interactive AI conversations',
+    'Space-themed user interface',
+    'Portfolio navigation assistant',
+    'Project explanations and guidance',
+    'Real-time AI responses'
+  ],
+  result: 'Successfully deployed as an intelligent AI portfolio companion, helping visitors explore Pavan’s universe through natural conversations.',
+  status_note: 'Live and actively assisting visitors.',
+  live: 'https://candy-agent.netlify.app',
+ },
 };
 
 const CIN_KEYWORDS = [
@@ -2145,7 +2157,7 @@ const CIN_KEYWORDS = [
   { key: 'digit',      words: ['digit', 'recognizer', 'handwritten', 'cnn', 'mnist'] },
   { key: 'netflix',    words: ['netflix', 'netflix dashboard'] },
   { key: 'attrition',  words: ['attrition', 'employee attrition', 'hr analytics'] },
-  { key: 'zomato',     words: ['zomato', 'restaurant analysis'] },
+  { key: 'candy', words: ['candy', 'candy ai', 'portfolio assistant', 'candy universe', 'personal ai'] },
 ];
 
 function detectCinematicProject(text) {
