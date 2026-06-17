@@ -1,3 +1,604 @@
+ /* ═══════════════════════════════════════════════════
+   AI CINEMATIC MODE — cinematic.js
+   Add <script src="cinematic.js"></script>
+   just before </body>, after script.js
+═══════════════════════════════════════════════════ */
+
+(function () {
+  'use strict';
+
+  /* ══════════════════════════════════════
+     PROJECT DATABASE
+  ══════════════════════════════════════ */
+  const PROJECTS = {
+    sparms: {
+      name: 'Student Performance Analysis & Result Management',
+      type: 'DATABASE SYSTEM',
+      typeTag: '🗄 DATABASE SYSTEM DETECTED',
+      badge: 'DATABASE SYSTEM',
+      missionId: 'MISSION-001',
+      status: 'DEPLOYED',
+      statusColor: 'green',
+      objective: 'A role-based Java Swing desktop application engineered for academic result management at scale. Designed to eliminate manual data handling and automate grade computation across institutional workflows.',
+      tech: ['Java Swing', 'MySQL', 'JDBC', 'Maven', 'iText PDF', 'ZXing', 'Graphics2D'],
+      features: [
+        'Role-based dashboards for Admin, Faculty, and Students',
+        'Automated grade computation and result generation',
+        'OMR scanning integration for objective assessment',
+        'PDF report export with QR code verification',
+        'Ocean-blue custom Graphics2D UI theme',
+        'Secure login with session management',
+      ],
+      results: [
+        { icon: '✅', text: 'Zero manual calculation errors' },
+        { icon: '⚡', text: '70% faster result processing' },
+        { icon: '📄', text: 'Auto-generated verified PDF reports' },
+        { icon: '🔒', text: 'Role-based secure access control' },
+      ],
+      statusRows: [
+        { key: 'STATUS',    val: 'ACTIVE',     cls: 'green'  },
+        { key: 'PLATFORM',  val: 'DESKTOP',    cls: 'cyan'   },
+        { key: 'DATABASE',  val: 'MYSQL',      cls: 'purple' },
+        { key: 'LANGUAGE',  val: 'JAVA',       cls: 'amber'  },
+      ],
+      links: [
+        { label: 'View Demo', icon: 'play', url: 'https://github.com/kalyan-91/portfolio-website/blob/main/Demo/project-demo_T1Hirmbw.mp4', cls: 'primary' },
+        { label: 'GitHub',    icon: 'gh',   url: 'https://github.com/kalyan-91/portfolio-website', cls: 'secondary' },
+      ],
+    },
+
+    inventoryiq: {
+      name: 'InventoryIQ',
+      type: 'ANALYTICS MISSION',
+      typeTag: '📊 ANALYTICS MISSION DETECTED',
+      badge: 'ANALYTICS MISSION',
+      missionId: 'MISSION-002',
+      status: 'LIVE',
+      statusColor: 'green',
+      objective: 'A full-featured Streamlit-based inventory management and analytics platform built for e-commerce operations. Transforms raw CSV inventory data into interactive dashboards with real-time business insights.',
+      tech: ['Python', 'Streamlit', 'Pandas', 'Plotly', 'CSV', 'Authentication'],
+      features: [
+        'Secure login system with role-based access',
+        'Product management with full CRUD operations',
+        'Interactive analytics dashboards with Plotly charts',
+        'Complete audit logs for all transactions',
+        'CSV import/export for data portability',
+        'Real-time inventory alerts and thresholds',
+      ],
+      results: [
+        { icon: '📊', text: 'Live business intelligence dashboard' },
+        { icon: '🔍', text: 'Full audit trail and accountability' },
+        { icon: '📤', text: 'One-click CSV export functionality' },
+        { icon: '⚡', text: 'Deployed on Streamlit Cloud' },
+      ],
+      statusRows: [
+        { key: 'STATUS',    val: 'LIVE',       cls: 'green'  },
+        { key: 'PLATFORM',  val: 'STREAMLIT',  cls: 'cyan'   },
+        { key: 'DATA',      val: 'CSV',        cls: 'purple' },
+        { key: 'CHARTS',    val: 'PLOTLY',     cls: 'amber'  },
+      ],
+      links: [
+        { label: 'Live Demo', icon: 'link', url: 'https://inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app/', cls: 'primary' },
+        { label: 'GitHub',    icon: 'gh',   url: 'https://github.com/kalyan-91/InventoryIQ-E-commerce-Inventory-Analytics-System', cls: 'secondary' },
+      ],
+    },
+
+    digit: {
+      name: 'Digit Recognizer',
+      type: 'AI EXPERIMENT',
+      typeTag: '🤖 AI EXPERIMENT DETECTED',
+      badge: 'AI EXPERIMENT',
+      missionId: 'MISSION-003',
+      status: 'LIVE',
+      statusColor: 'green',
+      objective: 'A convolutional neural network deployed as an interactive web application that recognizes handwritten digits in real time. Users draw directly on an HTML5 canvas and receive instant predictions with confidence scores.',
+      tech: ['Python', 'TensorFlow', 'Keras', 'CNN', 'Streamlit', 'OpenCV', 'NumPy'],
+      features: [
+        'Interactive HTML5 canvas for digit drawing',
+        'CNN model trained on MNIST dataset',
+        'Real-time prediction with confidence percentage',
+        'Digit classes 0 through 9 fully supported',
+        'Image preprocessing with OpenCV pipeline',
+        'Instant inference with sub-second response',
+      ],
+      results: [
+        { icon: '🧠', text: 'CNN model with 99%+ training accuracy' },
+        { icon: '⚡', text: 'Sub-second real-time predictions' },
+        { icon: '🌐', text: 'Deployed live on Streamlit Cloud' },
+        { icon: '✏️', text: 'Interactive canvas drawing interface' },
+      ],
+      statusRows: [
+        { key: 'STATUS',    val: 'LIVE',       cls: 'green'  },
+        { key: 'MODEL',     val: 'CNN',        cls: 'cyan'   },
+        { key: 'FRAMEWORK', val: 'TENSORFLOW', cls: 'purple' },
+        { key: 'DATASET',   val: 'MNIST',      cls: 'amber'  },
+      ],
+      links: [
+        { label: 'Try Live', icon: 'link', url: 'https://hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app/', cls: 'primary' },
+        { label: 'GitHub',   icon: 'gh',   url: 'https://github.com/kalyan-91/Hand-Written-Digit-Recognition', cls: 'secondary' },
+      ],
+    },
+
+    netflix: {
+      name: 'Netflix Analytics Dashboard',
+      type: 'ANALYTICS MISSION',
+      typeTag: '📊 ANALYTICS MISSION DETECTED',
+      badge: 'ANALYTICS MISSION',
+      missionId: 'MISSION-004',
+      status: 'DEPLOYED',
+      statusColor: 'green',
+      objective: 'An advanced Power BI dashboard exploring over 5,000 Netflix titles. Uncovers hidden patterns in content types, release trends, geographic distribution, and genre composition using sophisticated DAX measures.',
+      tech: ['Power BI', 'DAX', 'Power Query', 'Data Modeling', 'M Language'],
+      features: [
+        'Analysis of 5,000+ Netflix titles and metadata',
+        'Content type breakdown: Movies vs TV Shows',
+        'Geographic distribution across 50+ countries',
+        'Genre trend analysis over years of content',
+        'Advanced DAX calculated measures and KPIs',
+        'Interactive cross-filtering across all visuals',
+      ],
+      results: [
+        { icon: '🎬', text: '5,000+ titles analyzed and visualized' },
+        { icon: '🌍', text: 'Geographic insights across 50+ countries' },
+        { icon: '📈', text: 'Year-over-year content trend analysis' },
+        { icon: '⚙️', text: 'Advanced DAX measures and data model' },
+      ],
+      statusRows: [
+        { key: 'STATUS',  val: 'COMPLETE', cls: 'green'  },
+        { key: 'TOOL',    val: 'POWER BI', cls: 'cyan'   },
+        { key: 'RECORDS', val: '5000+',   cls: 'purple' },
+        { key: 'ENGINE',  val: 'DAX',     cls: 'amber'  },
+      ],
+      links: [
+        { label: 'Download .pbix', icon: 'dl', url: 'https://github.com/kalyan-91/Netflix-PowerBI-Dashboard/raw/main/netflix.pbix', cls: 'primary' },
+        { label: 'GitHub',         icon: 'gh', url: 'https://github.com/kalyan-91/Netflix-PowerBI-Dashboard', cls: 'secondary' },
+      ],
+    },
+
+    attrition: {
+      name: 'Employee Attrition Analysis',
+      type: 'AI EXPERIMENT',
+      typeTag: '🤖 AI EXPERIMENT DETECTED',
+      badge: 'AI EXPERIMENT',
+      missionId: 'MISSION-005',
+      status: 'DEPLOYED',
+      statusColor: 'green',
+      objective: 'A combined machine learning and business intelligence solution for HR analytics. Identifies key factors driving employee resignations and provides predictive attrition scores via classification models backed by an interactive Power BI dashboard.',
+      tech: ['Python', 'Scikit-learn', 'Pandas', 'Power BI', 'Random Forest', 'Logistic Regression'],
+      features: [
+        'Multiple ML classification models compared',
+        'Feature importance analysis for attrition drivers',
+        'Interactive Power BI HR analytics dashboard',
+        'Predictive attrition scoring system',
+        'Data preprocessing and EDA pipeline',
+        'Business recommendations from model insights',
+      ],
+      results: [
+        { icon: '🤖', text: 'ML model with 85%+ prediction accuracy' },
+        { icon: '📊', text: 'Interactive Power BI HR dashboard' },
+        { icon: '🔑', text: 'Top 5 attrition factors identified' },
+        { icon: '💼', text: 'Actionable HR retention recommendations' },
+      ],
+      statusRows: [
+        { key: 'STATUS',  val: 'COMPLETE',  cls: 'green'  },
+        { key: 'MODEL',   val: 'RF + LR',   cls: 'cyan'   },
+        { key: 'VIZ',     val: 'POWER BI',  cls: 'purple' },
+        { key: 'DOMAIN',  val: 'HR ANALYTICS', cls: 'amber' },
+      ],
+      links: [
+        { label: 'Download .pbix', icon: 'dl', url: 'https://github.com/kalyan-91/EmployeeAttritionAndEngagementAnalysis/raw/main/dashboard.pbix', cls: 'primary' },
+        { label: 'GitHub',         icon: 'gh', url: 'https://github.com/kalyan-91/EmployeeAttritionAndEngagementAnalysis', cls: 'secondary' },
+      ],
+    },
+
+    candy: {
+      name: 'Candy — Portfolio AI Agent',
+      type: 'AI EXPERIMENT',
+      typeTag: '🤖 AI EXPERIMENT DETECTED',
+      badge: 'AI EXPERIMENT',
+      missionId: 'MISSION-006',
+      status: 'LIVE',
+      statusColor: 'green',
+      objective: 'A standalone AI chat agent deployed as its own web application. Powered by Groq\'s LLaMA 3.3-70B for ultra-fast inference, featuring a cosmic UI, voice I/O, a living universe, cinematic mode, skill galaxy, mood ring, and admin analytics — all built from scratch.',
+      tech: ['Groq API', 'LLaMA 3.3-70B', 'Cloudflare Workers', 'Web Speech API', 'Vanilla JS', 'CSS Animations', 'EmailJS', 'KV Storage'],
+      features: [
+        'LLaMA 3.3-70B via Groq for sub-second responses',
+        'Living Universe — galaxy grows with conversations',
+        'Skill Galaxy — interactive orbiting planet canvas',
+        'Candy Mood Ring — avatar reacts to conversation tone',
+        'Voice input and speech synthesis output',
+        'Admin analytics panel with KV-backed data',
+        'Portfolio tour and cinematic project briefings',
+        'Cloudflare Workers proxy with CORS and rate limiting',
+      ],
+      results: [
+        { icon: '🚀', text: 'Deployed live at candy-agent.netlify.app' },
+        { icon: '⚡', text: 'Sub-second AI responses via Groq' },
+        { icon: '🌌', text: 'Living Universe with planet discovery' },
+        { icon: '📊', text: 'Real-time analytics with Cloudflare KV' },
+      ],
+      statusRows: [
+        { key: 'STATUS',  val: 'LIVE',     cls: 'green'  },
+        { key: 'MODEL',   val: 'LLAMA 3.3',cls: 'cyan'   },
+        { key: 'PROXY',   val: 'CLOUDFLARE',cls:'purple' },
+        { key: 'DEPLOY',  val: 'NETLIFY',  cls: 'amber'  },
+      ],
+      links: [
+        { label: 'Try Live', icon: 'link', url: 'https://candy-agent.netlify.app', cls: 'primary' },
+        { label: 'GitHub',   icon: 'gh',   url: 'https://github.com/kalyan-91/candy-agent', cls: 'secondary' },
+      ],
+    },
+  };
+
+  /* ── Keyword → project mapping ── */
+  const KEYWORD_MAP = [
+    { keys: ['sparms','student performance','result management','java swing','academic result'], project: 'sparms' },
+    { keys: ['inventoryiq','inventory','e-commerce inventory','streamlit inventory'], project: 'inventoryiq' },
+    { keys: ['digit recognizer','handwritten digit','hand-written digit','cnn digit','digit recognition'], project: 'digit' },
+    { keys: ['netflix dashboard','netflix analytics','netflix power bi','netflix powerbi'], project: 'netflix' },
+    { keys: ['attrition','employee attrition','hr analytics','attrition analysis'], project: 'attrition' },
+    { keys: ['candy','candy ai','portfolio ai agent','candy agent'], project: 'candy' },
+  ];
+
+  function detectProject(text) {
+    const lower = text.toLowerCase();
+    for (const entry of KEYWORD_MAP) {
+      if (entry.keys.some(k => lower.includes(k))) {
+        return entry.project;
+      }
+    }
+    return null;
+  }
+
+  /* ══════════════════════════════════════
+     PARTICLE SYSTEM
+  ══════════════════════════════════════ */
+  const pcv = document.getElementById('cmParticles');
+  let particles = [];
+  let pRaf;
+
+  function initParticles() {
+    if (!pcv) return;
+    pcv.width  = window.innerWidth;
+    pcv.height = window.innerHeight;
+    particles  = [];
+    const pctx = pcv.getContext('2d');
+    const cols = ['rgba(6,182,212,','rgba(139,92,246,','rgba(244,114,182,','rgba(255,255,255,'];
+    for (let i = 0; i < 120; i++) {
+      particles.push({
+        x: Math.random() * pcv.width,
+        y: Math.random() * pcv.height,
+        r: Math.random() * 1.6 + .2,
+        a: Math.random(),
+        da: (Math.random() - .5) * .01,
+        vx: (Math.random() - .5) * .3,
+        vy: (Math.random() - .5) * .3,
+        col: cols[Math.floor(Math.random() * cols.length)],
+      });
+    }
+    function drawP() {
+      pctx.clearRect(0, 0, pcv.width, pcv.height);
+      particles.forEach(p => {
+        p.a = Math.max(.04, Math.min(1, p.a + p.da));
+        if (p.a <= .04 || p.a >= 1) p.da *= -1;
+        p.x = (p.x + p.vx + pcv.width)  % pcv.width;
+        p.y = (p.y + p.vy + pcv.height) % pcv.height;
+        pctx.beginPath();
+        pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        pctx.fillStyle = p.col + p.a + ')';
+        pctx.shadowColor = p.col + '.8)';
+        pctx.shadowBlur = 4;
+        pctx.fill();
+      });
+      pctx.shadowBlur = 0;
+      pRaf = requestAnimationFrame(drawP);
+    }
+    drawP();
+  }
+
+  function stopParticles() {
+    if (pRaf) cancelAnimationFrame(pRaf);
+  }
+
+  /* ══════════════════════════════════════
+     TYPEWRITER
+  ══════════════════════════════════════ */
+  function typewrite(el, text, speed, cb) {
+    el.innerHTML = '';
+    const cursor = document.createElement('span');
+    cursor.className = 'cm-cursor';
+    el.appendChild(cursor);
+    let i = 0;
+    function tick() {
+      if (i < text.length) {
+        cursor.insertAdjacentText('beforebegin', text[i++]);
+        setTimeout(tick, speed);
+      } else {
+        cursor.remove();
+        if (cb) cb();
+      }
+    }
+    tick();
+  }
+
+  /* ══════════════════════════════════════
+     SPEAK
+  ══════════════════════════════════════ */
+  function speak(msg) {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(msg);
+    u.lang = 'en-US'; u.rate = .92; u.pitch = 1.05; u.volume = .8;
+    const vv = speechSynthesis.getVoices();
+    const v = vv.find(v => v.name.includes('Google US English'))
+           || vv.find(v => v.lang === 'en-US' && !v.localService)
+           || vv.find(v => v.lang.startsWith('en-'));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+
+  /* ══════════════════════════════════════
+     ICON SVG HELPERS
+  ══════════════════════════════════════ */
+  const ICONS = {
+    link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+    gh:   `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>`,
+    dl:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+    play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+  };
+
+  /* ══════════════════════════════════════
+     LAUNCH CINEMATIC
+  ══════════════════════════════════════ */
+  function launchCinematic(projectKey) {
+    const data = PROJECTS[projectKey];
+    if (!data) return;
+
+    const overlay = document.getElementById('cmOverlay');
+    const phaseDetect = document.getElementById('cmPhaseDetect');
+    const phaseBrief  = document.getElementById('cmPhaseBrief');
+
+    if (!overlay) return;
+
+    // Reset
+    phaseDetect.style.display = 'flex';
+    phaseBrief.style.display  = 'none';
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    initParticles();
+
+    // Set detect tag
+    document.getElementById('cmDetectTag').textContent = data.typeTag;
+
+    // Reset steps
+    ['cmStep1','cmStep2','cmStep3','cmStep4'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('done');
+    });
+
+    // Announce
+    speak(`${data.typeTag.replace(/[🤖📊🌐🗄]/gu, '').trim()}. Initializing cinematic briefing.`);
+
+    // Progress bar animation
+    const barFill = document.getElementById('cmDetectBarFill');
+    const pctEl   = document.getElementById('cmDetectPct');
+    let pct = 0;
+    const stepTimes = [600, 1200, 1800, 2400];
+    stepTimes.forEach((t, i) => {
+      setTimeout(() => {
+        document.getElementById(`cmStep${i + 1}`)?.classList.add('done');
+      }, t);
+    });
+
+    const barInt = setInterval(() => {
+      pct = Math.min(100, pct + 1.4);
+      barFill.style.width = pct + '%';
+      pctEl.textContent   = Math.round(pct) + '%';
+      if (pct >= 100) clearInterval(barInt);
+    }, 35);
+
+    // Transition to briefing
+    setTimeout(() => {
+      phaseDetect.style.display = 'none';
+      phaseBrief.style.display  = 'flex';
+      buildBriefing(data);
+    }, 3200);
+  }
+
+  /* ══════════════════════════════════════
+     BUILD BRIEFING
+  ══════════════════════════════════════ */
+  function buildBriefing(data) {
+    // Time
+    const now = new Date();
+    document.getElementById('cmBriefTime').textContent =
+      now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
+
+    // Badge / status / id
+    document.getElementById('cmMissionBadge').textContent  = data.badge;
+    document.getElementById('cmMissionStatus').textContent = `● ${data.status}`;
+    document.getElementById('cmMissionId').textContent     = data.missionId;
+
+    // Name typewriter
+    const nameEl = document.getElementById('cmProjectName');
+    const underEl = document.getElementById('cmNameUnderline') || document.querySelector('.cm-name-underline');
+    typewrite(nameEl, data.name, 38, () => {
+      if (underEl) underEl.classList.add('grow');
+      speak(`Mission designation: ${data.name}.`);
+    });
+
+    // Reveal sections with stagger
+    const sections = [
+      'cmSecObjective',
+      'cmSecTech',
+      'cmSecFeatures',
+      'cmSecResults',
+      'cmSecStatus',
+    ];
+    sections.forEach((id, i) => {
+      setTimeout(() => {
+        document.getElementById(id)?.classList.add('reveal');
+      }, 600 + i * 200);
+    });
+
+    // Objective
+    setTimeout(() => {
+      const el = document.getElementById('cmObjectiveText');
+      if (el) typewrite(el, data.objective, 14);
+    }, 700);
+
+    // Tech tags
+    setTimeout(() => {
+      const grid = document.getElementById('cmTechGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      data.tech.forEach((t, i) => {
+        const tag = document.createElement('span');
+        tag.className = 'cm-tech-tag';
+        tag.textContent = t;
+        grid.appendChild(tag);
+        setTimeout(() => tag.classList.add('pop'), i * 80);
+      });
+    }, 900);
+
+    // Features
+    setTimeout(() => {
+      const list = document.getElementById('cmFeaturesList');
+      if (!list) return;
+      list.innerHTML = '';
+      data.features.forEach((f, i) => {
+        const item = document.createElement('div');
+        item.className = 'cm-feature-item';
+        item.innerHTML = `<span class="cm-feature-num">[${String(i + 1).padStart(2, '0')}]</span>${f}`;
+        list.appendChild(item);
+        setTimeout(() => item.classList.add('slide'), i * 100);
+      });
+    }, 1100);
+
+    // Results
+    setTimeout(() => {
+      const list = document.getElementById('cmResultsList');
+      if (!list) return;
+      list.innerHTML = '';
+      data.results.forEach((r, i) => {
+        const item = document.createElement('div');
+        item.className = 'cm-result-item';
+        item.innerHTML = `<span class="cm-result-icon">${r.icon}</span>${r.text}`;
+        list.appendChild(item);
+        setTimeout(() => item.classList.add('show'), i * 120);
+      });
+    }, 1300);
+
+    // Status rows
+    setTimeout(() => {
+      const panel = document.getElementById('cmStatusPanel');
+      if (!panel) return;
+      panel.innerHTML = '';
+      data.statusRows.forEach(row => {
+        const div = document.createElement('div');
+        div.className = 'cm-status-row';
+        div.innerHTML = `
+          <span class="cm-status-key">${row.key}</span>
+          <span class="cm-status-val ${row.cls}">${row.val}</span>`;
+        panel.appendChild(div);
+      });
+    }, 1400);
+
+    // Links
+    setTimeout(() => {
+      const row = document.getElementById('cmLinksRow');
+      if (!row) return;
+      row.innerHTML = '';
+      data.links.forEach(l => {
+        const a = document.createElement('a');
+        a.className = `cm-link-btn ${l.cls}`;
+        a.href = l.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.innerHTML = `${ICONS[l.icon] || ''} ${l.label}`;
+        row.appendChild(a);
+      });
+    }, 1500);
+
+    // Final voice briefing
+    setTimeout(() => {
+      speak(`Mission briefing complete. ${data.name} uses ${data.tech.slice(0, 3).join(', ')}. Status: ${data.status}.`);
+    }, 2800);
+  }
+
+  /* ══════════════════════════════════════
+     CLOSE
+  ══════════════════════════════════════ */
+  function closeCinematic() {
+    const overlay = document.getElementById('cmOverlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    stopParticles();
+    speechSynthesis.cancel?.();
+
+    // Reset sections
+    document.querySelectorAll('.cm-section').forEach(s => s.classList.remove('reveal'));
+    document.querySelectorAll('.cm-tech-tag').forEach(t => t.classList.remove('pop'));
+    document.querySelectorAll('.cm-feature-item').forEach(f => f.classList.remove('slide'));
+    document.querySelectorAll('.cm-result-item').forEach(r => r.classList.remove('show'));
+    const underEl = document.querySelector('.cm-name-underline');
+    if (underEl) underEl.classList.remove('grow');
+  }
+
+  document.getElementById('cmCloseBtn')?.addEventListener('click', closeCinematic);
+  document.getElementById('cmOverlay')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('cmOverlay')) closeCinematic();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeCinematic();
+  });
+
+  /* ══════════════════════════════════════
+     HOOK INTO CANDY CHAT
+  ══════════════════════════════════════ */
+  const msgsEl = document.getElementById('msgs');
+  if (msgsEl) {
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(m => {
+        m.addedNodes.forEach(node => {
+          if (node.nodeType !== 1) return;
+
+          // Scan both user and AI messages
+          const isUser = node.classList.contains('mrow--u');
+          const textEl = node.querySelector(isUser ? '.buser' : '.bai');
+          if (!textEl) return;
+
+          const txt = textEl.textContent || '';
+          // Only trigger on messages that mention a project specifically
+          if (!isUser && txt.length > 60) {
+            const projectKey = detectProject(txt);
+            if (projectKey) {
+              setTimeout(() => launchCinematic(projectKey), 600);
+            }
+          }
+        });
+      });
+    });
+    observer.observe(msgsEl, { childList: true });
+  }
+
+  /* ══════════════════════════════════════
+     EXPOSE for manual trigger
+  ══════════════════════════════════════ */
+  window.__CINEMATIC__ = { launch: launchCinematic, close: closeCinematic, projects: Object.keys(PROJECTS) };
+
+  // Resize particles canvas
+  window.addEventListener('resize', () => {
+    if (pcv) { pcv.width = window.innerWidth; pcv.height = window.innerHeight; }
+  });
+
+})();
+     draw();
+   }
+
+
+
 'use strict';
 
 const EMAILJS_SERVICE_ID  = 'service_7qybkps';
@@ -2498,601 +3099,4 @@ function showToast(msg) { const el = document.getElementById('toast'); el.textCo
 
 
 
-     /* ═══════════════════════════════════════════════════
-   AI CINEMATIC MODE — cinematic.js
-   Add <script src="cinematic.js"></script>
-   just before </body>, after script.js
-═══════════════════════════════════════════════════ */
-
-(function () {
-  'use strict';
-
-  /* ══════════════════════════════════════
-     PROJECT DATABASE
-  ══════════════════════════════════════ */
-  const PROJECTS = {
-    sparms: {
-      name: 'Student Performance Analysis & Result Management',
-      type: 'DATABASE SYSTEM',
-      typeTag: '🗄 DATABASE SYSTEM DETECTED',
-      badge: 'DATABASE SYSTEM',
-      missionId: 'MISSION-001',
-      status: 'DEPLOYED',
-      statusColor: 'green',
-      objective: 'A role-based Java Swing desktop application engineered for academic result management at scale. Designed to eliminate manual data handling and automate grade computation across institutional workflows.',
-      tech: ['Java Swing', 'MySQL', 'JDBC', 'Maven', 'iText PDF', 'ZXing', 'Graphics2D'],
-      features: [
-        'Role-based dashboards for Admin, Faculty, and Students',
-        'Automated grade computation and result generation',
-        'OMR scanning integration for objective assessment',
-        'PDF report export with QR code verification',
-        'Ocean-blue custom Graphics2D UI theme',
-        'Secure login with session management',
-      ],
-      results: [
-        { icon: '✅', text: 'Zero manual calculation errors' },
-        { icon: '⚡', text: '70% faster result processing' },
-        { icon: '📄', text: 'Auto-generated verified PDF reports' },
-        { icon: '🔒', text: 'Role-based secure access control' },
-      ],
-      statusRows: [
-        { key: 'STATUS',    val: 'ACTIVE',     cls: 'green'  },
-        { key: 'PLATFORM',  val: 'DESKTOP',    cls: 'cyan'   },
-        { key: 'DATABASE',  val: 'MYSQL',      cls: 'purple' },
-        { key: 'LANGUAGE',  val: 'JAVA',       cls: 'amber'  },
-      ],
-      links: [
-        { label: 'View Demo', icon: 'play', url: 'https://github.com/kalyan-91/portfolio-website/blob/main/Demo/project-demo_T1Hirmbw.mp4', cls: 'primary' },
-        { label: 'GitHub',    icon: 'gh',   url: 'https://github.com/kalyan-91/portfolio-website', cls: 'secondary' },
-      ],
-    },
-
-    inventoryiq: {
-      name: 'InventoryIQ',
-      type: 'ANALYTICS MISSION',
-      typeTag: '📊 ANALYTICS MISSION DETECTED',
-      badge: 'ANALYTICS MISSION',
-      missionId: 'MISSION-002',
-      status: 'LIVE',
-      statusColor: 'green',
-      objective: 'A full-featured Streamlit-based inventory management and analytics platform built for e-commerce operations. Transforms raw CSV inventory data into interactive dashboards with real-time business insights.',
-      tech: ['Python', 'Streamlit', 'Pandas', 'Plotly', 'CSV', 'Authentication'],
-      features: [
-        'Secure login system with role-based access',
-        'Product management with full CRUD operations',
-        'Interactive analytics dashboards with Plotly charts',
-        'Complete audit logs for all transactions',
-        'CSV import/export for data portability',
-        'Real-time inventory alerts and thresholds',
-      ],
-      results: [
-        { icon: '📊', text: 'Live business intelligence dashboard' },
-        { icon: '🔍', text: 'Full audit trail and accountability' },
-        { icon: '📤', text: 'One-click CSV export functionality' },
-        { icon: '⚡', text: 'Deployed on Streamlit Cloud' },
-      ],
-      statusRows: [
-        { key: 'STATUS',    val: 'LIVE',       cls: 'green'  },
-        { key: 'PLATFORM',  val: 'STREAMLIT',  cls: 'cyan'   },
-        { key: 'DATA',      val: 'CSV',        cls: 'purple' },
-        { key: 'CHARTS',    val: 'PLOTLY',     cls: 'amber'  },
-      ],
-      links: [
-        { label: 'Live Demo', icon: 'link', url: 'https://inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app/', cls: 'primary' },
-        { label: 'GitHub',    icon: 'gh',   url: 'https://github.com/kalyan-91/InventoryIQ-E-commerce-Inventory-Analytics-System', cls: 'secondary' },
-      ],
-    },
-
-    digit: {
-      name: 'Digit Recognizer',
-      type: 'AI EXPERIMENT',
-      typeTag: '🤖 AI EXPERIMENT DETECTED',
-      badge: 'AI EXPERIMENT',
-      missionId: 'MISSION-003',
-      status: 'LIVE',
-      statusColor: 'green',
-      objective: 'A convolutional neural network deployed as an interactive web application that recognizes handwritten digits in real time. Users draw directly on an HTML5 canvas and receive instant predictions with confidence scores.',
-      tech: ['Python', 'TensorFlow', 'Keras', 'CNN', 'Streamlit', 'OpenCV', 'NumPy'],
-      features: [
-        'Interactive HTML5 canvas for digit drawing',
-        'CNN model trained on MNIST dataset',
-        'Real-time prediction with confidence percentage',
-        'Digit classes 0 through 9 fully supported',
-        'Image preprocessing with OpenCV pipeline',
-        'Instant inference with sub-second response',
-      ],
-      results: [
-        { icon: '🧠', text: 'CNN model with 99%+ training accuracy' },
-        { icon: '⚡', text: 'Sub-second real-time predictions' },
-        { icon: '🌐', text: 'Deployed live on Streamlit Cloud' },
-        { icon: '✏️', text: 'Interactive canvas drawing interface' },
-      ],
-      statusRows: [
-        { key: 'STATUS',    val: 'LIVE',       cls: 'green'  },
-        { key: 'MODEL',     val: 'CNN',        cls: 'cyan'   },
-        { key: 'FRAMEWORK', val: 'TENSORFLOW', cls: 'purple' },
-        { key: 'DATASET',   val: 'MNIST',      cls: 'amber'  },
-      ],
-      links: [
-        { label: 'Try Live', icon: 'link', url: 'https://hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app/', cls: 'primary' },
-        { label: 'GitHub',   icon: 'gh',   url: 'https://github.com/kalyan-91/Hand-Written-Digit-Recognition', cls: 'secondary' },
-      ],
-    },
-
-    netflix: {
-      name: 'Netflix Analytics Dashboard',
-      type: 'ANALYTICS MISSION',
-      typeTag: '📊 ANALYTICS MISSION DETECTED',
-      badge: 'ANALYTICS MISSION',
-      missionId: 'MISSION-004',
-      status: 'DEPLOYED',
-      statusColor: 'green',
-      objective: 'An advanced Power BI dashboard exploring over 5,000 Netflix titles. Uncovers hidden patterns in content types, release trends, geographic distribution, and genre composition using sophisticated DAX measures.',
-      tech: ['Power BI', 'DAX', 'Power Query', 'Data Modeling', 'M Language'],
-      features: [
-        'Analysis of 5,000+ Netflix titles and metadata',
-        'Content type breakdown: Movies vs TV Shows',
-        'Geographic distribution across 50+ countries',
-        'Genre trend analysis over years of content',
-        'Advanced DAX calculated measures and KPIs',
-        'Interactive cross-filtering across all visuals',
-      ],
-      results: [
-        { icon: '🎬', text: '5,000+ titles analyzed and visualized' },
-        { icon: '🌍', text: 'Geographic insights across 50+ countries' },
-        { icon: '📈', text: 'Year-over-year content trend analysis' },
-        { icon: '⚙️', text: 'Advanced DAX measures and data model' },
-      ],
-      statusRows: [
-        { key: 'STATUS',  val: 'COMPLETE', cls: 'green'  },
-        { key: 'TOOL',    val: 'POWER BI', cls: 'cyan'   },
-        { key: 'RECORDS', val: '5000+',   cls: 'purple' },
-        { key: 'ENGINE',  val: 'DAX',     cls: 'amber'  },
-      ],
-      links: [
-        { label: 'Download .pbix', icon: 'dl', url: 'https://github.com/kalyan-91/Netflix-PowerBI-Dashboard/raw/main/netflix.pbix', cls: 'primary' },
-        { label: 'GitHub',         icon: 'gh', url: 'https://github.com/kalyan-91/Netflix-PowerBI-Dashboard', cls: 'secondary' },
-      ],
-    },
-
-    attrition: {
-      name: 'Employee Attrition Analysis',
-      type: 'AI EXPERIMENT',
-      typeTag: '🤖 AI EXPERIMENT DETECTED',
-      badge: 'AI EXPERIMENT',
-      missionId: 'MISSION-005',
-      status: 'DEPLOYED',
-      statusColor: 'green',
-      objective: 'A combined machine learning and business intelligence solution for HR analytics. Identifies key factors driving employee resignations and provides predictive attrition scores via classification models backed by an interactive Power BI dashboard.',
-      tech: ['Python', 'Scikit-learn', 'Pandas', 'Power BI', 'Random Forest', 'Logistic Regression'],
-      features: [
-        'Multiple ML classification models compared',
-        'Feature importance analysis for attrition drivers',
-        'Interactive Power BI HR analytics dashboard',
-        'Predictive attrition scoring system',
-        'Data preprocessing and EDA pipeline',
-        'Business recommendations from model insights',
-      ],
-      results: [
-        { icon: '🤖', text: 'ML model with 85%+ prediction accuracy' },
-        { icon: '📊', text: 'Interactive Power BI HR dashboard' },
-        { icon: '🔑', text: 'Top 5 attrition factors identified' },
-        { icon: '💼', text: 'Actionable HR retention recommendations' },
-      ],
-      statusRows: [
-        { key: 'STATUS',  val: 'COMPLETE',  cls: 'green'  },
-        { key: 'MODEL',   val: 'RF + LR',   cls: 'cyan'   },
-        { key: 'VIZ',     val: 'POWER BI',  cls: 'purple' },
-        { key: 'DOMAIN',  val: 'HR ANALYTICS', cls: 'amber' },
-      ],
-      links: [
-        { label: 'Download .pbix', icon: 'dl', url: 'https://github.com/kalyan-91/EmployeeAttritionAndEngagementAnalysis/raw/main/dashboard.pbix', cls: 'primary' },
-        { label: 'GitHub',         icon: 'gh', url: 'https://github.com/kalyan-91/EmployeeAttritionAndEngagementAnalysis', cls: 'secondary' },
-      ],
-    },
-
-    candy: {
-      name: 'Candy — Portfolio AI Agent',
-      type: 'AI EXPERIMENT',
-      typeTag: '🤖 AI EXPERIMENT DETECTED',
-      badge: 'AI EXPERIMENT',
-      missionId: 'MISSION-006',
-      status: 'LIVE',
-      statusColor: 'green',
-      objective: 'A standalone AI chat agent deployed as its own web application. Powered by Groq\'s LLaMA 3.3-70B for ultra-fast inference, featuring a cosmic UI, voice I/O, a living universe, cinematic mode, skill galaxy, mood ring, and admin analytics — all built from scratch.',
-      tech: ['Groq API', 'LLaMA 3.3-70B', 'Cloudflare Workers', 'Web Speech API', 'Vanilla JS', 'CSS Animations', 'EmailJS', 'KV Storage'],
-      features: [
-        'LLaMA 3.3-70B via Groq for sub-second responses',
-        'Living Universe — galaxy grows with conversations',
-        'Skill Galaxy — interactive orbiting planet canvas',
-        'Candy Mood Ring — avatar reacts to conversation tone',
-        'Voice input and speech synthesis output',
-        'Admin analytics panel with KV-backed data',
-        'Portfolio tour and cinematic project briefings',
-        'Cloudflare Workers proxy with CORS and rate limiting',
-      ],
-      results: [
-        { icon: '🚀', text: 'Deployed live at candy-agent.netlify.app' },
-        { icon: '⚡', text: 'Sub-second AI responses via Groq' },
-        { icon: '🌌', text: 'Living Universe with planet discovery' },
-        { icon: '📊', text: 'Real-time analytics with Cloudflare KV' },
-      ],
-      statusRows: [
-        { key: 'STATUS',  val: 'LIVE',     cls: 'green'  },
-        { key: 'MODEL',   val: 'LLAMA 3.3',cls: 'cyan'   },
-        { key: 'PROXY',   val: 'CLOUDFLARE',cls:'purple' },
-        { key: 'DEPLOY',  val: 'NETLIFY',  cls: 'amber'  },
-      ],
-      links: [
-        { label: 'Try Live', icon: 'link', url: 'https://candy-agent.netlify.app', cls: 'primary' },
-        { label: 'GitHub',   icon: 'gh',   url: 'https://github.com/kalyan-91/candy-agent', cls: 'secondary' },
-      ],
-    },
-  };
-
-  /* ── Keyword → project mapping ── */
-  const KEYWORD_MAP = [
-    { keys: ['sparms','student performance','result management','java swing','academic result'], project: 'sparms' },
-    { keys: ['inventoryiq','inventory','e-commerce inventory','streamlit inventory'], project: 'inventoryiq' },
-    { keys: ['digit recognizer','handwritten digit','hand-written digit','cnn digit','digit recognition'], project: 'digit' },
-    { keys: ['netflix dashboard','netflix analytics','netflix power bi','netflix powerbi'], project: 'netflix' },
-    { keys: ['attrition','employee attrition','hr analytics','attrition analysis'], project: 'attrition' },
-    { keys: ['candy','candy ai','portfolio ai agent','candy agent'], project: 'candy' },
-  ];
-
-  function detectProject(text) {
-    const lower = text.toLowerCase();
-    for (const entry of KEYWORD_MAP) {
-      if (entry.keys.some(k => lower.includes(k))) {
-        return entry.project;
-      }
-    }
-    return null;
-  }
-
-  /* ══════════════════════════════════════
-     PARTICLE SYSTEM
-  ══════════════════════════════════════ */
-  const pcv = document.getElementById('cmParticles');
-  let particles = [];
-  let pRaf;
-
-  function initParticles() {
-    if (!pcv) return;
-    pcv.width  = window.innerWidth;
-    pcv.height = window.innerHeight;
-    particles  = [];
-    const pctx = pcv.getContext('2d');
-    const cols = ['rgba(6,182,212,','rgba(139,92,246,','rgba(244,114,182,','rgba(255,255,255,'];
-    for (let i = 0; i < 120; i++) {
-      particles.push({
-        x: Math.random() * pcv.width,
-        y: Math.random() * pcv.height,
-        r: Math.random() * 1.6 + .2,
-        a: Math.random(),
-        da: (Math.random() - .5) * .01,
-        vx: (Math.random() - .5) * .3,
-        vy: (Math.random() - .5) * .3,
-        col: cols[Math.floor(Math.random() * cols.length)],
-      });
-    }
-    function drawP() {
-      pctx.clearRect(0, 0, pcv.width, pcv.height);
-      particles.forEach(p => {
-        p.a = Math.max(.04, Math.min(1, p.a + p.da));
-        if (p.a <= .04 || p.a >= 1) p.da *= -1;
-        p.x = (p.x + p.vx + pcv.width)  % pcv.width;
-        p.y = (p.y + p.vy + pcv.height) % pcv.height;
-        pctx.beginPath();
-        pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        pctx.fillStyle = p.col + p.a + ')';
-        pctx.shadowColor = p.col + '.8)';
-        pctx.shadowBlur = 4;
-        pctx.fill();
-      });
-      pctx.shadowBlur = 0;
-      pRaf = requestAnimationFrame(drawP);
-    }
-    drawP();
-  }
-
-  function stopParticles() {
-    if (pRaf) cancelAnimationFrame(pRaf);
-  }
-
-  /* ══════════════════════════════════════
-     TYPEWRITER
-  ══════════════════════════════════════ */
-  function typewrite(el, text, speed, cb) {
-    el.innerHTML = '';
-    const cursor = document.createElement('span');
-    cursor.className = 'cm-cursor';
-    el.appendChild(cursor);
-    let i = 0;
-    function tick() {
-      if (i < text.length) {
-        cursor.insertAdjacentText('beforebegin', text[i++]);
-        setTimeout(tick, speed);
-      } else {
-        cursor.remove();
-        if (cb) cb();
-      }
-    }
-    tick();
-  }
-
-  /* ══════════════════════════════════════
-     SPEAK
-  ══════════════════════════════════════ */
-  function speak(msg) {
-    if (!window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(msg);
-    u.lang = 'en-US'; u.rate = .92; u.pitch = 1.05; u.volume = .8;
-    const vv = speechSynthesis.getVoices();
-    const v = vv.find(v => v.name.includes('Google US English'))
-           || vv.find(v => v.lang === 'en-US' && !v.localService)
-           || vv.find(v => v.lang.startsWith('en-'));
-    if (v) u.voice = v;
-    speechSynthesis.speak(u);
-  }
-
-  /* ══════════════════════════════════════
-     ICON SVG HELPERS
-  ══════════════════════════════════════ */
-  const ICONS = {
-    link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
-    gh:   `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>`,
-    dl:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
-    play: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
-  };
-
-  /* ══════════════════════════════════════
-     LAUNCH CINEMATIC
-  ══════════════════════════════════════ */
-  function launchCinematic(projectKey) {
-    const data = PROJECTS[projectKey];
-    if (!data) return;
-
-    const overlay = document.getElementById('cmOverlay');
-    const phaseDetect = document.getElementById('cmPhaseDetect');
-    const phaseBrief  = document.getElementById('cmPhaseBrief');
-
-    if (!overlay) return;
-
-    // Reset
-    phaseDetect.style.display = 'flex';
-    phaseBrief.style.display  = 'none';
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-
-    initParticles();
-
-    // Set detect tag
-    document.getElementById('cmDetectTag').textContent = data.typeTag;
-
-    // Reset steps
-    ['cmStep1','cmStep2','cmStep3','cmStep4'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.remove('done');
-    });
-
-    // Announce
-    speak(`${data.typeTag.replace(/[🤖📊🌐🗄]/gu, '').trim()}. Initializing cinematic briefing.`);
-
-    // Progress bar animation
-    const barFill = document.getElementById('cmDetectBarFill');
-    const pctEl   = document.getElementById('cmDetectPct');
-    let pct = 0;
-    const stepTimes = [600, 1200, 1800, 2400];
-    stepTimes.forEach((t, i) => {
-      setTimeout(() => {
-        document.getElementById(`cmStep${i + 1}`)?.classList.add('done');
-      }, t);
-    });
-
-    const barInt = setInterval(() => {
-      pct = Math.min(100, pct + 1.4);
-      barFill.style.width = pct + '%';
-      pctEl.textContent   = Math.round(pct) + '%';
-      if (pct >= 100) clearInterval(barInt);
-    }, 35);
-
-    // Transition to briefing
-    setTimeout(() => {
-      phaseDetect.style.display = 'none';
-      phaseBrief.style.display  = 'flex';
-      buildBriefing(data);
-    }, 3200);
-  }
-
-  /* ══════════════════════════════════════
-     BUILD BRIEFING
-  ══════════════════════════════════════ */
-  function buildBriefing(data) {
-    // Time
-    const now = new Date();
-    document.getElementById('cmBriefTime').textContent =
-      now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
-
-    // Badge / status / id
-    document.getElementById('cmMissionBadge').textContent  = data.badge;
-    document.getElementById('cmMissionStatus').textContent = `● ${data.status}`;
-    document.getElementById('cmMissionId').textContent     = data.missionId;
-
-    // Name typewriter
-    const nameEl = document.getElementById('cmProjectName');
-    const underEl = document.getElementById('cmNameUnderline') || document.querySelector('.cm-name-underline');
-    typewrite(nameEl, data.name, 38, () => {
-      if (underEl) underEl.classList.add('grow');
-      speak(`Mission designation: ${data.name}.`);
-    });
-
-    // Reveal sections with stagger
-    const sections = [
-      'cmSecObjective',
-      'cmSecTech',
-      'cmSecFeatures',
-      'cmSecResults',
-      'cmSecStatus',
-    ];
-    sections.forEach((id, i) => {
-      setTimeout(() => {
-        document.getElementById(id)?.classList.add('reveal');
-      }, 600 + i * 200);
-    });
-
-    // Objective
-    setTimeout(() => {
-      const el = document.getElementById('cmObjectiveText');
-      if (el) typewrite(el, data.objective, 14);
-    }, 700);
-
-    // Tech tags
-    setTimeout(() => {
-      const grid = document.getElementById('cmTechGrid');
-      if (!grid) return;
-      grid.innerHTML = '';
-      data.tech.forEach((t, i) => {
-        const tag = document.createElement('span');
-        tag.className = 'cm-tech-tag';
-        tag.textContent = t;
-        grid.appendChild(tag);
-        setTimeout(() => tag.classList.add('pop'), i * 80);
-      });
-    }, 900);
-
-    // Features
-    setTimeout(() => {
-      const list = document.getElementById('cmFeaturesList');
-      if (!list) return;
-      list.innerHTML = '';
-      data.features.forEach((f, i) => {
-        const item = document.createElement('div');
-        item.className = 'cm-feature-item';
-        item.innerHTML = `<span class="cm-feature-num">[${String(i + 1).padStart(2, '0')}]</span>${f}`;
-        list.appendChild(item);
-        setTimeout(() => item.classList.add('slide'), i * 100);
-      });
-    }, 1100);
-
-    // Results
-    setTimeout(() => {
-      const list = document.getElementById('cmResultsList');
-      if (!list) return;
-      list.innerHTML = '';
-      data.results.forEach((r, i) => {
-        const item = document.createElement('div');
-        item.className = 'cm-result-item';
-        item.innerHTML = `<span class="cm-result-icon">${r.icon}</span>${r.text}`;
-        list.appendChild(item);
-        setTimeout(() => item.classList.add('show'), i * 120);
-      });
-    }, 1300);
-
-    // Status rows
-    setTimeout(() => {
-      const panel = document.getElementById('cmStatusPanel');
-      if (!panel) return;
-      panel.innerHTML = '';
-      data.statusRows.forEach(row => {
-        const div = document.createElement('div');
-        div.className = 'cm-status-row';
-        div.innerHTML = `
-          <span class="cm-status-key">${row.key}</span>
-          <span class="cm-status-val ${row.cls}">${row.val}</span>`;
-        panel.appendChild(div);
-      });
-    }, 1400);
-
-    // Links
-    setTimeout(() => {
-      const row = document.getElementById('cmLinksRow');
-      if (!row) return;
-      row.innerHTML = '';
-      data.links.forEach(l => {
-        const a = document.createElement('a');
-        a.className = `cm-link-btn ${l.cls}`;
-        a.href = l.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.innerHTML = `${ICONS[l.icon] || ''} ${l.label}`;
-        row.appendChild(a);
-      });
-    }, 1500);
-
-    // Final voice briefing
-    setTimeout(() => {
-      speak(`Mission briefing complete. ${data.name} uses ${data.tech.slice(0, 3).join(', ')}. Status: ${data.status}.`);
-    }, 2800);
-  }
-
-  /* ══════════════════════════════════════
-     CLOSE
-  ══════════════════════════════════════ */
-  function closeCinematic() {
-    const overlay = document.getElementById('cmOverlay');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-    stopParticles();
-    speechSynthesis.cancel?.();
-
-    // Reset sections
-    document.querySelectorAll('.cm-section').forEach(s => s.classList.remove('reveal'));
-    document.querySelectorAll('.cm-tech-tag').forEach(t => t.classList.remove('pop'));
-    document.querySelectorAll('.cm-feature-item').forEach(f => f.classList.remove('slide'));
-    document.querySelectorAll('.cm-result-item').forEach(r => r.classList.remove('show'));
-    const underEl = document.querySelector('.cm-name-underline');
-    if (underEl) underEl.classList.remove('grow');
-  }
-
-  document.getElementById('cmCloseBtn')?.addEventListener('click', closeCinematic);
-  document.getElementById('cmOverlay')?.addEventListener('click', e => {
-    if (e.target === document.getElementById('cmOverlay')) closeCinematic();
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeCinematic();
-  });
-
-  /* ══════════════════════════════════════
-     HOOK INTO CANDY CHAT
-  ══════════════════════════════════════ */
-  const msgsEl = document.getElementById('msgs');
-  if (msgsEl) {
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(m => {
-        m.addedNodes.forEach(node => {
-          if (node.nodeType !== 1) return;
-
-          // Scan both user and AI messages
-          const isUser = node.classList.contains('mrow--u');
-          const textEl = node.querySelector(isUser ? '.buser' : '.bai');
-          if (!textEl) return;
-
-          const txt = textEl.textContent || '';
-          // Only trigger on messages that mention a project specifically
-          if (!isUser && txt.length > 60) {
-            const projectKey = detectProject(txt);
-            if (projectKey) {
-              setTimeout(() => launchCinematic(projectKey), 600);
-            }
-          }
-        });
-      });
-    });
-    observer.observe(msgsEl, { childList: true });
-  }
-
-  /* ══════════════════════════════════════
-     EXPOSE for manual trigger
-  ══════════════════════════════════════ */
-  window.__CINEMATIC__ = { launch: launchCinematic, close: closeCinematic, projects: Object.keys(PROJECTS) };
-
-  // Resize particles canvas
-  window.addEventListener('resize', () => {
-    if (pcv) { pcv.width = window.innerWidth; pcv.height = window.innerHeight; }
-  });
-
-})();
-     draw();
-   }
+    
