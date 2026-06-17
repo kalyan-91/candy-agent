@@ -2493,6 +2493,8 @@ function showToast(msg) { const el = document.getElementById('toast'); el.textCo
        ctx.globalAlpha = 1;
        requestAnimationFrame(draw);
      }
+     draw();
+   }
 
 
     
