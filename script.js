@@ -716,6 +716,76 @@ function setMood(text) {
 })();
 
 
+(function buildLaunchStars(){
+  const c = document.getElementById('launchStars');
+  if (!c) return;
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    const r = Math.random();
+    s.className = 'launch-star ' + (r < 0.7 ? 'launch-star--sm' : r < 0.9 ? 'launch-star--md' : 'launch-star--lg');
+    s.style.left  = Math.random() * 100 + '%';
+    s.style.top   = Math.random() * 100 + '%';
+    s.style.setProperty('--d',     (2 + Math.random() * 5) + 's');
+    s.style.setProperty('--delay', (Math.random() * 6) + 's');
+    c.appendChild(s);
+  }
+})();
+
+function setProgress(pct) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  const el = document.getElementById('progressPct');
+  el.textContent = pct + '%';
+  el.classList.toggle('active', pct > 0);
+}
+
+function completeStep(idx, delay) {
+  return new Promise(resolve => setTimeout(() => {
+    const spin = document.getElementById('spin' + idx);
+    const status = document.getElementById('status' + idx);
+    if (spin) spin.style.display = 'none';
+    if (status) { status.className = 't-status t-status-ok'; status.textContent = 'OK'; }
+    resolve();
+  }, delay));
+}
+
+async function runLaunch() {
+  await new Promise(r => setTimeout(r, 300));
+  setProgress(5);
+
+  document.getElementById('line0').classList.add('visible');
+  setProgress(20);
+  await completeStep(0, 1100);
+  setProgress(38);
+
+  await new Promise(r => setTimeout(r, 200));
+  document.getElementById('line1').classList.add('visible');
+  setProgress(50);
+  await completeStep(1, 1300);
+  setProgress(68);
+
+  await new Promise(r => setTimeout(r, 200));
+  document.getElementById('line2').classList.add('visible');
+  setProgress(80);
+  await completeStep(2, 1200);
+  setProgress(92);
+
+  await new Promise(r => setTimeout(r, 300));
+  document.getElementById('line3').classList.add('visible');
+  setProgress(100);
+
+  await new Promise(r => setTimeout(r, 400));
+  document.getElementById('launchText').classList.add('visible');
+
+  await new Promise(r => setTimeout(r, 1400));
+  document.getElementById('launchScreen').classList.add('fade-out');
+
+  await new Promise(r => setTimeout(r, 850));
+  document.getElementById('launchScreen').remove();
+}
+
+runLaunch();
+
+
 /* ═══════════════════════════════════════════════════════════
    CANDY SPACESHIP MODE — spaceship.js
    Paste entire contents inside your <script> block,
