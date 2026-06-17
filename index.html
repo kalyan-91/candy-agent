@@ -510,148 +510,7 @@
 </div><!-- /spaceship-overlay -->
 
 
-     <!-- ═══════════════════════════════════════════════════
-     AI CINEMATIC MODE — cinematic.html
-     This is the OVERLAY — paste just before </body>
-     in your index.html (before script tags)
-═══════════════════════════════════════════════════ -->
-
-<!-- Cinematic Overlay -->
-<div class="cm-overlay" id="cmOverlay">
-
-  <!-- Particle canvas -->
-  <canvas class="cm-particles" id="cmParticles"></canvas>
-
-  <!-- Grid lines -->
-  <div class="cm-grid"></div>
-
-  <!-- Scanning beam -->
-  <div class="cm-scan-beam" id="cmScanBeam"></div>
-
-  <!-- ── PHASE 1: Detection Screen ── -->
-  <div class="cm-phase cm-phase-detect" id="cmPhaseDetect">
-    <div class="cm-detect-inner">
-      <div class="cm-radar" id="cmRadar">
-        <div class="cm-radar-ring r1"></div>
-        <div class="cm-radar-ring r2"></div>
-        <div class="cm-radar-ring r3"></div>
-        <div class="cm-radar-sweep"></div>
-        <div class="cm-radar-dot"></div>
-      </div>
-      <div class="cm-detect-tag" id="cmDetectTag">🤖 AI EXPERIMENT DETECTED</div>
-      <div class="cm-detect-title">INITIALIZING CINEMATIC BRIEFING</div>
-      <div class="cm-detect-steps">
-        <div class="cm-step" id="cmStep1"><span class="cm-step-dot"></span>Scanning database...</div>
-        <div class="cm-step" id="cmStep2"><span class="cm-step-dot"></span>Loading mission data...</div>
-        <div class="cm-step" id="cmStep3"><span class="cm-step-dot"></span>Preparing holographic interface...</div>
-        <div class="cm-step" id="cmStep4"><span class="cm-step-dot"></span>Decrypting classified records...</div>
-      </div>
-      <div class="cm-detect-bar">
-        <div class="cm-detect-bar-fill" id="cmDetectBarFill"></div>
-      </div>
-      <div class="cm-detect-pct" id="cmDetectPct">0%</div>
-    </div>
-  </div>
-
-  <!-- ── PHASE 2: Mission Briefing ── -->
-  <div class="cm-phase cm-phase-brief" id="cmPhaseBrief" style="display:none">
-    <div class="cm-brief-wrap">
-
-      <!-- Header bar -->
-      <div class="cm-brief-header">
-        <div class="cm-brief-header-left">
-          <div class="cm-holo-dot"></div>
-          <span class="cm-brief-sys">CANDY AI // MISSION CONTROL</span>
-        </div>
-        <div class="cm-brief-header-right">
-          <span class="cm-brief-time" id="cmBriefTime"></span>
-          <button class="cm-close-btn" id="cmCloseBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Mission type badge -->
-      <div class="cm-mission-type-row">
-        <span class="cm-mission-badge" id="cmMissionBadge">AI EXPERIMENT</span>
-        <span class="cm-mission-status" id="cmMissionStatus">● ACTIVE</span>
-        <span class="cm-mission-id" id="cmMissionId">MISSION-001</span>
-      </div>
-
-      <!-- Project name — typewriter -->
-      <div class="cm-project-name-wrap">
-        <div class="cm-project-name-label">PROJECT DESIGNATION</div>
-        <h1 class="cm-project-name" id="cmProjectName"></h1>
-        <div class="cm-name-underline"></div>
-      </div>
-
-      <!-- Holographic divider -->
-      <div class="cm-holo-divider">
-        <div class="cm-holo-line"></div>
-        <span class="cm-holo-icon">◈</span>
-        <div class="cm-holo-line"></div>
-      </div>
-
-      <!-- Objective -->
-      <div class="cm-section" id="cmSecObjective">
-        <div class="cm-sec-label">
-          <span class="cm-sec-icon">⊕</span> MISSION OBJECTIVE
-        </div>
-        <p class="cm-sec-body" id="cmObjectiveText"></p>
-      </div>
-
-      <!-- Tech stack -->
-      <div class="cm-section" id="cmSecTech">
-        <div class="cm-sec-label">
-          <span class="cm-sec-icon">⊞</span> TECH ARSENAL
-        </div>
-        <div class="cm-tech-grid" id="cmTechGrid"></div>
-      </div>
-
-      <!-- Key features -->
-      <div class="cm-section" id="cmSecFeatures">
-        <div class="cm-sec-label">
-          <span class="cm-sec-icon">◉</span> KEY CAPABILITIES
-        </div>
-        <div class="cm-features-list" id="cmFeaturesList"></div>
-      </div>
-
-      <!-- Results + status grid -->
-      <div class="cm-two-col">
-        <div class="cm-section cm-half" id="cmSecResults">
-          <div class="cm-sec-label">
-            <span class="cm-sec-icon">▲</span> MISSION RESULTS
-          </div>
-          <div class="cm-results-list" id="cmResultsList"></div>
-        </div>
-        <div class="cm-section cm-half" id="cmSecStatus">
-          <div class="cm-sec-label">
-            <span class="cm-sec-icon">◈</span> CURRENT STATUS
-          </div>
-          <div class="cm-status-panel" id="cmStatusPanel"></div>
-        </div>
-      </div>
-
-      <!-- Links row -->
-      <div class="cm-links-row" id="cmLinksRow"></div>
-
-      <!-- Footer -->
-      <div class="cm-brief-footer">
-        <span>CANDY AI MISSION CONTROL // CLASSIFIED</span>
-        <span class="cm-footer-dot">◈</span>
-        <span>kalyanfinity-portfolio.netlify.app</span>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-<!-- End Cinematic Overlay -->
-
-
+    
 <div class="clock-widget" id="kurnoolTime">
   <canvas id="clockCanvas" width="80" height="80"></canvas>
   <div class="clock-info">
@@ -908,6 +767,151 @@
   </main>
 
 </div>
+
+
+ <!-- ═══════════════════════════════════════════════════
+     AI CINEMATIC MODE — cinematic.html
+     This is the OVERLAY — paste just before </body>
+     in your index.html (before script tags)
+═══════════════════════════════════════════════════ -->
+
+<!-- Cinematic Overlay -->
+<div class="cm-overlay" id="cmOverlay">
+
+  <!-- Particle canvas -->
+  <canvas class="cm-particles" id="cmParticles"></canvas>
+
+  <!-- Grid lines -->
+  <div class="cm-grid"></div>
+
+  <!-- Scanning beam -->
+  <div class="cm-scan-beam" id="cmScanBeam"></div>
+
+  <!-- ── PHASE 1: Detection Screen ── -->
+  <div class="cm-phase cm-phase-detect" id="cmPhaseDetect">
+    <div class="cm-detect-inner">
+      <div class="cm-radar" id="cmRadar">
+        <div class="cm-radar-ring r1"></div>
+        <div class="cm-radar-ring r2"></div>
+        <div class="cm-radar-ring r3"></div>
+        <div class="cm-radar-sweep"></div>
+        <div class="cm-radar-dot"></div>
+      </div>
+      <div class="cm-detect-tag" id="cmDetectTag">🤖 AI EXPERIMENT DETECTED</div>
+      <div class="cm-detect-title">INITIALIZING CINEMATIC BRIEFING</div>
+      <div class="cm-detect-steps">
+        <div class="cm-step" id="cmStep1"><span class="cm-step-dot"></span>Scanning database...</div>
+        <div class="cm-step" id="cmStep2"><span class="cm-step-dot"></span>Loading mission data...</div>
+        <div class="cm-step" id="cmStep3"><span class="cm-step-dot"></span>Preparing holographic interface...</div>
+        <div class="cm-step" id="cmStep4"><span class="cm-step-dot"></span>Decrypting classified records...</div>
+      </div>
+      <div class="cm-detect-bar">
+        <div class="cm-detect-bar-fill" id="cmDetectBarFill"></div>
+      </div>
+      <div class="cm-detect-pct" id="cmDetectPct">0%</div>
+    </div>
+  </div>
+
+  <!-- ── PHASE 2: Mission Briefing ── -->
+  <div class="cm-phase cm-phase-brief" id="cmPhaseBrief" style="display:none">
+    <div class="cm-brief-wrap">
+
+      <!-- Header bar -->
+      <div class="cm-brief-header">
+        <div class="cm-brief-header-left">
+          <div class="cm-holo-dot"></div>
+          <span class="cm-brief-sys">CANDY AI // MISSION CONTROL</span>
+        </div>
+        <div class="cm-brief-header-right">
+          <span class="cm-brief-time" id="cmBriefTime"></span>
+          <button class="cm-close-btn" id="cmCloseBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mission type badge -->
+      <div class="cm-mission-type-row">
+        <span class="cm-mission-badge" id="cmMissionBadge">AI EXPERIMENT</span>
+        <span class="cm-mission-status" id="cmMissionStatus">● ACTIVE</span>
+        <span class="cm-mission-id" id="cmMissionId">MISSION-001</span>
+      </div>
+
+      <!-- Project name — typewriter -->
+      <div class="cm-project-name-wrap">
+        <div class="cm-project-name-label">PROJECT DESIGNATION</div>
+        <h1 class="cm-project-name" id="cmProjectName"></h1>
+        <div class="cm-name-underline"></div>
+      </div>
+
+      <!-- Holographic divider -->
+      <div class="cm-holo-divider">
+        <div class="cm-holo-line"></div>
+        <span class="cm-holo-icon">◈</span>
+        <div class="cm-holo-line"></div>
+      </div>
+
+      <!-- Objective -->
+      <div class="cm-section" id="cmSecObjective">
+        <div class="cm-sec-label">
+          <span class="cm-sec-icon">⊕</span> MISSION OBJECTIVE
+        </div>
+        <p class="cm-sec-body" id="cmObjectiveText"></p>
+      </div>
+
+      <!-- Tech stack -->
+      <div class="cm-section" id="cmSecTech">
+        <div class="cm-sec-label">
+          <span class="cm-sec-icon">⊞</span> TECH ARSENAL
+        </div>
+        <div class="cm-tech-grid" id="cmTechGrid"></div>
+      </div>
+
+      <!-- Key features -->
+      <div class="cm-section" id="cmSecFeatures">
+        <div class="cm-sec-label">
+          <span class="cm-sec-icon">◉</span> KEY CAPABILITIES
+        </div>
+        <div class="cm-features-list" id="cmFeaturesList"></div>
+      </div>
+
+      <!-- Results + status grid -->
+      <div class="cm-two-col">
+        <div class="cm-section cm-half" id="cmSecResults">
+          <div class="cm-sec-label">
+            <span class="cm-sec-icon">▲</span> MISSION RESULTS
+          </div>
+          <div class="cm-results-list" id="cmResultsList"></div>
+        </div>
+        <div class="cm-section cm-half" id="cmSecStatus">
+          <div class="cm-sec-label">
+            <span class="cm-sec-icon">◈</span> CURRENT STATUS
+          </div>
+          <div class="cm-status-panel" id="cmStatusPanel"></div>
+        </div>
+      </div>
+
+      <!-- Links row -->
+      <div class="cm-links-row" id="cmLinksRow"></div>
+
+      <!-- Footer -->
+      <div class="cm-brief-footer">
+        <span>CANDY AI MISSION CONTROL // CLASSIFIED</span>
+        <span class="cm-footer-dot">◈</span>
+        <span>kalyanfinity-portfolio.netlify.app</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<!-- End Cinematic Overlay -->
+
+
+  
 
 <div class="toast" id="toast"></div>
 
