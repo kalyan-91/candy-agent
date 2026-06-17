@@ -2074,9 +2074,6 @@ async function go() {
     if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e?.error?.message || `HTTP ${r.status}`); }
     const d   = await r.json();
     const rep = d.choices?.[0]?.message?.content?.trim() || 'Empty response. Please try again.';
-    if (window.CinematicMode) {
-      window.CinematicMode.tryIntercept(txt);
-    }
     removeTyping(tid);
     await typeMsg(fmt(rep));
     hist.push({ role: 'assistant', content: rep });
