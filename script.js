@@ -2048,6 +2048,7 @@ window.addEventListener('beforeunload', () => {
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
   const txt = inpEl.value.trim(); if (!txt) return;
+  CinematicMode.tryIntercept(txt);
   inpEl.value = ''; resizeTA(inpEl); stopListen();
   addMsg('user', esc(txt));
   sessionMessageCount++;
