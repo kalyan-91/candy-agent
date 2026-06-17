@@ -230,6 +230,159 @@
 }
 .progress-pct.active { color: #4a5568; }
 
+
+.dream-bubble {
+  position: fixed; bottom: 24px; left: 24px; z-index: 500;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px 10px 10px;
+  background: rgba(20,12,48,0.88);
+  border: 1px solid rgba(124,107,255,0.3);
+  border-radius: 100px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 0 30px rgba(124,107,255,0.18);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px) scale(0.94);
+  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
+  pointer-events: none;
+  max-width: 320px;
+}
+.dream-bubble.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+.dream-bubble:hover { box-shadow: 0 0 40px rgba(124,107,255,0.32); border-color: rgba(124,107,255,0.5); }
+
+.dream-orb {
+  position: relative; flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(124,107,255,0.4) 0%, rgba(45,212,191,0.2) 100%);
+  border: 1px solid rgba(124,107,255,0.55);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px rgba(124,107,255,0.35);
+  animation: dreamOrbPulse 2.6s ease-in-out infinite;
+}
+@keyframes dreamOrbPulse {
+  0%,100% { transform: scale(1);    box-shadow: 0 0 16px rgba(124,107,255,0.35); }
+  50%      { transform: scale(1.08); box-shadow: 0 0 24px rgba(124,107,255,0.55); }
+}
+.dream-orb-icon { font-size: 0.95rem; line-height: 1; }
+.dream-orb::after {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 1px solid rgba(45,212,191,0.3);
+  animation: dreamRing 4s linear infinite;
+}
+@keyframes dreamRing { to { transform: rotate(360deg); } }
+
+.dream-bubble-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.dream-bubble-label {
+  font-family: 'DM Mono', monospace; font-size: 0.56rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: #a78bfa; display: flex; align-items: center; gap: 5px;
+}
+.dream-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #a78bfa;
+  animation: dreamDotBlink 1.6s ease-in-out infinite;
+}
+@keyframes dreamDotBlink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.dream-bubble-snippet {
+  font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+  color: #cbd5e1; line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 230px;
+}
+
+.dream-viewer {
+  position: fixed; inset: 0; z-index: 600;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(4,2,16,0.7);
+  backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+  padding: 24px;
+}
+.dream-viewer.open { opacity: 1; pointer-events: auto; }
+
+.dream-card {
+  position: relative;
+  width: min(480px, 100%);
+  background: radial-gradient(ellipse at 30% 0%, rgba(124,107,255,0.18) 0%, rgba(20,12,48,0.95) 55%);
+  border: 1px solid rgba(124,107,255,0.35);
+  border-radius: 18px;
+  padding: 28px 26px 24px;
+  box-shadow: 0 0 60px rgba(124,107,255,0.25);
+  transform: scale(0.92) translateY(10px);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.dream-viewer.open .dream-card { transform: scale(1) translateY(0); }
+
+.dream-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.dream-card-tag {
+  font-family: 'DM Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #5eead4;
+  display: flex; align-items: center; gap: 7px;
+}
+.dream-card-tag .dream-dot { background: #5eead4; }
+.dream-card-id {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.05rem;
+  background: linear-gradient(90deg, #a78bfa, #2dd4bf);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.dream-close {
+  width: 28px; height: 28px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: #94a3b8;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+}
+.dream-close:hover { background: rgba(251,113,133,0.12); border-color: rgba(251,113,133,0.3); color: #fda4af; }
+
+.dream-card-body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem; line-height: 1.7;
+  color: #e2e8f0;
+  min-height: 90px;
+}
+.dream-card-body .dream-highlight {
+  color: #c4b5fd; font-weight: 500;
+}
+
+.dream-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 22px; padding-top: 16px;
+  border-top: 1px solid rgba(124,107,255,0.15);
+}
+.dream-meta {
+  font-family: 'DM Mono', monospace; font-size: 0.6rem;
+  color: #4a5568; letter-spacing: 0.05em;
+}
+.dream-next-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 100px;
+  background: rgba(124,107,255,0.1);
+  border: 1px solid rgba(124,107,255,0.3);
+  color: #c4b5fd;
+  font-family: 'Syne', sans-serif; font-size: 0.74rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.dream-next-btn:hover { background: rgba(124,107,255,0.18); transform: translateX(2px); }
+
+.dream-particle {
+  position: absolute; border-radius: 50%;
+  background: rgba(167,139,250,0.5);
+  pointer-events: none;
+  animation: dreamFloat var(--pd,6s) ease-in-out infinite var(--pdelay,0s);
+}
+@keyframes dreamFloat {
+  0%,100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+  50%      { transform: translateY(-14px) translateX(6px); opacity: 0.8; }
+}
+
+
 :root{
   --v1:#6d28d9; --v2:#7c3aed; --v3:#8b5cf6; --v4:#a78bfa; --v5:#c4b5fd;
   --c1:#0e7490; --c2:#0891b2; --c3:#06b6d4; --c4:#22d3ee; --c5:#67e8f9;
