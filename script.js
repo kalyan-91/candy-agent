@@ -1793,40 +1793,11 @@ appendMessage('assistant',
         </svg>
         View Portfolio
       </a>
-      <button onclick="document.getElementById('cinematicBtn').click()" style="
-        display:inline-flex;align-items:center;gap:6px;
-        padding:8px 14px;border-radius:8px;cursor:pointer;
-        background:rgba(139,92,246,0.10);border:1px solid #a78bfa66;
-        color:#a78bfa;font-size:.75rem;font-weight:600;
-        font-family:'JetBrains Mono',monospace;letter-spacing:.5px;
-        position:relative;overflow:hidden;
-        transition:all 0.3s ease;
-      "
-      onmouseover="
-        this.style.background='rgba(139,92,246,0.25)';
-        this.style.borderColor='#a78bfa';
-        this.style.boxShadow='0 0 18px #a78bfa55, 0 0 6px #a78bfa33';
-        this.style.color='#d8b4fe';
-        this.style.transform='translateY(-1px)';
-        this.querySelector('.cin-shine').style.left='120%';
-      "
-      onmouseout="
-        this.style.background='rgba(139,92,246,0.10)';
-        this.style.borderColor='#a78bfa66';
-        this.style.boxShadow='none';
-        this.style.color='#a78bfa';
-        this.style.transform='translateY(0)';
-        this.querySelector('.cin-shine').style.left='-40%';
-      ">
-        <span class="cin-shine" style="
-          position:absolute;top:0;left:-40%;width:30%;height:100%;
-          background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
-          transform:skewX(-20deg);transition:left 0.5s ease;pointer-events:none;
-        "></span>
+      <button onclick="document.getElementById('cinematicBtn').click()" class="portbtn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         🎬 Cinematic Mode
       </button>
-      <button class="tour-start-btn" id="startTourBtn" onclick="startTour()" style="margin-top:0">
+      <button class="portbtn" id="startTourBtn" onclick="startTour()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="8" x2="12" y2="12"/>
