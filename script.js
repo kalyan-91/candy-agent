@@ -2151,16 +2151,13 @@ function detectCinematicProject(text) {
   return null;
 }
 
-async function launchCinematicInChat(projectKey) {
+ async function launchCinematicInChat(projectKey) {
   const p = CINEMATIC_DB[projectKey];
   if (!p) return;
 
-  // Voice narration
   if (voiceOn && window.speechSynthesis) {
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(
-      `Mission briefing initiated. Project: ${p.name}. All systems nominal.`
-    );
+    const u = new SpeechSynthesisUtterance(`Mission briefing initiated. Project: ${p.name}. All systems nominal.`);
     u.lang = 'en-US'; u.rate = 0.92; u.pitch = 0.85;
     const voices = speechSynthesis.getVoices();
     const v = voices.find(v => v.name.includes('Google US English'))
@@ -2196,19 +2193,246 @@ async function launchCinematicInChat(projectKey) {
     const fill = document.getElementById('cinFill');
     if (fill) fill.style.width = ((i + 1) / 4 * 100) + '%';
   }
-
   await new Promise(r => setTimeout(r, 400));
   bootRow.remove();
 
-  // Mission card
+  // ── HOLOGRAM OVERLAY ──
+  const holoOverlay = document.createElement('div');
+  holoOverlay.id = 'holoOverlay';
+  holoOverlay.style.cssText = `
+    position:fixed;inset:0;z-index:99999;
+    background:rgba(0,4,20,0.92);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity .5s;
+    perspective:1200px;
+  `;
+
+  const techBadgesH = p.tech.map(t =>
+    `<span style="padding:3px 10px;border-radius:100px;border:1px solid ${p.typeColor}55;
+      color:${p.typeColor};font-size:.68rem;background:${p.typeColor}11">${t}</span>`
+  ).join('');
+
+  const featuresH = p.features.map(f =>
+    `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:.75rem;color:#94a3b8">
+      <span style="color:${p.typeColor};margin-top:1px">▸</span>${f}
+    </div>`
+  ).join('');
+
+  const liveBtnH = p.live
+    ? `<a href="${p.live}" target="_blank" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 18px;border-radius:8px;font-size:.75rem;font-weight:600;
+        background:${p.typeColor};color:#000;text-decoration:none;
+        box-shadow:0 0 20px ${p.typeColor}66">🚀 Launch Live Mission</a>`
+    : '';
+
+  holoOverlay.innerHTML = `
+    <div id="holoScene" style="
+      width:min(680px,94vw);
+      transform-style:preserve-3d;
+      transform:rotateY(-30deg) rotateX(8deg) scale(0.7);
+      transition:transform 1.2s cubic-bezier(.23,1,.32,1), opacity .5s;
+      opacity:0;
+    ">
+      <!-- Glow rings -->
+      <div style="
+        position:absolute;inset:-40px;border-radius:24px;
+        border:1px solid ${p.typeColor}22;
+        box-shadow:0 0 60px ${p.typeColor}22, inset 0 0 60px ${p.typeColor}11;
+        pointer-events:none;transform:translateZ(-20px);
+      "></div>
+      <div style="
+        position:absolute;inset:-80px;border-radius:32px;
+        border:1px solid ${p.typeColor}11;
+        pointer-events:none;transform:translateZ(-40px);
+      "></div>
+
+      <!-- Main card -->
+      <div id="holoCard" style="
+        background:linear-gradient(135deg,rgba(8,4,40,0.97),rgba(2,10,40,0.97));
+        border:1px solid ${p.typeColor}44;
+        border-radius:20px;padding:28px;
+        box-shadow:0 0 80px ${p.typeColor}33, 0 0 160px ${p.typeColor}11;
+        position:relative;overflow:hidden;cursor:grab;
+        transform-style:preserve-3d;
+      ">
+        <!-- Scan line animation -->
+        <div id="holoScan" style="
+          position:absolute;left:0;right:0;height:2px;top:0;
+          background:linear-gradient(90deg,transparent,${p.typeColor}88,transparent);
+          animation:holoScanAnim 3s linear infinite;pointer-events:none;
+        "></div>
+
+        <!-- Corner brackets -->
+        <div style="position:absolute;top:12px;left:12px;width:20px;height:20px;
+          border-top:2px solid ${p.typeColor};border-left:2px solid ${p.typeColor};border-radius:4px 0 0 0;pointer-events:none"></div>
+        <div style="position:absolute;top:12px;right:12px;width:20px;height:20px;
+          border-top:2px solid ${p.typeColor};border-right:2px solid ${p.typeColor};border-radius:0 4px 0 0;pointer-events:none"></div>
+        <div style="position:absolute;bottom:12px;left:12px;width:20px;height:20px;
+          border-bottom:2px solid ${p.typeColor};border-left:2px solid ${p.typeColor};border-radius:0 0 0 4px;pointer-events:none"></div>
+        <div style="position:absolute;bottom:12px;right:12px;width:20px;height:20px;
+          border-bottom:2px solid ${p.typeColor};border-right:2px solid ${p.typeColor};border-radius:0 0 4px 0;pointer-events:none"></div>
+
+        <!-- Header -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+          <div>
+            <div style="display:inline-flex;align-items:center;gap:6px;
+              padding:3px 10px;border-radius:100px;margin-bottom:8px;
+              border:1px solid ${p.typeColor}44;background:${p.typeColor}11">
+              <span style="width:6px;height:6px;border-radius:50%;
+                background:${p.typeColor};box-shadow:0 0 8px ${p.typeColor};
+                animation:holoPulse 1.5s ease-in-out infinite"></span>
+              <span style="color:${p.typeColor};font-size:.65rem;letter-spacing:2px;font-family:monospace">${p.type}</span>
+            </div>
+            <div style="font-size:1.5rem;font-weight:700;color:#f0e6ff;letter-spacing:.5px">${p.name}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="display:inline-flex;align-items:center;gap:5px;
+              padding:3px 10px;border-radius:100px;margin-bottom:6px;
+              border:1px solid ${p.statusColor}44;background:${p.statusColor}11">
+              <span style="width:6px;height:6px;border-radius:50%;
+                background:${p.statusColor};box-shadow:0 0 8px ${p.statusColor};
+                animation:holoPulse 1s ease-in-out infinite"></span>
+              <span style="color:${p.statusColor};font-size:.65rem;letter-spacing:1px;font-family:monospace">${p.status}</span>
+            </div>
+            <div style="color:#475569;font-size:.65rem;font-family:monospace">${p.id}</div>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div style="height:1px;background:linear-gradient(90deg,transparent,${p.typeColor}44,transparent);margin-bottom:20px"></div>
+
+        <!-- Grid -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          <div>
+            <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:8px">TECH STACK</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">${techBadgesH}</div>
+          </div>
+          <div>
+            <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:8px">KEY FEATURES</div>
+            ${featuresH}
+          </div>
+        </div>
+
+        <!-- Objective -->
+        <div style="background:${p.typeColor}0a;border:1px solid ${p.typeColor}22;border-radius:10px;padding:12px;margin-bottom:16px">
+          <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:6px">MISSION OBJECTIVE</div>
+          <div style="color:#cbd5e1;font-size:.78rem;line-height:1.6">${p.objective}</div>
+        </div>
+
+        <!-- Result -->
+        <div style="background:rgba(0,255,150,0.04);border:1px solid rgba(52,211,153,0.2);border-radius:10px;padding:12px;margin-bottom:20px">
+          <div style="color:#475569;font-size:.6rem;letter-spacing:2px;font-family:monospace;margin-bottom:6px">MISSION RESULT</div>
+          <div style="color:#34d399;font-size:.78rem;line-height:1.6">${p.result}</div>
+        </div>
+
+        <!-- Footer -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          ${liveBtnH}
+          <div style="display:flex;gap:10px;margin-left:auto">
+            <button id="holoFlipBtn" style="
+              padding:7px 16px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;
+              background:${p.typeColor}18;border:1px solid ${p.typeColor}44;color:${p.typeColor};
+              font-family:monospace;letter-spacing:1px">⟳ FLIP</button>
+            <button id="holoCloseBtn" style="
+              padding:7px 16px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;
+              background:rgba(255,255,255,0.05);border:1px solid #ffffff22;color:#64748b;
+              font-family:monospace;letter-spacing:1px">✕ CLOSE</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drag hint -->
+      <div style="text-align:center;margin-top:12px;color:#334155;font-size:.65rem;font-family:monospace;letter-spacing:1px">
+        DRAG TO ROTATE · SCROLL TO ZOOM
+      </div>
+    </div>
+
+    <style>
+      @keyframes holoScanAnim { from{top:0} to{top:100%} }
+      @keyframes holoPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    </style>
+  `;
+
+  document.body.appendChild(holoOverlay);
+  requestAnimationFrame(() => {
+    holoOverlay.style.opacity = '1';
+    const scene = document.getElementById('holoScene');
+    setTimeout(() => {
+      scene.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
+      scene.style.opacity = '1';
+    }, 80);
+  });
+
+  // ── 3D Mouse drag rotation ──
+  const card = document.getElementById('holoCard');
+  let isDragging = false, startX = 0, startY = 0, rotX = 0, rotY = 0;
+  let flipped = false;
+
+  card.addEventListener('mousedown', e => {
+    isDragging = true; startX = e.clientX; startY = e.clientY;
+    card.style.cursor = 'grabbing'; e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    rotY += dx * 0.4; rotX -= dy * 0.4;
+    rotX = Math.max(-35, Math.min(35, rotX));
+    card.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+    startX = e.clientX; startY = e.clientY;
+  });
+  window.addEventListener('mouseup', () => { isDragging = false; card.style.cursor = 'grab'; });
+
+  // Touch support
+  card.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+  }, { passive: true });
+  card.addEventListener('touchmove', e => {
+    const dx = e.touches[0].clientX - startX, dy = e.touches[0].clientY - startY;
+    rotY += dx * 0.4; rotX -= dy * 0.4;
+    rotX = Math.max(-35, Math.min(35, rotX));
+    card.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  // Scroll to zoom
+  holoOverlay.addEventListener('wheel', e => {
+    const scene = document.getElementById('holoScene');
+    const cur = parseFloat(scene.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1);
+    const next = Math.max(0.5, Math.min(1.4, cur - e.deltaY * 0.001));
+    scene.style.transform = `rotateY(0deg) rotateX(0deg) scale(${next})`;
+    e.preventDefault();
+  }, { passive: false });
+
+  // Flip button — auto-spin 360°
+  document.getElementById('holoFlipBtn').addEventListener('click', () => {
+    flipped = !flipped;
+    rotY += 360;
+    card.style.transition = 'transform 0.9s cubic-bezier(.23,1,.32,1)';
+    card.style.transform = `rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+    setTimeout(() => card.style.transition = '', 900);
+  });
+
+  // Close
+  function closeHolo() {
+    holoOverlay.style.opacity = '0';
+    setTimeout(() => holoOverlay.remove(), 500);
+  }
+  document.getElementById('holoCloseBtn').addEventListener('click', closeHolo);
+  holoOverlay.addEventListener('click', e => { if (e.target === holoOverlay) closeHolo(); });
+  document.addEventListener('keydown', function escHolo(e) {
+    if (e.key === 'Escape') { closeHolo(); document.removeEventListener('keydown', escHolo); }
+  });
+
+  // Also add mission card in chat as before
   const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const techBadges = p.tech.map(t => `<span class="cin-tech">${t}</span>`).join('');
   const features = p.features.map(f => `<div class="cin-feat"><span class="cin-feat-dot"></span>${f}</div>`).join('');
-  const liveBtn = p.live ? `<a href="${p.live}" target="_blank" class="cin-live-btn">🚀 Launch Live Mission</a>` : `<span class="cin-footer-meta">CANDY AI · MISSION CONTROL · ${new Date().toLocaleDateString('en-IN')}</span>`;
+  const liveBtn = p.live ? `<a href="${p.live}" target="_blank" class="cin-live-btn">🚀 Launch Live Mission</a>` : '';
 
-  const card = document.createElement('div');
-  card.className = 'mrow cin-card-row';
-  card.innerHTML = `
+  const chatCard = document.createElement('div');
+  chatCard.className = 'mrow cin-card-row';
+  chatCard.innerHTML = `
     <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa);font-size:.7rem">🎬</div>
     <div class="cin-card">
       <div class="cin-card-scan"></div>
@@ -2230,23 +2454,23 @@ async function launchCinematicInChat(projectKey) {
           </div>
         </div>
         <div class="cin-grid">
-          <div class="cin-section">
+          <div class="cin-section cin-revealed">
             <div class="cin-section-label">TECH STACK</div>
             <div class="cin-tech-row">${techBadges}</div>
           </div>
-          <div class="cin-section">
+          <div class="cin-section cin-revealed">
             <div class="cin-section-label">MISSION OBJECTIVE</div>
             <div class="cin-section-value">${p.objective}</div>
           </div>
-          <div class="cin-section">
+          <div class="cin-section cin-revealed">
             <div class="cin-section-label">KEY FEATURES</div>
             <div class="cin-features">${features}</div>
           </div>
-          <div class="cin-section">
+          <div class="cin-section cin-revealed">
             <div class="cin-section-label">MISSION RESULT</div>
             <div class="cin-callout">${p.result}</div>
           </div>
-          <div class="cin-section">
+          <div class="cin-section cin-revealed">
             <div class="cin-section-label">CURRENT STATUS</div>
             <div class="cin-section-value">${p.status_note}</div>
           </div>
@@ -2258,60 +2482,9 @@ async function launchCinematicInChat(projectKey) {
       </div>
       <div class="cin-mt">${t}</div>
     </div>`;
-
-  msgsEl.appendChild(card);
+  msgsEl.appendChild(chatCard);
   msgsEl.scrollTop = msgsEl.scrollHeight;
-
-  setTimeout(() => {
-    card.querySelectorAll('.cin-section').forEach((s, i) => {
-      setTimeout(() => s.classList.add('cin-revealed'), i * 180);
-    });
-  }, 200);
 }
-
-document.getElementById('cinematicBtn')?.addEventListener('click', () => {
-  const PROJECTS = Object.keys(CINEMATIC_DB);
-
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position:fixed;inset:0;z-index:9999;
-    background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
-    display:flex;align-items:center;justify-content:center;
-  `;
-  modal.innerHTML = `
-    <div style="background:#0d0d1a;border:1px solid #a78bfa44;
-      border-radius:16px;padding:24px;min-width:280px;max-width:360px">
-      <div style="color:#a78bfa;font-size:.7rem;letter-spacing:2px;
-        margin-bottom:14px">🎬 CHOOSE MISSION</div>
-      ${PROJECTS.map(k => `
-        <button data-key="${k}" style="
-          display:block;width:100%;text-align:left;
-          background:rgba(139,92,246,0.06);
-          border:1px solid #a78bfa33;border-radius:8px;
-          padding:10px 14px;margin-bottom:8px;
-          color:#c4b5fd;cursor:pointer;font-size:.82rem;
-          font-family:inherit;transition:all .2s"
-          onmouseover="this.style.background='rgba(139,92,246,0.15)'"
-          onmouseout="this.style.background='rgba(139,92,246,0.06)'"
-        >${CINEMATIC_DB[k].name}</button>
-      `).join('')}
-      <button id="cinModalClose" style="
-        margin-top:4px;width:100%;padding:8px;
-        background:transparent;border:1px solid #ffffff22;
-        border-radius:8px;color:#64748b;cursor:pointer;
-        font-family:inherit;font-size:.75rem">Cancel</button>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  modal.addEventListener('click', e => {
-    const key = e.target.closest('[data-key]')?.dataset.key;
-    if (key) { modal.remove(); launchCinematicInChat(key); }
-    if (e.target.id === 'cinModalClose' || e.target === modal) modal.remove();
-  });
-});
-
 
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
