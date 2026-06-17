@@ -1793,7 +1793,7 @@ appendMessage('assistant',
         </svg>
         View Portfolio
       </a>
-      <button onclick="document.getElementById('cinematicBtn').click()" class="portbtn">
+      <button onclick="openCinematicPicker()" class="portbtn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         🎬 Cinematic Mode
       </button>
@@ -2711,6 +2711,46 @@ document.getElementById('cinematicBtn')?.addEventListener('click', () => {
     if (e.target.id === 'cinModalClose' || e.target === modal) modal.remove();
   });
 });
+
+function openCinematicPicker() {
+  const PROJECTS = Object.keys(CINEMATIC_DB);
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+  `;
+  modal.innerHTML = `
+    <div style="background:#0d0d1a;border:1px solid #a78bfa44;
+      border-radius:16px;padding:24px;min-width:280px;max-width:360px">
+      <div style="color:#a78bfa;font-size:.7rem;letter-spacing:2px;
+        margin-bottom:14px">🎬 CHOOSE MISSION</div>
+      ${PROJECTS.map(k => `
+        <button data-key="${k}" style="
+          display:block;width:100%;text-align:left;
+          background:rgba(139,92,246,0.06);
+          border:1px solid #a78bfa33;border-radius:8px;
+          padding:10px 14px;margin-bottom:8px;
+          color:#c4b5fd;cursor:pointer;font-size:.82rem;
+          font-family:inherit;transition:all .2s"
+          onmouseover="this.style.background='rgba(139,92,246,0.15)'"
+          onmouseout="this.style.background='rgba(139,92,246,0.06)'"
+        >${CINEMATIC_DB[k].name}</button>
+      `).join('')}
+      <button id="cinModalClose" style="
+        margin-top:4px;width:100%;padding:8px;
+        background:transparent;border:1px solid #ffffff22;
+        border-radius:8px;color:#64748b;cursor:pointer;
+        font-family:inherit;font-size:.75rem">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => {
+    const key = e.target.closest('[data-key]')?.dataset.key;
+    if (key) { modal.remove(); launchCinematicInChat(key); }
+    if (e.target.id === 'cinModalClose' || e.target === modal) modal.remove();
+  });
+}
 
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
