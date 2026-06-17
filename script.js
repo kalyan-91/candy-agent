@@ -1792,6 +1792,19 @@ function appendWelcome() {
       </svg>
       View Portfolio
     </a>
+
+    <button onclick="document.getElementById('cinematicBtn').click()" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 14px;border-radius:8px;cursor:pointer;
+        background:rgba(139,92,246,0.10);border:1px solid #a78bfa44;
+        color:#a78bfa;font-size:.75rem;font-weight:600;
+        font-family:'JetBrains Mono',monospace;letter-spacing:.5px;
+      ">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+        🎬 Cinematic Mode
+      </button>
+    </div>
+    
     <button class="tour-start-btn" id="startTourBtn" onclick="startTour()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="10"/>
