@@ -2044,6 +2044,225 @@ window.addEventListener('beforeunload', () => {
   if (visitorSession.questions.length > 0) sendVisitorReport();
 });
 
+
+
+/* ══════════ AI CINEMATIC MODE ══════════ */
+const CINEMATIC_DB = {
+  sparms: {
+    name: 'SPARMS',
+    id: 'MSN-001',
+    type: 'DATABASE SYSTEM',
+    typeColor: '#fb7185',
+    status: 'COMPLETED',
+    statusColor: '#34d399',
+    tech: ['Java Swing', 'MySQL', 'JDBC', 'Maven', 'iText PDF', 'ZXing'],
+    objective: 'Build a full-featured academic result management system with role-based access, OMR scanning, and automated PDF reporting.',
+    features: ['Role-based dashboards for Admin, Faculty & Students', 'OMR sheet scanning via OpenCV', 'Automated grade computation', 'PDF marksheet export', 'MySQL backend with JDBC'],
+    result: 'Fully functional standalone desktop system managing entire academic cycles from exam scanning to result publication.',
+    status_note: 'Completed & available on GitHub.',
+    live: null,
+  },
+  inventoryiq: {
+    name: 'InventoryIQ',
+    id: 'MSN-002',
+    type: 'ANALYTICS DASHBOARD',
+    typeColor: '#22d3ee',
+    status: 'LIVE ONLINE',
+    statusColor: '#22d3ee',
+    tech: ['Python', 'Streamlit', 'Pandas', 'Plotly', 'CSV'],
+    objective: 'Build an e-commerce inventory analytics dashboard giving real-time insight into stock health, sales velocity, and warehouse efficiency.',
+    features: ['Live inventory monitoring with alerts', 'Sales velocity and demand trends', 'Audit log with timestamped history', 'CSV import and export', 'Secure multi-user login'],
+    result: 'Deployed on Streamlit Cloud. Actively usable by any e-commerce business as a plug-and-play analytics layer.',
+    status_note: 'Live on Streamlit Cloud — publicly accessible.',
+    live: 'https://inventoryiq-e-commerce-inventory-analytics-system-lqpsn7qy8hhd.streamlit.app',
+  },
+  digit: {
+    name: 'Digit Recognizer',
+    id: 'MSN-003',
+    type: 'AI EXPERIMENT',
+    typeColor: '#a78bfa',
+    status: 'LIVE ONLINE',
+    statusColor: '#22d3ee',
+    tech: ['Python', 'TensorFlow', 'Keras', 'CNN', 'Streamlit', 'OpenCV'],
+    objective: 'Train a CNN to recognise handwritten digits 0-9 in real time via an interactive canvas demo.',
+    features: ['CNN with convolutional and pooling layers', 'Trained on MNIST 60,000 samples', 'Live canvas for real-time drawing', 'Confidence score per class', 'Streamlit web deployment'],
+    result: 'Deployed as fully interactive web app where visitors draw digits and see instant AI predictions with confidence scores.',
+    status_note: 'Live on Streamlit Cloud — try it now.',
+    live: 'https://hand-written-digit-recognition-xp9dvpheswt6zju8xpknxn.streamlit.app',
+  },
+  netflix: {
+    name: 'Netflix Dashboard',
+    id: 'MSN-004',
+    type: 'BUSINESS INTELLIGENCE',
+    typeColor: '#f43f5e',
+    status: 'COMPLETED',
+    statusColor: '#34d399',
+    tech: ['Power BI', 'DAX', 'Power Query', 'Excel', 'Data Modeling'],
+    objective: 'Transform 5000+ Netflix titles into a fully interactive BI dashboard revealing content strategy, genre distribution, and release trends.',
+    features: ['Interactive slicers for genre, year, country', 'Top director and cast frequency analysis', 'Movies vs TV Shows ratio over time', 'Geographic production heatmap', 'DAX measures for ratings analytics'],
+    result: 'Polished executive-level BI report turning a flat CSV into a navigable content intelligence tool.',
+    status_note: 'Completed. Part of Pavan\'s data analytics portfolio.',
+    live: null,
+  },
+  attrition: {
+    name: 'Employee Attrition Analysis',
+    id: 'MSN-005',
+    type: 'ML CLASSIFICATION',
+    typeColor: '#34d399',
+    status: 'COMPLETED',
+    statusColor: '#34d399',
+    tech: ['Python', 'Scikit-learn', 'Pandas', 'Power BI', 'Seaborn', 'SMOTE'],
+    objective: 'Predict employee attrition risk using supervised ML and surface HR insights through a Power BI dashboard.',
+    features: ['EDA across 35+ HR features', 'Logistic Regression, Random Forest, XGBoost', 'SMOTE oversampling for class balance', 'Feature importance analysis', 'Power BI HR dashboard with predictions'],
+    result: 'Identified key attrition drivers — overtime, job satisfaction, years at company — and built a decision-support dashboard for HR.',
+    status_note: 'Completed. Showcased as a data science portfolio project.',
+    live: null,
+  },
+  zomato: {
+    name: 'Zomato Analysis',
+    id: 'MSN-006',
+    type: 'DATA ANALYSIS',
+    typeColor: '#fbbf24',
+    status: 'COMPLETED',
+    statusColor: '#34d399',
+    tech: ['Python', 'Pandas', 'Seaborn', 'Matplotlib', 'Scikit-learn', 'NumPy'],
+    objective: 'Analyse Zomato restaurant data to uncover rating patterns, cuisine popularity, and build a predictive model for restaurant success.',
+    features: ['City-level restaurant density analysis', 'Price vs rating correlation study', 'Online delivery vs dine-in comparison', 'Cuisine popularity index', 'Rating prediction regression model'],
+    result: 'Mid-priced restaurants with online delivery consistently outperform premium dine-in in aggregate rating — key insight delivered.',
+    status_note: 'Completed. Part of Pavan\'s analytics portfolio.',
+    live: null,
+  },
+};
+
+const CIN_KEYWORDS = [
+  { key: 'sparms',     words: ['sparms', 'academic result', 'omr', 'java swing', 'result management'] },
+  { key: 'inventoryiq', words: ['inventoryiq', 'inventory', 'stock dashboard'] },
+  { key: 'digit',      words: ['digit', 'recognizer', 'handwritten', 'cnn', 'mnist'] },
+  { key: 'netflix',    words: ['netflix', 'netflix dashboard'] },
+  { key: 'attrition',  words: ['attrition', 'employee attrition', 'hr analytics'] },
+  { key: 'zomato',     words: ['zomato', 'restaurant analysis'] },
+];
+
+function detectCinematicProject(text) {
+  const t = text.toLowerCase();
+  for (const entry of CIN_KEYWORDS) {
+    if (entry.words.some(w => t.includes(w))) return entry.key;
+  }
+  return null;
+}
+
+async function launchCinematicInChat(projectKey) {
+  const p = CINEMATIC_DB[projectKey];
+  if (!p) return;
+
+  // Step 1 — Boot message
+  const bootRow = document.createElement('div');
+  bootRow.className = 'mrow cin-boot-row';
+  bootRow.innerHTML = `
+    <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa)">🎬</div>
+    <div class="cin-boot-bubble">
+      <div class="cin-boot-label">🚨 PROJECT DETECTED</div>
+      <div class="cin-boot-title">Initializing Cinematic Briefing...</div>
+      <div class="cin-boot-steps" id="cinSteps">
+        <div class="cin-step" id="cs0">▸ Scanning Knowledge Database...</div>
+        <div class="cin-step" id="cs1">▸ Loading Mission Data...</div>
+        <div class="cin-step" id="cs2">▸ Preparing Mission Briefing...</div>
+      </div>
+      <div class="cin-boot-bar"><div class="cin-boot-fill" id="cinFill"></div></div>
+    </div>`;
+  msgsEl.appendChild(bootRow);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  // Animate steps
+  for (let i = 0; i < 3; i++) {
+    await new Promise(r => setTimeout(r, 600));
+    const step = document.getElementById(`cs${i}`);
+    if (step) { step.classList.add('cin-step-done'); step.textContent = '✓ ' + step.textContent.slice(2); }
+    const fill = document.getElementById('cinFill');
+    if (fill) fill.style.width = ((i + 1) / 3 * 100) + '%';
+  }
+
+  await new Promise(r => setTimeout(r, 500));
+  bootRow.remove();
+
+  // Step 2 — Mission briefing card
+  const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const techBadges = p.tech.map(t => `<span class="cin-tech">${t}</span>`).join('');
+  const features = p.features.map(f => `<div class="cin-feat"><span class="cin-feat-dot"></span>${f}</div>`).join('');
+  const liveBtn = p.live ? `<a href="${p.live}" target="_blank" class="cin-live-btn">🚀 Launch Live Mission</a>` : '';
+
+  const card = document.createElement('div');
+  card.className = 'mrow cin-card-row';
+  card.innerHTML = `
+    <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa)">🎬</div>
+    <div class="cin-card">
+      <div class="cin-card-scan"></div>
+      <div class="cin-card-header">
+        <div class="cin-card-left">
+          <div class="cin-type-badge" style="color:${p.typeColor};border-color:${p.typeColor}44;background:${p.typeColor}11">
+            <span class="cin-type-dot" style="background:${p.typeColor}"></span>
+            ${p.type}
+          </div>
+          <div class="cin-project-name">${p.name}</div>
+        </div>
+        <div class="cin-card-right">
+          <div class="cin-status" style="color:${p.statusColor};border-color:${p.statusColor}44;background:${p.statusColor}11">
+            <span class="cin-status-dot" style="background:${p.statusColor}"></span>
+            ${p.status}
+          </div>
+          <div class="cin-mission-id">${p.id}</div>
+        </div>
+      </div>
+      <div class="cin-divider"></div>
+      <div class="cin-grid">
+        <div class="cin-section">
+          <div class="cin-section-label">TECH STACK</div>
+          <div class="cin-tech-row">${techBadges}</div>
+        </div>
+        <div class="cin-section">
+          <div class="cin-section-label">MISSION OBJECTIVE</div>
+          <div class="cin-section-value">${p.objective}</div>
+        </div>
+        <div class="cin-section">
+          <div class="cin-section-label">KEY FEATURES</div>
+          <div class="cin-features">${features}</div>
+        </div>
+        <div class="cin-section">
+          <div class="cin-section-label">MISSION RESULT</div>
+          <div class="cin-callout">${p.result}</div>
+        </div>
+        <div class="cin-section">
+          <div class="cin-section-label">CURRENT STATUS</div>
+          <div class="cin-section-value">${p.status_note}</div>
+        </div>
+      </div>
+      <div class="cin-card-footer">
+        ${liveBtn}
+        <div class="cin-footer-meta">CANDY AI · MISSION CONTROL · ${new Date().toLocaleDateString('en-IN')}</div>
+      </div>
+      <div class="cin-mt">${t}</div>
+    </div>`;
+
+  msgsEl.appendChild(card);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  // Animate sections in
+  setTimeout(() => {
+    card.querySelectorAll('.cin-section').forEach((s, i) => {
+      setTimeout(() => s.classList.add('cin-revealed'), i * 150);
+    });
+  }, 100);
+}
+
+// Cinematic button — pick a project
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('cinematicBtn')?.addEventListener('click', () => {
+    const projects = Object.keys(CINEMATIC_DB);
+    const pick = projects[Math.floor(Math.random() * projects.length)];
+    launchCinematicInChat(pick);
+  });
+});
+
  
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
@@ -2074,6 +2293,8 @@ async function go() {
     if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e?.error?.message || `HTTP ${r.status}`); }
     const d   = await r.json();
     const rep = d.choices?.[0]?.message?.content?.trim() || 'Empty response. Please try again.';
+    const cinKey = detectCinematicProject(txt);
+    if (cinKey) setTimeout(() => launchCinematicInChat(cinKey), 300);
     removeTyping(tid);
     await typeMsg(fmt(rep));
     hist.push({ role: 'assistant', content: rep });
