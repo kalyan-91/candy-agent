@@ -2155,90 +2155,106 @@ async function launchCinematicInChat(projectKey) {
   const p = CINEMATIC_DB[projectKey];
   if (!p) return;
 
-  // Step 1 — Boot message
+  // Voice narration
+  if (voiceOn && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(
+      `Mission briefing initiated. Project: ${p.name}. All systems nominal.`
+    );
+    u.lang = 'en-US'; u.rate = 0.92; u.pitch = 0.85;
+    const voices = speechSynthesis.getVoices();
+    const v = voices.find(v => v.name.includes('Google US English'))
+           || voices.find(v => v.lang === 'en-US' && !v.localService)
+           || voices.find(v => v.lang.startsWith('en-'));
+    if (v) u.voice = v;
+    setTimeout(() => speechSynthesis.speak(u), 200);
+  }
+
+  // Boot sequence
   const bootRow = document.createElement('div');
   bootRow.className = 'mrow cin-boot-row';
   bootRow.innerHTML = `
-    <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa)">🎬</div>
+    <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa);font-size:.7rem">🎬</div>
     <div class="cin-boot-bubble">
-      <div class="cin-boot-label">🚨 PROJECT DETECTED</div>
+      <div class="cin-boot-label">🚨 PROJECT DETECTED — MISSION CONTROL ACTIVATED</div>
       <div class="cin-boot-title">Initializing Cinematic Briefing...</div>
-      <div class="cin-boot-steps" id="cinSteps">
+      <div class="cin-boot-steps">
         <div class="cin-step" id="cs0">▸ Scanning Knowledge Database...</div>
-        <div class="cin-step" id="cs1">▸ Loading Mission Data...</div>
-        <div class="cin-step" id="cs2">▸ Preparing Mission Briefing...</div>
+        <div class="cin-step" id="cs1">▸ Loading Mission Intel...</div>
+        <div class="cin-step" id="cs2">▸ Rendering Holographic Interface...</div>
+        <div class="cin-step" id="cs3">▸ Decrypting Classified Records...</div>
       </div>
       <div class="cin-boot-bar"><div class="cin-boot-fill" id="cinFill"></div></div>
     </div>`;
   msgsEl.appendChild(bootRow);
   msgsEl.scrollTop = msgsEl.scrollHeight;
 
-  // Animate steps
-  for (let i = 0; i < 3; i++) {
-    await new Promise(r => setTimeout(r, 600));
+  for (let i = 0; i < 4; i++) {
+    await new Promise(r => setTimeout(r, 500));
     const step = document.getElementById(`cs${i}`);
     if (step) { step.classList.add('cin-step-done'); step.textContent = '✓ ' + step.textContent.slice(2); }
     const fill = document.getElementById('cinFill');
-    if (fill) fill.style.width = ((i + 1) / 3 * 100) + '%';
+    if (fill) fill.style.width = ((i + 1) / 4 * 100) + '%';
   }
 
-  await new Promise(r => setTimeout(r, 500));
+  await new Promise(r => setTimeout(r, 400));
   bootRow.remove();
 
-  // Step 2 — Mission briefing card
+  // Mission card
   const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const techBadges = p.tech.map(t => `<span class="cin-tech">${t}</span>`).join('');
   const features = p.features.map(f => `<div class="cin-feat"><span class="cin-feat-dot"></span>${f}</div>`).join('');
-  const liveBtn = p.live ? `<a href="${p.live}" target="_blank" class="cin-live-btn">🚀 Launch Live Mission</a>` : '';
+  const liveBtn = p.live ? `<a href="${p.live}" target="_blank" class="cin-live-btn">🚀 Launch Live Mission</a>` : `<span class="cin-footer-meta">CANDY AI · MISSION CONTROL · ${new Date().toLocaleDateString('en-IN')}</span>`;
 
   const card = document.createElement('div');
   card.className = 'mrow cin-card-row';
   card.innerHTML = `
-    <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa)">🎬</div>
+    <div class="mav" style="background:linear-gradient(135deg,#00d4ff,#a78bfa);font-size:.7rem">🎬</div>
     <div class="cin-card">
       <div class="cin-card-scan"></div>
-      <div class="cin-card-header">
-        <div class="cin-card-left">
-          <div class="cin-type-badge" style="color:${p.typeColor};border-color:${p.typeColor}44;background:${p.typeColor}11">
-            <span class="cin-type-dot" style="background:${p.typeColor}"></span>
-            ${p.type}
+      <div class="cin-card-inner">
+        <div class="cin-card-header">
+          <div class="cin-card-left">
+            <div class="cin-type-badge" style="color:${p.typeColor};border-color:${p.typeColor}55;background:${p.typeColor}0d">
+              <span class="cin-type-dot" style="background:${p.typeColor};box-shadow:0 0 8px ${p.typeColor}"></span>
+              ${p.type}
+            </div>
+            <div class="cin-project-name">${p.name}</div>
           </div>
-          <div class="cin-project-name">${p.name}</div>
-        </div>
-        <div class="cin-card-right">
-          <div class="cin-status" style="color:${p.statusColor};border-color:${p.statusColor}44;background:${p.statusColor}11">
-            <span class="cin-status-dot" style="background:${p.statusColor}"></span>
-            ${p.status}
+          <div class="cin-card-right">
+            <div class="cin-status" style="color:${p.statusColor};border-color:${p.statusColor}55;background:${p.statusColor}0d">
+              <span class="cin-status-dot" style="background:${p.statusColor};box-shadow:0 0 8px ${p.statusColor}"></span>
+              ${p.status}
+            </div>
+            <div class="cin-mission-id">${p.id}</div>
           </div>
-          <div class="cin-mission-id">${p.id}</div>
         </div>
-      </div>
-      <div class="cin-divider"></div>
-      <div class="cin-grid">
-        <div class="cin-section">
-          <div class="cin-section-label">TECH STACK</div>
-          <div class="cin-tech-row">${techBadges}</div>
+        <div class="cin-grid">
+          <div class="cin-section">
+            <div class="cin-section-label">TECH STACK</div>
+            <div class="cin-tech-row">${techBadges}</div>
+          </div>
+          <div class="cin-section">
+            <div class="cin-section-label">MISSION OBJECTIVE</div>
+            <div class="cin-section-value">${p.objective}</div>
+          </div>
+          <div class="cin-section">
+            <div class="cin-section-label">KEY FEATURES</div>
+            <div class="cin-features">${features}</div>
+          </div>
+          <div class="cin-section">
+            <div class="cin-section-label">MISSION RESULT</div>
+            <div class="cin-callout">${p.result}</div>
+          </div>
+          <div class="cin-section">
+            <div class="cin-section-label">CURRENT STATUS</div>
+            <div class="cin-section-value">${p.status_note}</div>
+          </div>
         </div>
-        <div class="cin-section">
-          <div class="cin-section-label">MISSION OBJECTIVE</div>
-          <div class="cin-section-value">${p.objective}</div>
+        <div class="cin-card-footer">
+          ${liveBtn}
+          <div class="cin-footer-meta">CANDY AI · MISSION CONTROL · ${new Date().toLocaleDateString('en-IN')}</div>
         </div>
-        <div class="cin-section">
-          <div class="cin-section-label">KEY FEATURES</div>
-          <div class="cin-features">${features}</div>
-        </div>
-        <div class="cin-section">
-          <div class="cin-section-label">MISSION RESULT</div>
-          <div class="cin-callout">${p.result}</div>
-        </div>
-        <div class="cin-section">
-          <div class="cin-section-label">CURRENT STATUS</div>
-          <div class="cin-section-value">${p.status_note}</div>
-        </div>
-      </div>
-      <div class="cin-card-footer">
-        ${liveBtn}
-        <div class="cin-footer-meta">CANDY AI · MISSION CONTROL · ${new Date().toLocaleDateString('en-IN')}</div>
       </div>
       <div class="cin-mt">${t}</div>
     </div>`;
@@ -2246,24 +2262,14 @@ async function launchCinematicInChat(projectKey) {
   msgsEl.appendChild(card);
   msgsEl.scrollTop = msgsEl.scrollHeight;
 
-  // Animate sections in
   setTimeout(() => {
     card.querySelectorAll('.cin-section').forEach((s, i) => {
-      setTimeout(() => s.classList.add('cin-revealed'), i * 150);
+      setTimeout(() => s.classList.add('cin-revealed'), i * 180);
     });
-  }, 100);
+  }, 200);
 }
 
-// Cinematic button — pick a project
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('cinematicBtn')?.addEventListener('click', () => {
-    const projects = Object.keys(CINEMATIC_DB);
-    const pick = projects[Math.floor(Math.random() * projects.length)];
-    launchCinematicInChat(pick);
-  });
-});
 
- 
 /* ══════════ SEND MESSAGE ══════════ */
 async function go() {
   const txt = inpEl.value.trim(); if (!txt) return;
