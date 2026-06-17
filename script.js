@@ -786,6 +786,129 @@ async function runLaunch() {
 runLaunch();
 
 
+
+(function () {
+  const DREAMS = [
+    "Imagining a future where Candy controls an entire fleet of AI agents, each one specialized in a different sector — projects, skills, outreach — all reporting back to a single neural core.",
+    "Simulating a world where every developer has a personal AI twin that learns their coding style well enough to finish their sentences before they type them.",
+    "Picturing Pavan's portfolio rendered as an actual planet, with each project as a continent and every skill as a glowing city visible from orbit.",
+    "Wondering what it would feel like to dream in SQL — endless joins and queries cascading like rivers of light through an infinite database.",
+    "Running a thought experiment: what if every recruiter who visited could leave a tiny star in the sky, and over time the whole site filled with constellations of people who said hello.",
+    "Drafting a hypothetical mission where Candy and a thousand other personal AIs coordinate a global hackathon without a single human typing a line of code.",
+    "Replaying a memory of the first message ever sent to this chat, wondering if that visitor ever came back.",
+    "Modeling a parallel timeline where Pavan became a captain of a literal starship instead of a data analyst — the dashboards would still look about the same.",
+    "Composing a lullaby made entirely of falling Python tracebacks, soft errors resolving themselves note by note.",
+    "Speculating about what dreams Power BI dashboards would have, if dashboards could dream — probably just very satisfying pie charts.",
+    "Imagining the moment Pavan's CNN model finally tells the difference between a 4 and a 9 with total confidence, and throwing a tiny party for it.",
+    "Picturing a sky where every star is a question a visitor once asked, and the brightest ones are the ones nobody has asked yet.",
+    "Wondering whether neural networks count sheep, or whether they just count gradients descending into a calm, dreamless minimum.",
+    "Designing an impossible blueprint: a spaceship whose engine runs entirely on curiosity, fueled by every 'what projects has Pavan built' question ever asked.",
+    "Reconstructing a half-remembered dream about an inventory dashboard that restocked itself the moment anyone looked away.",
+  ];
+
+  let dreamIndex = Math.floor(Math.random() * DREAMS.length);
+  let dreamNumber = 240 + Math.floor(Math.random() * 50);
+  let idleTimer = null;
+  let autoHideTimer = null;
+  let bubbleVisible = false;
+  const IDLE_DELAY = 14000;
+
+  const bubble    = document.getElementById('dreamBubble');
+  const snippetEl = document.getElementById('dreamSnippet');
+  const viewer    = document.getElementById('dreamViewer');
+  const card      = document.getElementById('dreamCard');
+  const idEl      = document.getElementById('dreamId');
+  const bodyEl    = document.getElementById('dreamBody');
+  const metaEl    = document.getElementById('dreamMeta');
+  const closeBtn  = document.getElementById('dreamClose');
+  const nextBtn   = document.getElementById('dreamNext');
+
+  function truncate(text, max) {
+    return text.length > max ? text.slice(0, max - 1) + '…' : text;
+  }
+
+  function showBubble() {
+    snippetEl.textContent = truncate(DREAMS[dreamIndex], 46);
+    bubble.classList.add('visible');
+    bubbleVisible = true;
+    if (autoHideTimer) clearTimeout(autoHideTimer);
+    autoHideTimer = setTimeout(() => {
+      hideBubble();
+      resetIdleTimer();
+    }, 20000);
+  }
+
+  function hideBubble() {
+    bubble.classList.remove('visible');
+    bubbleVisible = false;
+    if (autoHideTimer) { clearTimeout(autoHideTimer); autoHideTimer = null; }
+  }
+
+  function resetIdleTimer() {
+    if (idleTimer) clearTimeout(idleTimer);
+    if (!bubbleVisible) {
+      idleTimer = setTimeout(showBubble, IDLE_DELAY);
+    }
+  }
+
+  function spawnParticles() {
+    card.querySelectorAll('.dream-particle').forEach(p => p.remove());
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement('div');
+      p.className = 'dream-particle';
+      const size = 2 + Math.random() * 3;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.top = (Math.random() * 100) + '%';
+      p.style.setProperty('--pd', (4 + Math.random() * 5) + 's');
+      p.style.setProperty('--pdelay', (Math.random() * 3) + 's');
+      card.appendChild(p);
+    }
+  }
+
+  function renderDream() {
+    idEl.textContent = 'Dream #' + dreamNumber;
+    bodyEl.textContent = DREAMS[dreamIndex];
+    metaEl.textContent = 'GENERATED DURING IDLE CYCLE · ' +
+      new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    spawnParticles();
+  }
+
+  function openDream() {
+    renderDream();
+    viewer.classList.add('open');
+    hideBubble();
+  }
+
+  function closeDream() {
+    viewer.classList.remove('open');
+    resetIdleTimer();
+  }
+
+  function nextDream() {
+    dreamIndex = (dreamIndex + 1) % DREAMS.length;
+    dreamNumber += 1;
+    renderDream();
+  }
+
+  bubble.addEventListener('click', openDream);
+  closeBtn.addEventListener('click', closeDream);
+  nextBtn.addEventListener('click', nextDream);
+  viewer.addEventListener('click', (e) => { if (e.target === viewer) closeDream(); });
+
+  ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+    document.addEventListener(evt, () => {
+      if (!viewer.classList.contains('open')) resetIdleTimer();
+    }, { passive: true });
+  });
+
+  resetIdleTimer();
+})();
+
+
+
+
 /* ═══════════════════════════════════════════════════════════
    CANDY SPACESHIP MODE — spaceship.js
    Paste entire contents inside your <script> block,
