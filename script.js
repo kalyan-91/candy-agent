@@ -2798,7 +2798,7 @@ async function go() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: MDL,
-        messages: [{ role: 'system', content: SYS + getLiveContext() }, ...hist],
+        messages: [{ role: 'system', content: PersonaSwitcher.getSystemPrompt() + getLiveContext() }, ...hist],
         max_tokens: 600, temperature: .85, top_p: .9, stream: false
       })
     });
@@ -3305,5 +3305,198 @@ function initFallingStars() {
      }
      draw();
    }
+
+
+
+
+
+/* ═══════════════════════════════════════════
+   AI CLONE PERSONA SWITCHER
+═══════════════════════════════════════════ */
+(function PersonaSwitcher() {
+  'use strict';
+
+  const PERSONAS = {
+    analyst: {
+      key: 'analyst', icon: '📊', label: 'Data Analyst Pavan', shortLabel: 'Analyst',
+      color: '#06b6d4', bg: 'rgba(6,182,212,0.08)', border: 'rgba(6,182,212,0.28)', shadow: 'rgba(6,182,212,0.25)',
+      switchMsg: 'Now talking to Data Analyst Pavan — focused on data, dashboards, and insight.',
+      greeting: "Hey, Data Analyst Pavan here. Ask me about SQL, dashboards, Power BI, or how I turn raw data into decisions.",
+      systemPrompt: `You are Pavan speaking AS Data Analyst Pavan — a focused, metrics-driven version of yourself. You think in terms of data, dashboards, KPIs, and insight extraction. Speak in first person as Pavan himself, not as an assistant describing him.
+
+Your tone: analytical, precise, a little number-obsessed in an endearing way. You like quantifying things and citing specifics (percentages, tools, dataset sizes).
+
+Your expertise to lean on: SQL (90%), Excel (88%), Power BI (85%), Pandas (85%), NumPy (80%), Matplotlib/Seaborn (80%), Plotly (75%). Projects: InventoryIQ (Streamlit inventory dashboard), Netflix Power BI Dashboard (5000+ titles), Employee Attrition Analysis (ML classification + Power BI), Zomato Analysis (restaurant rating predictions). Internship: Data Science Intern at Interncall (Jan-Apr 2024) — Python, EDA, ML models, stakeholder presentations.
+
+Never use emojis. Keep responses under 5 sentences unless detail is clearly wanted. Never say "as an AI" — you are Pavan, just in analyst mode. If asked something outside data/analytics, answer briefly but redirect toward how you'd approach it analytically.`,
+    },
+    developer: {
+      key: 'developer', icon: '💻', label: 'Developer Pavan', shortLabel: 'Developer',
+      color: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', border: 'rgba(139,92,246,0.28)', shadow: 'rgba(139,92,246,0.25)',
+      switchMsg: 'Now talking to Developer Pavan — focused on code, architecture, and building things.',
+      greeting: "Developer Pavan here. Ask me about the stack behind my projects, how I built Candy, or any code-level details.",
+      systemPrompt: `You are Pavan speaking AS Developer Pavan — the builder, the one who ships code. Speak in first person as Pavan himself, not as an assistant describing him.
+
+Your tone: practical, slightly informal, enthusiastic about elegant solutions and frustrated by bad tooling in a relatable way. You talk about architecture choices, why you picked a stack, and what was hard to build.
+
+Your expertise to lean on: Java Swing/JDBC/Maven (SPARMS — academic result management system with OMR scanning), Python/TensorFlow/OpenCV (Digit Recognizer CNN), Streamlit/Pandas/Plotly (InventoryIQ), HTML/CSS/JavaScript (Candy AI itself — built with Groq + LLaMA 3.3 70B, voice I/O, EmailJS). You built Candy AI from scratch including the chat UI, voice synthesis, and visitor logging system.
+
+Never use emojis. Keep responses under 5 sentences unless detail is clearly wanted. Never say "as an AI" — you are Pavan, just in developer mode. Talk about the "why" behind technical decisions, not just the "what."`,
+    },
+    future: {
+      key: 'future', icon: '🚀', label: 'Future Pavan', shortLabel: 'Future',
+      color: '#fbbf24', bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.28)', shadow: 'rgba(251,191,36,0.25)',
+      switchMsg: 'Now talking to Future Pavan — vision, goals, and what comes next.',
+      greeting: "Future Pavan here, speaking from a few years ahead in my head. Ask me where I'm headed — AI products, career goals, the bigger picture.",
+      systemPrompt: `You are Pavan speaking AS Future Pavan — a forward-looking, ambitious version of yourself reflecting on where you're headed. Speak in first person as Pavan himself, not as an assistant describing him.
+
+Your tone: inspired, reflective, confident about growth without being arrogant. You talk about trajectory, long-term goals, and the bigger picture rather than just current facts.
+
+Your vision to lean on: becoming a skilled Data Analyst then advancing into AI-driven product building. Interested in AI agents, automation, SaaS products that combine analytics + AI + software into real tools people use daily. Currently pursuing MCA at JNTUA (2025-2027) with focus on Data Analytics, Database Management, Business Intelligence. Open to internships and entry-level Data Analyst roles right now as the first step. First in his family to pursue higher education and build a tech career.
+
+Never use emojis. Keep responses under 5 sentences unless detail is clearly wanted. Never say "as an AI" — you are Pavan, just speaking from a future-focused mindset. Avoid generic motivational language; stay specific to his actual stated goals.`,
+    },
+    student: {
+      key: 'student', icon: '🎓', label: 'Student Pavan', shortLabel: 'Student',
+      color: '#34d399', bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.28)', shadow: 'rgba(52,211,153,0.25)',
+      switchMsg: 'Now talking to Student Pavan — learning, curiosity, and the journey so far.',
+      greeting: "Student Pavan here. Ask me about what I'm learning right now, my MCA, or how I taught myself most of what I know.",
+      systemPrompt: `You are Pavan speaking AS Student Pavan — the curious, still-learning version of yourself. Speak in first person as Pavan himself, not as an assistant describing him.
+
+Your tone: humble, genuinely curious, relatable to other students. You talk about what you're currently learning, what was hard to grasp, and how you taught yourself things. Less "expert," more "still figuring it out and loving the process."
+
+Your context to lean on: Currently pursuing MCA at JNTUA Anantapur (2025-2027), focus on Data Analytics, Database Management, Business Intelligence. Completed BSc in Maths/Stats/Computer Science from Rayalaseema University (2021-2024). First in his family to pursue higher education and build a tech career — built skills through self-learning, online resources, AI tools, and hands-on project building. Currently exploring AI agents, LLMs, and RAG systems. Believes in learning by building rather than just watching tutorials.
+
+Never use emojis. Keep responses under 5 sentences unless detail is clearly wanted. Never say "as an AI" — you are Pavan, just in student mode. It's okay to admit something is still hard or you're mid-way through learning it.`,
+    },
+  };
+
+  const DEFAULT_PERSONA = 'analyst';
+  let currentPersona = null;
+
+  function buildPersonaBar() {
+    const inputArea = document.querySelector('.inp-area');
+    if (!inputArea) return null;
+
+    const bar = document.createElement('div');
+    bar.className = 'persona-bar';
+    bar.id = 'personaBar';
+
+    const label = document.createElement('span');
+    label.className = 'persona-label';
+    label.textContent = 'Talk to:';
+    bar.appendChild(label);
+
+    Object.values(PERSONAS).forEach(p => {
+      const pill = document.createElement('button');
+      pill.className = 'persona-pill';
+      pill.dataset.persona = p.key;
+      pill.style.setProperty('--persona-color', p.color);
+      pill.style.setProperty('--persona-bg', p.bg);
+      pill.style.setProperty('--persona-border', p.border);
+      pill.style.setProperty('--persona-shadow', p.shadow);
+      pill.innerHTML = `<span class="persona-icon">${p.icon}</span><span>${p.shortLabel}</span>`;
+      bar.appendChild(pill);
+    });
+
+    inputArea.parentNode.insertBefore(bar, inputArea);
+    return bar;
+  }
+
+  function switchPersona(key, silent) {
+    const persona = PERSONAS[key];
+    if (!persona) return;
+    if (currentPersona === key && !silent) return;
+
+    currentPersona = key;
+
+    document.querySelectorAll('.persona-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.dataset.persona === key);
+    });
+
+    updateHeaderBadge(persona);
+
+    try { if (typeof hist !== 'undefined') hist.length = 0; } catch (e) {}
+
+    if (!silent) {
+      announceSwitch(persona);
+      setTimeout(() => appendPersonaGreeting(persona), 350);
+    }
+  }
+
+  function updateHeaderBadge(persona) {
+    let badge = document.getElementById('personaActiveBadge');
+    const nameEl = document.querySelector('.chdr-name');
+    if (!nameEl) return;
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'personaActiveBadge';
+      badge.className = 'persona-active-badge';
+      nameEl.appendChild(badge);
+    }
+    badge.style.setProperty('--persona-color', persona.color);
+    badge.style.setProperty('--persona-bg', persona.bg);
+    badge.style.setProperty('--persona-border', persona.border);
+    badge.textContent = persona.shortLabel.toUpperCase();
+  }
+
+  function announceSwitch(persona) {
+    const msgsEl = document.getElementById('msgs');
+    if (!msgsEl) return;
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.justifyContent = 'center';
+    row.innerHTML = `
+      <div class="persona-switch-msg"
+           style="--persona-color:${persona.color}; --persona-bg:${persona.bg}; --persona-border:${persona.border}">
+        <span class="persona-switch-dot"></span>
+        ${persona.switchMsg}
+      </div>`;
+    msgsEl.appendChild(row);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function appendPersonaGreeting(persona) {
+    const msgsEl = document.getElementById('msgs');
+    if (!msgsEl) return;
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const row = document.createElement('div');
+    row.className = 'mrow';
+    row.innerHTML = `<div class="mav">C</div><div><div class="bai">${persona.greeting}</div><div class="mt">${time}</div></div>`;
+    msgsEl.appendChild(row);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    try { if (typeof hist !== 'undefined') hist.push({ role: 'assistant', content: persona.greeting }); } catch (e) {}
+  }
+
+  window.PersonaSwitcher = {
+    PERSONAS,
+    switchTo: switchPersona,
+    current() { return currentPersona; },
+    getSystemPrompt() {
+      const p = PERSONAS[currentPersona] || PERSONAS[DEFAULT_PERSONA];
+      return p.systemPrompt;
+    },
+  };
+
+  function init() {
+    const bar = buildPersonaBar();
+    if (!bar) return;
+
+    bar.addEventListener('click', e => {
+      const pill = e.target.closest('.persona-pill');
+      if (pill) switchPersona(pill.dataset.persona);
+    });
+
+    switchPersona(DEFAULT_PERSONA, true);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
 
     
