@@ -3516,3 +3516,372 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
   }
 
 })();
+
+
+
+/* ═══════════════════════════════════════════
+   CANDY TRAINING ROOM (Private — Pavan only)
+═══════════════════════════════════════════ */
+(function TrainingRoom() {
+  'use strict';
+
+  const TRAIN_PASSWORD = 'Kalyan@21'; // change this to whatever you like
+  const WORKER_BASE = 'https://pk-groq-proxy.daroorpavankalyan.workers.dev';
+
+  let trainHist = [];
+  let learnedFacts = []; // [{id, text}]
+  let pendingFactText = null;
+  let unlocked = false;
+
+  /* ── Build hidden trigger + gate + room DOM ── */
+  function buildDOM() {
+    // Hidden trigger
+    const trigger = document.createElement('div');
+    trigger.className = 'train-trigger';
+    trigger.id = 'trainTrigger';
+    trigger.title = '';
+    trigger.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.2 4.2l4.2 4.2m7.2 7.2l4.2 4.2M1 12h6m10 0h6M4.2 19.8l4.2-4.2m7.2-7.2l4.2-4.2"/></svg>`;
+    document.body.appendChild(trigger);
+
+    // Password gate
+    const gate = document.createElement('div');
+    gate.className = 'train-gate-overlay';
+    gate.id = 'trainGate';
+    gate.innerHTML = `
+      <div class="train-gate-card">
+        <div class="train-gate-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div class="train-gate-title">Restricted Access</div>
+        <div class="train-gate-sub">CANDY TRAINING ROOM · AUTHORIZED ONLY</div>
+        <input type="password" class="train-gate-input" id="trainPassInput" placeholder="Enter access code" autocomplete="off"/>
+        <button class="train-gate-btn" id="trainGateBtn">Enter Room</button>
+        <div class="train-gate-err" id="trainGateErr"></div>
+      </div>`;
+    document.body.appendChild(gate);
+
+    // Room
+    const room = document.createElement('div');
+    room.className = 'train-room';
+    room.id = 'trainRoom';
+    room.innerHTML = `
+      <canvas class="train-particle-canvas" id="trainParticleCanvas"></canvas>
+      <div class="train-header">
+        <div class="train-header-left">
+          <div class="train-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
+          <div>
+            <div class="train-title">Training Room<span class="priv-tag">PRIVATE</span></div>
+            <div class="train-sub"><span class="train-live-dot"></span>Pavan ↔ Candy · facts taught here update her knowledge</div>
+          </div>
+        </div>
+        <div class="train-header-acts">
+          <div class="train-stat-pill" id="trainFactCount">0 facts taught</div>
+          <button class="train-close-btn" id="trainCloseBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Close
+          </button>
+        </div>
+      </div>
+      <div class="train-body">
+        <div class="train-chat-col">
+          <div class="train-messages" id="trainMessages"></div>
+          <div class="train-input-area">
+            <div class="train-input-row">
+              <textarea class="train-textarea" id="trainTextarea" placeholder="Tell Candy something new, or correct something she got wrong..." rows="1"></textarea>
+              <button class="train-send-btn" id="trainSendBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+            <div class="train-input-hint">Facts you approve get queued for Candy's permanent knowledge</div>
+          </div>
+        </div>
+        <div class="train-facts-col">
+          <div class="train-facts-header"><div class="train-facts-title">Learned this session</div></div>
+          <div class="train-facts-list" id="trainFactsList">
+            <div class="train-facts-empty" id="trainFactsEmpty">No facts taught yet.<br>Chat naturally — Candy will flag anything new she should remember.</div>
+          </div>
+          <div class="train-facts-footer">
+            <button class="train-export-btn" id="trainExportBtn">Export Learned Facts</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(room);
+  }
+
+  /* ── Particle canvas (subtle drifting dots) ── */
+  function startParticles() {
+    const canvas = document.getElementById('trainParticleCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      particles = [];
+      const n = Math.floor((W * H) / 9000);
+      for (let i = 0; i < n; i++) {
+        particles.push({
+          x: Math.random() * W, y: Math.random() * H,
+          r: Math.random() * 1.4 + 0.3,
+          a: Math.random() * 0.4 + 0.1,
+          da: (Math.random() - 0.5) * 0.006,
+          vy: Math.random() * 0.15 + 0.03,
+        });
+      }
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => {
+        p.a += p.da;
+        if (p.a <= 0.05 || p.a >= 0.55) p.da *= -1;
+        p.y += p.vy;
+        if (p.y > H) { p.y = 0; p.x = Math.random() * W; }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(196,181,253,${p.a})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    resize(); draw();
+  }
+
+  /* ── Gate logic ── */
+  function openGate() {
+    document.getElementById('trainGate').classList.add('active');
+    document.getElementById('trainPassInput').value = '';
+    document.getElementById('trainGateErr').textContent = '';
+    setTimeout(() => document.getElementById('trainPassInput').focus(), 200);
+  }
+  function closeGate() {
+    document.getElementById('trainGate').classList.remove('active');
+  }
+  function attemptUnlock() {
+    const val = document.getElementById('trainPassInput').value;
+    if (val === TRAIN_PASSWORD) {
+      unlocked = true;
+      closeGate();
+      openRoom();
+    } else {
+      const err = document.getElementById('trainGateErr');
+      err.textContent = 'Incorrect access code';
+      document.getElementById('trainPassInput').value = '';
+      setTimeout(() => { err.textContent = ''; }, 2000);
+    }
+  }
+
+  /* ── Room open/close ── */
+  function openRoom() {
+    document.getElementById('trainRoom').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    if (trainHist.length === 0) {
+      appendTrainMsg('candy', "Hey Pavan — this is our private room. Teach me anything I'm missing or correct something I got wrong, and I'll flag it so you can lock it in.");
+    }
+  }
+  function closeRoom() {
+    document.getElementById('trainRoom').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  /* ── Chat rendering ── */
+  function appendTrainMsg(who, text) {
+    const msgsEl = document.getElementById('trainMessages');
+    const row = document.createElement('div');
+    row.className = `tmrow ${who === 'pavan' ? 'tmrow--u' : ''}`;
+    const avLetter = who === 'pavan' ? 'P' : 'C';
+    const avClass = who === 'pavan' ? 'tmav--pavan' : 'tmav--candy';
+    const bubbleClass = who === 'pavan' ? 'tbubble--pavan' : 'tbubble--candy';
+    row.innerHTML = `<div class="tmav ${avClass}">${avLetter}</div><div class="tbubble ${bubbleClass}">${text}</div>`;
+    msgsEl.appendChild(row);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    return row;
+  }
+
+  function appendFactCard(factText) {
+    const msgsEl = document.getElementById('trainMessages');
+    const id = 'fact-' + Date.now();
+    const wrap = document.createElement('div');
+    wrap.style.display = 'flex';
+    wrap.innerHTML = `
+      <div class="fact-card" id="${id}">
+        <div class="fact-card-label"><span class="fact-card-icon">💡</span>New fact detected</div>
+        <div class="fact-card-text">${factText}</div>
+        <div class="fact-card-actions">
+          <button class="fact-btn fact-btn--approve" data-action="approve">Approve & Remember</button>
+          <button class="fact-btn fact-btn--discard" data-action="discard">Discard</button>
+        </div>
+      </div>`;
+    msgsEl.appendChild(wrap);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    wrap.querySelector('[data-action="approve"]').addEventListener('click', (e) => {
+      approveFact(factText);
+      wrap.querySelectorAll('.fact-btn').forEach(b => b.classList.add('done'));
+      e.target.textContent = 'Approved ✓';
+    });
+    wrap.querySelector('[data-action="discard"]').addEventListener('click', (e) => {
+      wrap.querySelectorAll('.fact-btn').forEach(b => b.classList.add('done'));
+      e.target.textContent = 'Discarded';
+    });
+  }
+
+  /* ── Fact approval → side panel + (later) Worker POST ── */
+  function approveFact(text) {
+    const fact = { id: 'lf-' + Date.now(), text };
+    learnedFacts.push(fact);
+    renderFactsList();
+    // Queue for backend persistence (see setupWorkerStorage below — no-op until Worker route exists)
+    sendFactToWorker(fact);
+  }
+
+  function renderFactsList() {
+    const list = document.getElementById('trainFactsList');
+    const empty = document.getElementById('trainFactsEmpty');
+    const countPill = document.getElementById('trainFactCount');
+    countPill.textContent = `${learnedFacts.length} fact${learnedFacts.length === 1 ? '' : 's'} taught`;
+
+    if (learnedFacts.length === 0) {
+      if (empty) empty.style.display = 'block';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+
+    list.innerHTML = '';
+    learnedFacts.forEach(f => {
+      const item = document.createElement('div');
+      item.className = 'learned-fact-item';
+      item.innerHTML = `${f.text}<div class="learned-fact-remove" data-id="${f.id}">✕</div>`;
+      item.querySelector('.learned-fact-remove').addEventListener('click', () => {
+        learnedFacts = learnedFacts.filter(x => x.id !== f.id);
+        renderFactsList();
+      });
+      list.appendChild(item);
+    });
+  }
+
+  /* ── Send to Worker (placeholder until backend route exists) ── */
+  async function sendFactToWorker(fact) {
+    try {
+      await fetch(WORKER_BASE + '/learn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fact: fact.text, key: TRAIN_PASSWORD }),
+      });
+    } catch (e) {
+      // Worker route doesn't exist yet — fails silently for now.
+      // Once /learn is built on the Worker, this will actually persist.
+      console.log('[TrainingRoom] Worker not yet configured for /learn:', e.message);
+    }
+  }
+
+  /* ── Export facts as text ── */
+  function exportFacts() {
+    if (learnedFacts.length === 0) { showToast?.('No facts to export yet'); return; }
+    const text = learnedFacts.map((f, i) => `${i + 1}. ${f.text}`).join('\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'candy-learned-facts.txt';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  /* ── Send message to Candy (training context) ── */
+  async function sendTrainMsg() {
+    const ta = document.getElementById('trainTextarea');
+    const text = ta.value.trim();
+    if (!text) return;
+    ta.value = ''; ta.style.height = 'auto';
+
+    appendTrainMsg('pavan', escTrain(text));
+    trainHist.push({ role: 'user', content: text });
+
+    const typingRow = appendTrainMsg('candy', `<div style="display:flex;gap:5px"><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:trainBlink 1s infinite"></span><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:trainBlink 1s infinite .2s"></span><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:trainBlink 1s infinite .4s"></span></div>`);
+
+    const TRAIN_SYS = `You are Candy, but right now you are talking ONLY to Pavan in a private training session — not a regular visitor. He may teach you new facts about himself, correct things you got wrong, or just chat. 
+
+When Pavan tells you something that sounds like a new fact or correction worth remembering permanently (a new project, a changed detail, a new skill, a preference, a correction to existing info), respond conversationally AND end your reply with a line in this EXACT format on its own line:
+FACT::<the fact, written as a clean standalone sentence in third person about Pavan>
+
+If nothing fact-worthy was said (e.g. just casual chat, a question, small talk), do not include a FACT:: line at all.
+
+Keep your conversational reply warm and brief — you're talking to Pavan directly, so be relaxed and direct, not formal. Never use emojis.`;
+
+    try {
+      const res = await fetch(WORKER_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'system', content: TRAIN_SYS }, ...trainHist],
+          max_tokens: 400, temperature: 0.7, stream: false,
+        }),
+      });
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content?.trim() || "Got it.";
+      typingRow.remove();
+
+      // Split out FACT:: line if present
+      const factMatch = reply.match(/FACT::\s*(.+)/);
+      const cleanReply = reply.replace(/FACT::\s*.+/, '').trim();
+
+      appendTrainMsg('candy', escTrain(cleanReply || "Noted."));
+      trainHist.push({ role: 'assistant', content: reply });
+      if (trainHist.length > 30) trainHist = trainHist.slice(-30);
+
+      if (factMatch && factMatch[1]) {
+        appendFactCard(escTrain(factMatch[1].trim()));
+      }
+    } catch (err) {
+      typingRow.remove();
+      appendTrainMsg('candy', 'Connection hiccup — try again?');
+    }
+  }
+
+  function escTrain(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── Wire everything up ── */
+  function init() {
+    buildDOM();
+    startParticles();
+
+    document.getElementById('trainTrigger').addEventListener('click', openGate);
+    document.getElementById('trainGateBtn').addEventListener('click', attemptUnlock);
+    document.getElementById('trainPassInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptUnlock();
+    });
+    document.getElementById('trainGate').addEventListener('click', e => {
+      if (e.target.id === 'trainGate') closeGate();
+    });
+
+    document.getElementById('trainCloseBtn').addEventListener('click', closeRoom);
+    document.getElementById('trainSendBtn').addEventListener('click', sendTrainMsg);
+    const ta = document.getElementById('trainTextarea');
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendTrainMsg(); }
+    });
+    ta.addEventListener('input', () => {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 130) + 'px';
+    });
+
+    document.getElementById('trainExportBtn').addEventListener('click', exportFacts);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
