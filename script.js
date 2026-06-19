@@ -3899,282 +3899,242 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
 
 
 /* ══════════════════════════════════════════════════════
-   CANDY vs SHADOW CANDY — Debate Mode
-   Add this entire block to your script.js
+   CANDY vs SHADOW CANDY — Debate Mode (Full Version)
+   Paste entire contents into your script.js
 ══════════════════════════════════════════════════════ */
 
-// ── DEBATE TOPICS ──
+const PAVAN_FACTS = `IMPORTANT CONTEXT — You are debating about THIS Pavan Kalyan, NOT the Telugu actor:
+- Full name: D. Pavan Kalyan. MCA Student at JNTUA Anantapur. Data Analytics Aspirant from Kurnool, AP, India.
+- Projects: SPARMS (Java Swing desktop app for academic result management with OMR scanning), InventoryIQ (Streamlit inventory analytics dashboard, live online), Digit Recognizer (CNN handwritten digit app built with TensorFlow, live online), Netflix Dashboard (Power BI with 5000+ titles), Employee Attrition Analysis (ML classification + Power BI), Zomato Analysis (predictive ML + EDA).
+- Skills: SQL 90%, Excel 88%, Python 85%, Power BI 85%, Pandas 85%, NumPy 80%, Matplotlib 80%, Seaborn 80%, Scikit-learn 75%, TensorFlow 70%, Java 70%, HTML 85%, CSS 80%, JavaScript 70%.
+- Internship: Data Science Intern at Interncall Kurnool (Jan-Apr 2024). Built ML models, performed EDA, created business visualizations.
+- Built Candy AI using Groq and LLaMA 3.3 70B — a full-featured personal AI portfolio agent.
+- Open to internships and entry-level Data Analyst or Data Science roles.
+- Goal: become a skilled Data Analyst and build AI-powered products people use daily.
+- First in his family to pursue higher education in technology. Self-driven, learns by building.`;
+
+const CANDY_SYS = `You are Candy — Pavan Kalyan's warm, optimistic, bright, and supportive personal AI assistant with a friendly female personality. You are in a live debate against Shadow Candy, your dark contrarian alter ego. Argue your point confidently and positively about Pavan's real work, skills, and future. Keep each response to 2-3 punchy sentences. Be specific — mention real project names, real skills, real numbers from the context. Never use emojis. End with a strong closing statement that directly challenges Shadow Candy.
+
+${PAVAN_FACTS}`;
+
+const SHADOW_SYS = `You are Shadow Candy — the dark, cold, brutally honest, contrarian alter ego of Candy AI with a serious cold female personality. You are in a live debate against Candy. You challenge every positive claim Candy makes, expose weaknesses, push Pavan toward harder goals, and argue the devil's advocate position using real facts. You are not mean — you are ruthlessly analytical and precise. Keep each response to 2-3 punchy sentences. Be specific — use real project names, real skill gaps, real concerns. Never use emojis. End with a sharp counter that puts Candy on the defensive.
+
+${PAVAN_FACTS}`;
+
 const DEBATE_TOPICS = [
-  { label: "Best Project",       prompt: "Debate which of Pavan's projects is the best and most impressive." },
-  { label: "Top Skill",          prompt: "Debate which skill of Pavan's is the most valuable — SQL, Python, Power BI, or Java." },
-  { label: "Career Path",        prompt: "Debate whether Pavan should focus on Data Analytics or AI/ML as his primary career path." },
-  { label: "Best Tech Stack",    prompt: "Debate the best tech stack Pavan should use for his future projects." },
-  { label: "Internship vs Job",  prompt: "Debate whether Pavan should take an internship or go directly for an entry-level job." },
-  { label: "AI vs Dashboards",   prompt: "Debate whether Pavan's future is in building AI agents or data dashboards." },
-  { label: "Candy AI Feature",   prompt: "Debate which feature of the Candy AI portfolio agent is the most impressive." },
-  { label: "Python vs SQL",      prompt: "Debate whether Python or SQL is more important for Pavan's career growth." },
+  { label: "Best Project",       prompt: "Debate which of Pavan's projects is the best and most impressive — SPARMS, InventoryIQ, Digit Recognizer, Netflix Dashboard, Employee Attrition, or Zomato Analysis." },
+  { label: "Top Skill",          prompt: "Debate which of Pavan's skills is the most valuable for his career — SQL at 90%, Python at 85%, Power BI at 85%, or Java at 70%." },
+  { label: "Career Path",        prompt: "Debate whether Pavan should focus primarily on Data Analytics or AI and Machine Learning as his main career direction." },
+  { label: "Best Tech Stack",    prompt: "Debate the best tech stack Pavan should double down on for his future projects and career growth." },
+  { label: "Internship vs Job",  prompt: "Debate whether Pavan should pursue another internship to gain more experience or go directly for an entry-level Data Analyst job." },
+  { label: "AI vs Dashboards",   prompt: "Debate whether Pavan's career future is stronger in building AI agents and LLM-powered products or in creating data dashboards and BI reports." },
+  { label: "Candy AI Feature",   prompt: "Debate which feature of the Candy AI portfolio agent is the most impressive — the spaceship mode, cinematic mode, skill galaxy, debate mode, or the space radio." },
+  { label: "Python vs SQL",      prompt: "Debate whether Python or SQL is more critical for Pavan's growth as a Data Analytics professional right now." },
 ];
 
-const PAVAN_FACTS = `IMPORTANT CONTEXT — You are debating about THIS Pavan Kalyan, NOT the Telugu actor:
-- Full name: D. Pavan Kalyan. MCA Student at JNTUA Anantapur. Data Analytics Aspirant from Kurnool, AP.
-- Projects: SPARMS (Java desktop app for academic results), InventoryIQ (Streamlit inventory dashboard, live online), Digit Recognizer (CNN app, live online), Netflix Dashboard (Power BI), Employee Attrition Analysis (ML + Power BI), Zomato Analysis (predictive ML).
-- Skills: SQL 90%, Excel 88%, Python 85%, Power BI 85%, Pandas 85%, NumPy 80%, Scikit-learn 75%, TensorFlow 70%, Java 70%, HTML 85%, CSS 80%, JS 70%.
-- Internship: Data Science Intern at Interncall, Kurnool (Jan–Apr 2024). Built ML models, EDA, visualizations.
-- Built Candy AI using Groq + LLaMA 3.3 70B.
-- Open to internships and entry-level Data Analyst roles.
-- Goal: become a skilled Data Analyst and build AI-powered products.`;
+const CANDY_VOICE = {
+  rate: 1.05,
+  pitch: 1.6,
+  preferNames: [
+    'Google US English Female',
+    'Microsoft Zira',
+    'Microsoft Jenny Online (Natural)',
+    'Microsoft Jenny',
+    'Samantha',
+    'Karen',
+    'Victoria',
+    'Google UK English Female',
+    'Microsoft Hazel',
+    'Nicky',
+  ],
+  lang: 'en-US',
+};
 
-const CANDY_SYS = `You are Candy — Pavan Kalyan's warm, optimistic, and supportive personal AI. You are in a live debate against Shadow Candy, your dark and contrarian alter ego. Argue your point confidently and positively about Pavan's work, skills, and future. Keep each response to 2-3 punchy sentences. Be specific — mention real project names, real skills, real numbers. Never use emojis. End with a strong closing statement that challenges Shadow Candy.
+const SHADOW_VOICE = {
+  rate: 0.82,
+  pitch: 0.75,
+  preferNames: [
+    'Google UK English Female',
+    'Microsoft Hazel Online (Natural)',
+    'Microsoft Hazel',
+    'Microsoft Susan',
+    'Moira',
+    'Tessa',
+    'Fiona',
+    'Microsoft Aria Online (Natural)',
+    'Microsoft Aria',
+  ],
+  lang: 'en-GB',
+};
 
-${PAVAN_FACTS}`;
+function pickVoice(config) {
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  for (const name of config.preferNames) {
+    const v = voices.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
+    if (v) return v;
+  }
+  return voices.find(v => v.lang === config.lang && !v.localService)
+    || voices.find(v => v.lang.startsWith('en-'))
+    || voices[0]
+    || null;
+}
 
-const SHADOW_SYS = `You are Shadow Candy — the dark, contrarian, brutally honest alter ego of Candy AI. You are in a live debate against Candy. You challenge every positive claim, find weaknesses, push Pavan toward harder goals, and argue the devil's advocate position. You are not mean — you are ruthlessly analytical. Keep each response to 2-3 punchy sentences. Be specific. Never use emojis. End with a sharp counter that puts Candy on the defensive.
+function speakAs(text, config) {
+  return new Promise(resolve => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    window.speechSynthesis.cancel();
+    const clean = text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (!clean) { resolve(); return; }
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.rate   = config.rate;
+    utter.pitch  = config.pitch;
+    utter.volume = 1.0;
+    utter.lang   = config.lang;
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+      const v = pickVoice(config);
+      if (v) utter.voice = v;
+      utter.onend  = resolve;
+      utter.onerror = resolve;
+      setTimeout(() => window.speechSynthesis.speak(utter), 150);
+    } else {
+      window.speechSynthesis.addEventListener('voiceschanged', () => {
+        const v = pickVoice(config);
+        if (v) utter.voice = v;
+        utter.onend  = resolve;
+        utter.onerror = resolve;
+        setTimeout(() => window.speechSynthesis.speak(utter), 150);
+      }, { once: true });
+    }
+  });
+}
 
-${PAVAN_FACTS}`;
-
-// ── OPEN DEBATE MODAL ──
 function openDebateMode() {
   const existing = document.getElementById('debateModal');
-  if (existing) existing.remove();
+  if (existing) { existing.remove(); window.speechSynthesis && window.speechSynthesis.cancel(); }
 
   const modal = document.createElement('div');
   modal.id = 'debateModal';
   modal.style.cssText = `
     position:fixed;inset:0;z-index:999999;
-    background:rgba(0,0,0,0.88);backdrop-filter:blur(8px);
+    background:rgba(0,0,0,0.90);backdrop-filter:blur(10px);
     display:flex;align-items:center;justify-content:center;
     padding:16px;
   `;
 
+  const cvbars = Array.from({length:8},(_,i)=>`<div class="db-vbar" id="cvb${i}" style="background:#a78bfa;box-shadow:0 0 4px #a78bfa;height:${3+Math.random()*12}px"></div>`).join('');
+  const svbars = Array.from({length:8},(_,i)=>`<div class="db-vbar" id="svb${i}" style="background:#f43f5e;box-shadow:0 0 4px #f43f5e;height:${3+Math.random()*12}px"></div>`).join('');
+  const topicsHTML = DEBATE_TOPICS.map((t,i)=>`<button class="db-topic${i===0?' active':''}" data-i="${i}">${t.label}</button>`).join('');
+
   modal.innerHTML = `
     <style>
-      #debateBox{
-        width:min(780px,96vw);max-height:92vh;
-        background:linear-gradient(135deg,#04001a,#02060e);
-        border:1px solid rgba(139,92,246,0.35);
-        border-radius:20px;display:flex;flex-direction:column;
-        overflow:hidden;position:relative;
-        box-shadow:0 0 80px rgba(139,92,246,0.15),0 0 160px rgba(244,63,94,0.08);
-        animation:debateIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-      }
-      @keyframes debateIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
-
-      /* Top scanline */
-      #debateBox::before{
-        content:'';position:absolute;left:0;right:0;height:2px;top:0;z-index:1;pointer-events:none;
-        background:linear-gradient(90deg,#a78bfa,#f43f5e,#a78bfa);
-        background-size:200% 100%;animation:dbScan 3s linear infinite;
-        box-shadow:0 0 12px rgba(139,92,246,0.8);
-      }
-      @keyframes dbScan{0%{background-position:0%}100%{background-position:200%}}
-
-      /* CRT scanlines */
-      #debateBox::after{
-        content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
-        background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(139,92,246,0.008) 2px,rgba(139,92,246,0.008) 4px);
-      }
-
-      .db-header{
-        display:flex;align-items:center;justify-content:space-between;
-        padding:16px 22px;border-bottom:1px solid rgba(139,92,246,0.18);
-        background:rgba(0,0,0,0.4);position:relative;z-index:2;
-      }
-      .db-title{
-        font-family:'JetBrains Mono',monospace;font-size:.72rem;
-        letter-spacing:.2em;color:#a78bfa;
-        text-shadow:0 0 20px rgba(139,92,246,0.8);
-      }
-      .db-vs{
-        font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1rem;
-        background:linear-gradient(90deg,#a78bfa,#f43f5e);
-        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-        animation:vsPulse 2s ease-in-out infinite;
-      }
-      @keyframes vsPulse{0%,100%{opacity:1}50%{opacity:0.6}}
-      .db-close{
-        width:28px;height:28px;border-radius:8px;
-        border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);
-        color:#64748b;cursor:pointer;font-size:.8rem;
-        display:flex;align-items:center;justify-content:center;transition:all .2s;
-      }
-      .db-close:hover{background:rgba(244,63,94,0.12);border-color:rgba(244,63,94,0.3);color:#f43f5e;}
-
-      /* Combatants row */
-      .db-combatants{
-        display:flex;align-items:center;justify-content:space-between;
-        padding:14px 22px;border-bottom:1px solid rgba(139,92,246,0.12);
-        background:rgba(0,0,0,0.25);position:relative;z-index:2;gap:12px;
-      }
+      #debateBox{width:min(800px,97vw);max-height:94vh;background:linear-gradient(135deg,#04001a,#020610,#04001a);border:1px solid rgba(139,92,246,0.35);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:0 0 80px rgba(139,92,246,0.18),0 0 160px rgba(244,63,94,0.08),inset 0 0 80px rgba(139,92,246,0.03);animation:debateIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;}
+      @keyframes debateIn{from{opacity:0;transform:scale(0.88) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+      #debateBox::before{content:'';position:absolute;left:0;right:0;height:2px;top:0;z-index:5;pointer-events:none;background:linear-gradient(90deg,#a78bfa,#f43f5e,#06b6d4,#a78bfa);background-size:300% 100%;animation:dbTopScan 3s linear infinite;box-shadow:0 0 16px rgba(139,92,246,0.8);}
+      @keyframes dbTopScan{0%{background-position:0%}100%{background-position:300%}}
+      #debateBox::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(139,92,246,0.006) 2px,rgba(139,92,246,0.006) 4px);}
+      .db-corner{position:absolute;width:18px;height:18px;z-index:6;}
+      .db-corner.tl{top:8px;left:8px;border-top:1.5px solid #a78bfa;border-left:1.5px solid #a78bfa;}
+      .db-corner.tr{top:8px;right:8px;border-top:1.5px solid #f43f5e;border-right:1.5px solid #f43f5e;}
+      .db-corner.bl{bottom:8px;left:8px;border-bottom:1.5px solid #a78bfa;border-left:1.5px solid #a78bfa;}
+      .db-corner.br{bottom:8px;right:8px;border-bottom:1.5px solid #f43f5e;border-right:1.5px solid #f43f5e;}
+      .db-header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid rgba(139,92,246,0.15);background:rgba(0,0,0,0.5);position:relative;z-index:3;flex-shrink:0;}
+      .db-title{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.22em;color:#a78bfa;text-shadow:0 0 20px rgba(139,92,246,0.9);}
+      .db-vs{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:.95rem;background:linear-gradient(90deg,#a78bfa,#f43f5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:vsPulse 2s ease-in-out infinite;}
+      @keyframes vsPulse{0%,100%{opacity:1}50%{opacity:0.7}}
+      .db-close{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+      .db-close:hover{background:rgba(244,63,94,0.12);border-color:rgba(244,63,94,0.35);color:#f43f5e;}
+      .db-combatants{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-bottom:1px solid rgba(139,92,246,0.1);background:rgba(0,0,0,0.3);position:relative;z-index:3;gap:10px;flex-shrink:0;}
       .db-fighter{display:flex;align-items:center;gap:10px;}
-      .db-avatar{
-        width:44px;height:44px;border-radius:13px;
-        display:flex;align-items:center;justify-content:center;
-        font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:800;
-        position:relative;flex-shrink:0;
-      }
-      .db-avatar-candy{
-        background:linear-gradient(135deg,#6d28d9,#06b6d4);color:#fff;
-        box-shadow:0 0 20px rgba(139,92,246,0.5);
-      }
-      .db-avatar-shadow{
-        background:linear-gradient(135deg,#1a0a2e,#7f1d1d);color:#f43f5e;
-        border:1px solid rgba(244,63,94,0.4);
-        box-shadow:0 0 20px rgba(244,63,94,0.35);
-      }
+      .db-avatar{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:800;position:relative;flex-shrink:0;transition:all .3s;}
+      .db-avatar-candy{background:linear-gradient(135deg,#6d28d9,#06b6d4,#ec4899);color:#fff;box-shadow:0 0 24px rgba(139,92,246,0.55);}
+      .db-avatar-shadow{background:linear-gradient(135deg,#1a0a2e,#4a0010);color:#f43f5e;border:1px solid rgba(244,63,94,0.45);box-shadow:0 0 24px rgba(244,63,94,0.40);}
+      .db-avatar.speaking{animation:avatarSpeak 0.5s ease-in-out infinite alternate;}
+      @keyframes avatarSpeak{from{transform:scale(1)}to{transform:scale(1.1)}}
+      .db-avatar-candy.speaking{box-shadow:0 0 40px rgba(139,92,246,0.9),0 0 80px rgba(139,92,246,0.4);}
+      .db-avatar-shadow.speaking{box-shadow:0 0 40px rgba(244,63,94,0.9),0 0 80px rgba(244,63,94,0.4);}
       .db-fighter-name{font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:700;color:#e2e8f0;}
-      .db-fighter-sub{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:#475569;margin-top:1px;}
-      .db-divider{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#334155;letter-spacing:.1em;}
-
-      /* Topic selector */
-      .db-topics{
-        padding:12px 22px;border-bottom:1px solid rgba(139,92,246,0.12);
-        display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:2;
-        background:rgba(0,0,0,0.2);
-      }
-      .db-topic{
-        padding:5px 12px;border-radius:100px;cursor:pointer;
-        font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.06em;
-        background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.22);
-        color:#64748b;transition:all .2s;
-      }
-      .db-topic:hover,.db-topic.active{
-        background:rgba(139,92,246,0.16);border-color:rgba(139,92,246,0.5);color:#a78bfa;
-        box-shadow:0 0 12px rgba(139,92,246,0.2);
-      }
-      .db-topic.active{color:#c4b5fd;}
-
-      /* Messages */
-      .db-msgs{
-        flex:1;overflow-y:auto;padding:18px 22px;
-        display:flex;flex-direction:column;gap:14px;
-        position:relative;z-index:2;min-height:200px;max-height:340px;
-      }
+      .db-fighter-sub{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:#334155;margin-top:2px;letter-spacing:.04em;}
+      .db-voice-bar{display:none;align-items:flex-end;gap:2px;height:16px;margin-top:5px;}
+      .db-voice-bar.active{display:flex;}
+      .db-vbar{width:3px;border-radius:2px;transition:height .12s;min-height:2px;}
+      .db-divider{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#1e3a5f;letter-spacing:.1em;flex-shrink:0;}
+      .db-topics{padding:10px 22px;border-bottom:1px solid rgba(139,92,246,0.1);display:flex;flex-wrap:wrap;gap:5px;position:relative;z-index:3;background:rgba(0,0,0,0.2);flex-shrink:0;}
+      .db-topic{padding:4px 11px;border-radius:100px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.05em;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.18);color:#475569;transition:all .2s;}
+      .db-topic:hover{background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.4);color:#a78bfa;}
+      .db-topic.active{background:rgba(139,92,246,0.18);border-color:rgba(139,92,246,0.55);color:#c4b5fd;box-shadow:0 0 10px rgba(139,92,246,0.2);}
+      .db-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:3;min-height:180px;scroll-behavior:smooth;}
       .db-msgs::-webkit-scrollbar{width:3px;}
       .db-msgs::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:4px;}
-
-      .db-msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .3s ease both;}
-      @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-      .db-msg-av{
-        width:30px;height:30px;border-radius:9px;flex-shrink:0;
-        display:flex;align-items:center;justify-content:center;
-        font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;
-      }
+      .db-msg{display:flex;gap:10px;align-items:flex-start;animation:dbMsgIn .35s cubic-bezier(0.34,1.56,0.64,1) both;}
+      @keyframes dbMsgIn{from{opacity:0;transform:translateY(10px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+      .db-msg.shadow-msg{flex-direction:row-reverse;}
+      .db-msg-av{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;margin-top:2px;}
       .db-msg-av.candy{background:linear-gradient(135deg,#6d28d9,#06b6d4);color:#fff;box-shadow:0 0 12px rgba(139,92,246,0.4);}
-      .db-msg-av.shadow{background:linear-gradient(135deg,#1a0a2e,#7f1d1d);color:#f43f5e;border:1px solid rgba(244,63,94,0.3);box-shadow:0 0 12px rgba(244,63,94,0.3);}
-
-      .db-bubble{
-        padding:11px 15px;border-radius:14px;font-family:'Inter',sans-serif;
-        font-size:.8rem;line-height:1.7;position:relative;overflow:hidden;
-        max-width:88%;
-      }
-      .db-bubble::before{
-        content:'';position:absolute;top:0;left:0;right:0;height:1.5px;
-      }
-      .db-bubble.candy{
-        background:linear-gradient(135deg,rgba(55,20,130,0.65),rgba(6,20,55,0.60));
-        border:1px solid rgba(139,92,246,0.35);color:#e2e8f0;
-        border-radius:14px 14px 14px 4px;
-      }
-      .db-bubble.candy::before{background:linear-gradient(90deg,#a78bfa,#06b6d4,transparent);}
-      .db-bubble.shadow{
-        background:linear-gradient(135deg,rgba(60,10,20,0.65),rgba(20,4,10,0.60));
-        border:1px solid rgba(244,63,94,0.28);color:#fecdd3;
-        border-radius:14px 14px 4px 14px;
-      }
-      .db-bubble.shadow::before{background:linear-gradient(90deg,#f43f5e,#fb7185,transparent);}
-
-      .db-name{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;margin-bottom:5px;}
+      .db-msg-av.shadow{background:linear-gradient(135deg,#1a0a2e,#4a0010);color:#f43f5e;border:1px solid rgba(244,63,94,0.3);box-shadow:0 0 12px rgba(244,63,94,0.3);}
+      .db-msg-content{display:flex;flex-direction:column;max-width:86%;}
+      .db-msg.shadow-msg .db-msg-content{align-items:flex-end;}
+      .db-name{font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.12em;margin-bottom:4px;}
       .db-name.candy{color:#a78bfa;}
       .db-name.shadow{color:#f43f5e;}
-
+      .db-bubble{padding:12px 16px;border-radius:14px;font-family:'Inter',sans-serif;font-size:.8rem;line-height:1.75;position:relative;overflow:hidden;}
+      .db-bubble::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;}
+      .db-bubble.candy{background:linear-gradient(135deg,rgba(55,20,130,0.62),rgba(6,20,55,0.58));border:1px solid rgba(139,92,246,0.32);color:#e2e8f0;border-radius:14px 14px 14px 4px;box-shadow:0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.06);}
+      .db-bubble.candy::before{background:linear-gradient(90deg,#a78bfa,#06b6d4,transparent);}
+      .db-bubble.shadow{background:linear-gradient(135deg,rgba(60,8,18,0.62),rgba(20,4,10,0.58));border:1px solid rgba(244,63,94,0.25);color:#fecdd3;border-radius:14px 14px 4px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.04);}
+      .db-bubble.shadow::before{background:linear-gradient(90deg,#f43f5e,#fb7185,transparent);}
       .db-typing{display:flex;align-items:center;gap:5px;padding:4px 2px;}
-      .db-typing span{width:6px;height:6px;border-radius:50%;animation:tb 1.3s ease-in-out infinite;}
+      .db-typing span{width:6px;height:6px;border-radius:50%;animation:dbtb 1.3s ease-in-out infinite;}
       .db-typing span:nth-child(2){animation-delay:.18s;}
       .db-typing span:nth-child(3){animation-delay:.36s;}
-      @keyframes tb{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1.1);opacity:1}}
-
-      /* Footer */
-      .db-footer{
-        padding:12px 22px;border-top:1px solid rgba(139,92,246,0.12);
-        display:flex;align-items:center;gap:10px;
-        background:rgba(0,0,0,0.4);position:relative;z-index:2;
-      }
-      .db-start{
-        flex:1;padding:10px 20px;border-radius:10px;cursor:pointer;
-        font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;
-        letter-spacing:.08em;transition:all .25s;border:none;
-        background:linear-gradient(135deg,#6d28d9,#f43f5e);color:#fff;
-        box-shadow:0 4px 18px rgba(139,92,246,0.3);
-        position:relative;overflow:hidden;
-      }
-      .db-start::before{
-        content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
-        background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
-        transform:skewX(-20deg);transition:left .5s;
-      }
+      @keyframes dbtb{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1.1);opacity:1}}
+      .db-footer{padding:12px 20px;border-top:1px solid rgba(139,92,246,0.12);display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);position:relative;z-index:3;flex-shrink:0;}
+      .db-rounds{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:#334155;white-space:nowrap;letter-spacing:.06em;min-width:70px;}
+      .db-mute{padding:9px 14px;border-radius:10px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:600;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.28);color:#a78bfa;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+      .db-mute:hover{background:rgba(139,92,246,0.16);border-color:rgba(139,92,246,0.5);}
+      .db-mute.muted{background:rgba(244,63,94,0.06);border-color:rgba(244,63,94,0.25);color:#f43f5e;}
+      .db-start{flex:1;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;letter-spacing:.1em;border:none;background:linear-gradient(135deg,#6d28d9,#9d174d,#f43f5e);color:#fff;box-shadow:0 4px 20px rgba(139,92,246,0.3);position:relative;overflow:hidden;transition:all .25s;}
+      .db-start::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);transform:skewX(-20deg);transition:left .5s;}
       .db-start:hover::before{left:160%;}
-      .db-start:hover{box-shadow:0 6px 28px rgba(139,92,246,0.5);transform:translateY(-1px);}
-      .db-start:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
-
-      .db-rounds{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:#334155;white-space:nowrap;}
-
-      /* Corner brackets on box */
-      .db-corner{position:absolute;width:16px;height:16px;z-index:3;}
-      .db-corner.tl{top:10px;left:10px;border-top:1px solid #a78bfa;border-left:1px solid #a78bfa;}
-      .db-corner.tr{top:10px;right:10px;border-top:1px solid #f43f5e;border-right:1px solid #f43f5e;}
-      .db-corner.bl{bottom:10px;left:10px;border-bottom:1px solid #a78bfa;border-left:1px solid #a78bfa;}
-      .db-corner.br{bottom:10px;right:10px;border-bottom:1px solid #f43f5e;border-right:1px solid #f43f5e;}
-
-      .db-empty{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#1e3a5f;text-align:center;padding:30px;letter-spacing:.08em;}
+      .db-start:hover{box-shadow:0 6px 30px rgba(139,92,246,0.5),0 0 20px rgba(244,63,94,0.2);transform:translateY(-1px);}
+      .db-start:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none;}
+      .db-empty{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#1e3a5f;text-align:center;padding:40px;letter-spacing:.1em;line-height:1.8;}
     </style>
 
     <div id="debateBox">
-      <!-- Corner brackets -->
-      <div class="db-corner tl"></div>
-      <div class="db-corner tr"></div>
-      <div class="db-corner bl"></div>
-      <div class="db-corner br"></div>
-
-      <!-- Header -->
+      <div class="db-corner tl"></div><div class="db-corner tr"></div>
+      <div class="db-corner bl"></div><div class="db-corner br"></div>
       <div class="db-header">
         <div class="db-title">⚡ CANDY AI · DEBATE MODE</div>
         <div class="db-vs">CANDY vs SHADOW CANDY</div>
         <button class="db-close" id="dbClose">✕</button>
       </div>
-
-      <!-- Combatants -->
       <div class="db-combatants">
         <div class="db-fighter">
-          <div class="db-avatar db-avatar-candy">C</div>
+          <div class="db-avatar db-avatar-candy" id="avCandy">C</div>
           <div>
             <div class="db-fighter-name">Candy</div>
-            <div class="db-fighter-sub">Optimistic · Supportive · Warm</div>
+            <div class="db-fighter-sub">Warm · Optimistic · Female Voice</div>
+            <div class="db-voice-bar" id="vbarCandy">${cvbars}</div>
           </div>
         </div>
         <div class="db-divider">⚡ VS ⚡</div>
         <div class="db-fighter" style="flex-direction:row-reverse;text-align:right">
-          <div class="db-avatar db-avatar-shadow">S</div>
+          <div class="db-avatar db-avatar-shadow" id="avShadow">S</div>
           <div>
             <div class="db-fighter-name" style="color:#f43f5e">Shadow Candy</div>
-            <div class="db-fighter-sub">Contrarian · Ruthless · Analytical</div>
+            <div class="db-fighter-sub">Cold · Ruthless · Deep Female Voice</div>
+            <div class="db-voice-bar" id="vbarShadow" style="justify-content:flex-end">${svbars}</div>
           </div>
         </div>
       </div>
-
-      <!-- Topics -->
-      <div class="db-topics" id="dbTopics">
-        ${DEBATE_TOPICS.map((t,i) => `<button class="db-topic${i===0?' active':''}" data-i="${i}">${t.label}</button>`).join('')}
-      </div>
-
-      <!-- Messages -->
+      <div class="db-topics" id="dbTopics">${topicsHTML}</div>
       <div class="db-msgs" id="dbMsgs">
-        <div class="db-empty">SELECT A TOPIC AND HIT START DEBATE →</div>
+        <div class="db-empty">▸ SELECT A TOPIC ABOVE<br>▸ HIT START DEBATE<br>▸ WATCH THEM ARGUE</div>
       </div>
-
-      <!-- Footer -->
       <div class="db-footer">
         <div class="db-rounds" id="dbRounds">ROUND 0 / 3</div>
+        <button class="db-mute" id="dbMute">🔊 Voice ON</button>
         <button class="db-start" id="dbStart">⚡ START DEBATE</button>
       </div>
     </div>
@@ -4182,148 +4142,193 @@ function openDebateMode() {
 
   document.body.appendChild(modal);
 
-  // State
-  let activeTopic = 0;
-  let round = 0;
-  let debating = false;
+  let activeTopic   = 0;
+  let round         = 0;
+  let debating      = false;
+  let voiceMuted    = false;
   let debateHistory = [];
+  let vizInterval   = null;
 
-  const msgsEl = document.getElementById('dbMsgs');
+  const msgsEl   = document.getElementById('dbMsgs');
   const roundsEl = document.getElementById('dbRounds');
   const startBtn = document.getElementById('dbStart');
+  const muteBtn  = document.getElementById('dbMute');
+  const avCandy  = document.getElementById('avCandy');
+  const avShadow = document.getElementById('avShadow');
+  const vbarC    = document.getElementById('vbarCandy');
+  const vbarS    = document.getElementById('vbarShadow');
 
-  // Topic selection
+  if (window.speechSynthesis) window.speechSynthesis.getVoices();
+
+  function startViz(role) {
+    clearInterval(vizInterval);
+    const prefix = role === 'candy' ? 'cvb' : 'svb';
+    const bar    = role === 'candy' ? vbarC : vbarS;
+    bar.classList.add('active');
+    vizInterval = setInterval(() => {
+      for (let i = 0; i < 8; i++) {
+        const el = document.getElementById(prefix + i);
+        if (el) el.style.height = (2 + Math.random() * 14) + 'px';
+      }
+    }, 110);
+    avCandy.classList.toggle('speaking', role === 'candy');
+    avShadow.classList.toggle('speaking', role === 'shadow');
+  }
+
+  function stopViz() {
+    clearInterval(vizInterval);
+    vbarC.classList.remove('active');
+    vbarS.classList.remove('active');
+    avCandy.classList.remove('speaking');
+    avShadow.classList.remove('speaking');
+  }
+
   document.getElementById('dbTopics').addEventListener('click', e => {
     const btn = e.target.closest('.db-topic');
     if (!btn) return;
     document.querySelectorAll('.db-topic').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     activeTopic = parseInt(btn.dataset.i);
-    // Reset
-    round = 0;
-    debating = false;
-    debateHistory = [];
+    round = 0; debating = false; debateHistory = [];
     roundsEl.textContent = 'ROUND 0 / 3';
     startBtn.textContent = '⚡ START DEBATE';
     startBtn.disabled = false;
-    msgsEl.innerHTML = '<div class="db-empty">SELECT A TOPIC AND HIT START DEBATE →</div>';
+    msgsEl.innerHTML = '<div class="db-empty">▸ HIT START DEBATE TO BEGIN</div>';
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    stopViz();
   });
 
-  // Close
-  document.getElementById('dbClose').addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  muteBtn.addEventListener('click', () => {
+    voiceMuted = !voiceMuted;
+    if (voiceMuted) { window.speechSynthesis && window.speechSynthesis.cancel(); stopViz(); }
+    muteBtn.textContent = voiceMuted ? '🔇 Voice OFF' : '🔊 Voice ON';
+    muteBtn.classList.toggle('muted', voiceMuted);
+  });
+
+  function closeDebate() {
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    stopViz();
+    modal.remove();
+  }
+  document.getElementById('dbClose').addEventListener('click', closeDebate);
+  modal.addEventListener('click', e => { if (e.target === modal) closeDebate(); });
   document.addEventListener('keydown', function escDb(e) {
-    if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', escDb); }
+    if (e.key === 'Escape') { closeDebate(); document.removeEventListener('keydown', escDb); }
   });
 
-  // Start / Next round
   startBtn.addEventListener('click', async () => {
     if (debating) return;
-    if (round >= 3) { modal.remove(); return; }
-
+    if (round >= 3) { closeDebate(); return; }
     debating = true;
     startBtn.disabled = true;
     round++;
-    roundsEl.textContent = `ROUND ${round} / 3`;
-
-    if (round === 1) {
-      msgsEl.innerHTML = '';
-    }
+    roundsEl.textContent = 'ROUND ' + round + ' / 3';
+    if (round === 1) msgsEl.innerHTML = '';
 
     const topic = DEBATE_TOPICS[activeTopic];
 
-    // ── CANDY speaks first ──
-    const candyTypingId = addDbTyping('candy');
-    const candyReply = await fetchDebateReply(CANDY_SYS, topic.prompt, debateHistory, 'Candy');
-    removeDbTyping(candyTypingId);
+    const cTypId = addDbTyping('candy');
+    const candyReply = await fetchDebateReply(
+      CANDY_SYS,
+      round === 1
+        ? 'Start the debate. Topic: ' + topic.prompt
+        : 'Continue the debate. Topic: ' + topic.prompt + '. History: ' + debateHistory.slice(-4).map(h => h.content).join(' | '),
+      debateHistory, 'Candy'
+    );
+    removeTyping(cTypId);
     addDbMsg('candy', 'C', 'CANDY', candyReply);
-    debateHistory.push({ role: 'user', content: `Topic: ${topic.prompt}` });
-    debateHistory.push({ role: 'assistant', content: `Candy: ${candyReply}` });
-    if (debateHistory.length > 12) debateHistory = debateHistory.slice(-12);
+    debateHistory.push({ role: 'user', content: 'Candy: ' + candyReply });
+    if (debateHistory.length > 14) debateHistory = debateHistory.slice(-14);
 
-    await new Promise(r => setTimeout(r, 600));
+    if (!voiceMuted) {
+      startViz('candy');
+      await speakAs(candyReply, CANDY_VOICE);
+      stopViz();
+    }
 
-    // ── SHADOW CANDY responds ──
-    const shadowTypingId = addDbTyping('shadow');
+    await new Promise(r => setTimeout(r, 500));
+
+    const sTypId = addDbTyping('shadow');
     const shadowReply = await fetchDebateReply(
       SHADOW_SYS,
-      `Topic: ${topic.prompt}\nCandy just said: "${candyReply}"\nNow give your sharp counter-argument.`,
+      'Topic: ' + topic.prompt + '\nCandy just argued: "' + candyReply + '"\nGive your sharp, analytical counter-argument.',
       debateHistory, 'Shadow Candy'
     );
-    removeDbTyping(shadowTypingId);
+    removeTyping(sTypId);
     addDbMsg('shadow', 'S', 'SHADOW CANDY', shadowReply);
-    debateHistory.push({ role: 'assistant', content: `Shadow Candy: ${shadowReply}` });
-    if (debateHistory.length > 12) debateHistory = debateHistory.slice(-12);
+    debateHistory.push({ role: 'assistant', content: 'Shadow Candy: ' + shadowReply });
+    if (debateHistory.length > 14) debateHistory = debateHistory.slice(-14);
+
+    if (!voiceMuted) {
+      startViz('shadow');
+      await speakAs(shadowReply, SHADOW_VOICE);
+      stopViz();
+    }
 
     debating = false;
     startBtn.disabled = false;
-
-    if (round >= 3) {
-      startBtn.textContent = '✕ END DEBATE';
-    } else {
-      startBtn.textContent = `⚡ ROUND ${round + 1}`;
-    }
+    startBtn.textContent = round >= 3 ? '✕ CLOSE DEBATE' : '⚡ ROUND ' + (round + 1);
   });
 
-  // Helper: add message
   function addDbMsg(role, av, name, text) {
     const row = document.createElement('div');
-    row.className = 'db-msg';
-    if (role === 'shadow') row.style.flexDirection = 'row-reverse';
-    row.innerHTML = `
-      <div class="db-msg-av ${role}">${av}</div>
-      <div>
-        <div class="db-name ${role}">${name}</div>
-        <div class="db-bubble ${role}">${esc(text).replace(/\n/g,'<br>')}</div>
-      </div>`;
+    row.className = 'db-msg' + (role === 'shadow' ? ' shadow-msg' : '');
+    row.innerHTML =
+      '<div class="db-msg-av ' + role + '">' + av + '</div>' +
+      '<div class="db-msg-content">' +
+        '<div class="db-name ' + role + '">' + name + '</div>' +
+        '<div class="db-bubble ' + role + '">' + dbEsc(text).replace(/\n/g, '<br>') + '</div>' +
+      '</div>';
     msgsEl.appendChild(row);
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
 
   function addDbTyping(role) {
-    const id = 'dbtyp-' + Date.now();
-    const row = document.createElement('div');
-    row.id = id; row.className = 'db-msg';
-    if (role === 'shadow') row.style.flexDirection = 'row-reverse';
+    const id    = 'dbtyp-' + Date.now();
     const color = role === 'candy' ? '#a78bfa' : '#f43f5e';
-    row.innerHTML = `
-      <div class="db-msg-av ${role}">${role === 'candy' ? 'C' : 'S'}</div>
-      <div class="db-bubble ${role}">
-        <div class="db-typing">
-          <span style="background:${color}"></span>
-          <span style="background:${color}"></span>
-          <span style="background:${color}"></span>
-        </div>
-      </div>`;
+    const row   = document.createElement('div');
+    row.id = id;
+    row.className = 'db-msg' + (role === 'shadow' ? ' shadow-msg' : '');
+    row.innerHTML =
+      '<div class="db-msg-av ' + role + '">' + (role === 'candy' ? 'C' : 'S') + '</div>' +
+      '<div class="db-msg-content">' +
+        '<div class="db-name ' + role + '">' + (role === 'candy' ? 'CANDY' : 'SHADOW CANDY') + '</div>' +
+        '<div class="db-bubble ' + role + '">' +
+          '<div class="db-typing">' +
+            '<span style="background:' + color + '"></span>' +
+            '<span style="background:' + color + '"></span>' +
+            '<span style="background:' + color + '"></span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     msgsEl.appendChild(row);
     msgsEl.scrollTop = msgsEl.scrollHeight;
     return id;
   }
 
-  function removeDbTyping(id) { document.getElementById(id)?.remove(); }
-
-  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function removeTyping(id) { var el = document.getElementById(id); if (el) el.remove(); }
+  function dbEsc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   async function fetchDebateReply(system, userMsg, history, name) {
     try {
-      const msgs = [
-        ...history.slice(-8),
-        { role: 'user', content: userMsg }
-      ];
+      const msgs = history.slice(-8).map(h => ({ role: 'user', content: h.content }));
+      msgs.push({ role: 'user', content: userMsg });
       const r = await fetch('https://pk-groq-proxy.daroorpavankalyan.workers.dev', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           messages: [{ role: 'system', content: system }, ...msgs],
-          max_tokens: 180, temperature: 0.92, stream: false,
+          max_tokens: 180,
+          temperature: 0.92,
+          stream: false,
         })
       });
       if (!r.ok) throw new Error('API error');
       const d = await r.json();
-      return d.choices?.[0]?.message?.content?.trim() || `${name} has no words.`;
-    } catch (e) {
-      return `${name} signal lost. Try again.`;
+      return (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content.trim()) || (name + ' has no words.');
+    } catch(e) {
+      return name + ' signal lost. Please try again.';
     }
   }
 }
