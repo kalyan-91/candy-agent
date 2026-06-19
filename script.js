@@ -3699,6 +3699,50 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
     document.body.style.overflow = '';
   }
 
+
+function startParticles() {
+  const canvas = document.getElementById('trainParticleCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  const cols = ['#ddd6fe','#a5f3fc','#fde68a','#fda4af','#ffffff','#c7d2fe','#99f6e4','#fbcfe8'];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    particles = [];
+    const n = Math.floor((W * H) / 6500);
+    for (let i = 0; i < n; i++) {
+      particles.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: Math.random() * 1.8 + 0.4,
+        a: Math.random(),
+        da: (Math.random() - 0.5) * 0.01,
+        col: cols[Math.floor(Math.random() * cols.length)],
+      });
+    }
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.a = Math.max(0.1, Math.min(1, p.a + p.da));
+      if (p.a <= 0.1 || p.a >= 1) p.da *= -1;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = p.a;
+      ctx.shadowColor = p.col;
+      ctx.shadowBlur = p.r > 1.2 ? 8 : 4;
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize(); draw();
+}
+  
+
   /* ── Chat rendering ── */
   function appendTrainMsg(who, text) {
     const msgsEl = document.getElementById('trainMessages');
