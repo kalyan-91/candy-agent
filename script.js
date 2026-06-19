@@ -1716,7 +1716,7 @@ if (adminTrigger && adminOverlay) {
     adminOverlay.classList.remove('active');
     document.body.style.overflow = '';
   }
-}
+});
 
 /* ══════════ THEME ══════════ */
 function applyTheme(t) {
