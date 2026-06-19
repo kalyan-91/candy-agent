@@ -4583,109 +4583,93 @@ function openDebateMode() {
 }
 
 
-/* ═══════════════════════════════════════════
-   CONSTELLATION BUILDER — constellation.js
-   Paste into your script.js or link separately
+ /* ═══════════════════════════════════════════
+   CONSTELLATION BUILDER — Fixed JS
+   Paste at the bottom of your script.js
 ═══════════════════════════════════════════ */
 
 (function() {
 
-  /* ── State ── */
   const C = {
-    stars: [],
-    lines: [],
-    mode: 'add',
-    color: '#00d4ff',
-    selStar: null,
-    connecting: null,
-    hovStar: null,
-    bgStars: [],
-    animT: 0,
-    animFrame: null,
-    bgFrame: null,
-    W: 0,
-    H: 0,
-    bgW: 0,
-    bgH: 0,
+    stars: [], lines: [], mode: 'add', color: '#00d4ff',
+    selStar: null, connecting: null, hovStar: null,
+    bgStars: [], animT: 0, animFrame: null, bgFrame: null,
+    W: 0, H: 0, bgW: 0, bgH: 0, mousePos: null
   };
 
-  /* ── DOM refs (resolved on open) ── */
   let panel, canvas, ctx, bgCanvas, bgCtx, tooltip, hint, nameInput;
+  let _click, _move, _leave, _resize;
 
-  /* ══════════════════════════════════
-     PUBLIC: open / close
-  ══════════════════════════════════ */
+  /* ── Open ── */
   window.openConstellation = function() {
-    panel = document.getElementById('constellationPanel');
-    canvas = document.getElementById('constCanvas');
-    bgCanvas = document.getElementById('constBgCanvas');
-    tooltip = document.getElementById('constTooltip');
-    hint = document.getElementById('constHint');
+    /* Hide the spaceship main screen and show constellation panel */
+    const ssMain = document.getElementById('ssMain');
+    const ssHud  = document.getElementById('spaceshipOverlay');
+
+    panel     = document.getElementById('constellationPanel');
+    canvas    = document.getElementById('constCanvas');
+    bgCanvas  = document.getElementById('constBgCanvas');
+    tooltip   = document.getElementById('constTooltip');
+    hint      = document.getElementById('constHint');
     nameInput = document.getElementById('constName');
 
-    ctx = canvas.getContext('2d');
+    if (!panel || !canvas) { console.error('Constellation: panel or canvas not found'); return; }
+
+    ctx   = canvas.getContext('2d');
     bgCtx = bgCanvas.getContext('2d');
 
     panel.classList.add('active');
-    constResize();
-    constGenBgStars();
-    constBindEvents();
-    constBgLoop();
-    constDraw();
+    document.body.style.overflow = 'hidden';
 
-    /* Load saved constellation if exists */
-    constLoad();
+    setTimeout(() => {
+      constResize();
+      constGenBgStars();
+      constBindEvents();
+      constBgLoop();
+      constDrawLoop();
+      constLoad();
+    }, 50);
   };
 
+  /* ── Close ── */
   window.closeConstellation = function() {
-    panel.classList.remove('active');
+    if (panel) panel.classList.remove('active');
+    document.body.style.overflow = '';
     constUnbindEvents();
-    cancelAnimationFrame(C.animFrame);
-    cancelAnimationFrame(C.bgFrame);
-    C.animFrame = null;
-    C.bgFrame = null;
-    /* Save on close */
+    if (C.animFrame) { cancelAnimationFrame(C.animFrame); C.animFrame = null; }
+    if (C.bgFrame)   { cancelAnimationFrame(C.bgFrame);   C.bgFrame   = null; }
     constSave();
   };
 
-  /* ══════════════════════════════════
-     RESIZE
-  ══════════════════════════════════ */
+  /* ── Resize ── */
   function constResize() {
+    if (!canvas) return;
     const wrap = canvas.parentElement;
-    C.W = canvas.width = wrap.clientWidth;
-    C.H = canvas.height = wrap.clientHeight;
-    C.bgW = bgCanvas.width = window.innerWidth;
+    C.W = canvas.width  = wrap.clientWidth  || window.innerWidth;
+    C.H = canvas.height = wrap.clientHeight || (window.innerHeight - 180);
+    C.bgW = bgCanvas.width  = window.innerWidth;
     C.bgH = bgCanvas.height = window.innerHeight;
-    if (!C.bgStars.length) constGenBgStars();
   }
 
-  /* ══════════════════════════════════
-     BACKGROUND STAR FIELD
-  ══════════════════════════════════ */
-  const BG_COLORS = [
-    'rgba(255,255,255,',
-    'rgba(180,220,255,',
-    'rgba(200,190,255,',
-    'rgba(255,240,200,',
-    'rgba(160,230,255,'
-  ];
+  /* ── Background stars ── */
+  const BG_COLS = ['rgba(255,255,255,','rgba(180,220,255,','rgba(200,190,255,','rgba(255,240,200,'];
 
   function constGenBgStars() {
     C.bgStars = [];
     for (let i = 0; i < 220; i++) {
       C.bgStars.push({
-        x: Math.random() * C.bgW,
-        y: Math.random() * C.bgH,
-        r: Math.random() * 1.1 + 0.2,
-        a: Math.random() * 0.7 + 0.2,
+        x:  Math.random() * C.bgW,
+        y:  Math.random() * C.bgH,
+        r:  Math.random() * 1.1 + 0.2,
+        a:  Math.random() * 0.7 + 0.2,
         da: (Math.random() * 0.007 + 0.002) * (Math.random() < 0.5 ? 1 : -1),
-        c: BG_COLORS[Math.floor(Math.random() * BG_COLORS.length)]
+        c:  BG_COLS[Math.floor(Math.random() * BG_COLS.length)]
       });
     }
   }
 
   function constBgLoop() {
+    if (!bgCtx) return;
     C.bgStars.forEach(s => {
       s.a += s.da;
       if (s.a > 0.9 || s.a < 0.1) s.da *= -1;
@@ -4700,132 +4684,101 @@ function openDebateMode() {
     C.bgFrame = requestAnimationFrame(constBgLoop);
   }
 
-  /* ══════════════════════════════════
-     MAIN DRAW
-  ══════════════════════════════════ */
+  /* ── Main draw loop ── */
+  function constDrawLoop() {
+    constDraw();
+    C.animFrame = requestAnimationFrame(constDrawLoop);
+  }
+
   function constDraw() {
-    if (!ctx) return;
+    if (!ctx || !C.W) return;
     ctx.clearRect(0, 0, C.W, C.H);
 
-    /* Draw connection lines */
+    /* Lines */
     C.lines.forEach(l => {
       const a = C.stars[l.a], b = C.stars[l.b];
       if (!a || !b) return;
       const lg = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-      lg.addColorStop(0, hexA(a.c, 0.5));
-      lg.addColorStop(0.5, hexA(l.c || a.c, 0.85));
-      lg.addColorStop(1, hexA(b.c, 0.5));
+      lg.addColorStop(0,   hexA(a.c, 0.5));
+      lg.addColorStop(0.5, hexA(l.c || a.c, 0.88));
+      lg.addColorStop(1,   hexA(b.c, 0.5));
       ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.strokeStyle = lg;
-      ctx.lineWidth = 1.3;
-      ctx.setLineDash([]);
-      ctx.shadowColor = l.c || a.c;
-      ctx.shadowBlur = 7;
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      /* Midpoint sparkle */
-      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-      ctx.beginPath();
-      ctx.arc(mx, my, 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = hexA(l.c || a.c, 0.65);
-      ctx.fill();
+      ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = lg; ctx.lineWidth = 1.3;
+      ctx.shadowColor = l.c || a.c; ctx.shadowBlur = 8;
+      ctx.stroke(); ctx.shadowBlur = 0;
+      /* midpoint dot */
+      const mx = (a.x+b.x)/2, my = (a.y+b.y)/2;
+      ctx.beginPath(); ctx.arc(mx, my, 2, 0, Math.PI*2);
+      ctx.fillStyle = hexA(l.c||a.c, 0.6); ctx.fill();
     });
 
-    /* Draw preview line while connecting */
+    /* Preview line while connecting */
     if (C.connecting !== null && C.mousePos) {
       const a = C.stars[C.connecting];
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y);
       ctx.lineTo(C.mousePos.x, C.mousePos.y);
-      ctx.strokeStyle = hexA(C.color, 0.45);
-      ctx.lineWidth = 1;
-      ctx.setLineDash([5, 5]);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      ctx.strokeStyle = hexA(C.color, 0.4);
+      ctx.lineWidth = 1; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
     }
 
-    /* Draw stars */
+    /* Stars */
     C.stars.forEach((s, i) => {
-      const isHov = s === C.hovStar;
-      const isSel = i === C.selStar;
+      const isHov = s === C.hovStar, isSel = i === C.selStar;
 
-      /* Glow aura */
-      const aura = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 5);
-      aura.addColorStop(0, hexA(s.c, 0.20));
-      aura.addColorStop(1, 'transparent');
-      ctx.fillStyle = aura;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r * 5, 0, Math.PI * 2);
-      ctx.fill();
+      /* Aura */
+      const aura = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*6);
+      aura.addColorStop(0, hexA(s.c, 0.18)); aura.addColorStop(1,'transparent');
+      ctx.fillStyle = aura; ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r*6, 0, Math.PI*2); ctx.fill();
 
-      /* Selection / hover ring */
+      /* Selection ring */
       if (isSel || isHov) {
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r + 8, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r+9, 0, Math.PI*2);
         ctx.strokeStyle = hexA(s.c, isHov ? 0.7 : 0.5);
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        ctx.lineWidth = 1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
       }
 
-      /* Star rays */
+      /* Rays */
       const rays = s.pts || 6;
       for (let r = 0; r < rays; r++) {
-        const ang = (Math.PI * 2 / rays) * r;
-        const len = s.r + 5;
+        const ang = (Math.PI*2/rays)*r;
         ctx.beginPath();
-        ctx.moveTo(s.x + Math.cos(ang) * s.r, s.y + Math.sin(ang) * s.r);
-        ctx.lineTo(s.x + Math.cos(ang) * len, s.y + Math.sin(ang) * len);
-        ctx.strokeStyle = hexA(s.c, 0.45);
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
+        ctx.moveTo(s.x + Math.cos(ang)*s.r, s.y + Math.sin(ang)*s.r);
+        ctx.lineTo(s.x + Math.cos(ang)*(s.r+6), s.y + Math.sin(ang)*(s.r+6));
+        ctx.strokeStyle = hexA(s.c, 0.45); ctx.lineWidth = 0.8; ctx.stroke();
       }
 
-      /* Star body */
-      const sg = ctx.createRadialGradient(
-        s.x - s.r * 0.3, s.y - s.r * 0.3, 0,
-        s.x, s.y, s.r
-      );
-      sg.addColorStop(0, '#ffffff');
-      sg.addColorStop(0.35, hexA(s.c, 1));
-      sg.addColorStop(1, hexA(s.c, 0.65));
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      /* Body */
+      const sg = ctx.createRadialGradient(s.x-s.r*.3,s.y-s.r*.3,0,s.x,s.y,s.r);
+      sg.addColorStop(0,'#fff'); sg.addColorStop(0.35,hexA(s.c,1)); sg.addColorStop(1,hexA(s.c,0.6));
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
       ctx.fillStyle = sg;
-      ctx.shadowColor = s.c;
-      ctx.shadowBlur = isSel ? 22 : 13;
-      ctx.fill();
-      ctx.shadowBlur = 0;
+      ctx.shadowColor = s.c; ctx.shadowBlur = isSel ? 24 : 14;
+      ctx.fill(); ctx.shadowBlur = 0;
 
-      /* Star label */
+      /* Label */
       if (s.label) {
-        ctx.font = '500 11px Inter, sans-serif';
-        ctx.fillStyle = hexA(s.c, 0.88);
+        ctx.font = '500 11px Inter,sans-serif';
+        ctx.fillStyle = hexA(s.c, 0.9);
         ctx.textAlign = 'center';
-        ctx.fillText(s.label, s.x, s.y - s.r - 8);
+        ctx.fillText(s.label, s.x, s.y - s.r - 9);
       }
     });
 
-    /* Constellation name watermark */
-    const name = nameInput ? nameInput.value : '';
-    if (name && C.stars.length > 0) {
-      ctx.font = '500 13px Inter, sans-serif';
-      ctx.fillStyle = 'rgba(167,139,250,0.30)';
+    /* Name watermark */
+    const nm = nameInput ? nameInput.value : '';
+    if (nm && C.stars.length) {
+      ctx.font = '500 13px Inter,sans-serif';
+      ctx.fillStyle = 'rgba(167,139,250,0.28)';
       ctx.textAlign = 'left';
-      ctx.fillText(name, 14, C.H - 14);
+      ctx.fillText(nm, 14, C.H - 14);
     }
 
-    /* Update HUD */
     constUpdateHUD();
-    C.animFrame = requestAnimationFrame(constDraw);
   }
 
-  /* ══════════════════════════════════
-     HUD UPDATE
-  ══════════════════════════════════ */
+  /* ── HUD ── */
   function constUpdateHUD() {
     const sn = document.getElementById('constStarNum');
     const ln = document.getElementById('constLineNum');
@@ -4833,127 +4786,94 @@ function openDebateMode() {
     const sc = document.getElementById('constStarCount');
     if (sn) sn.textContent = C.stars.length;
     if (ln) ln.textContent = C.lines.length;
-    if (ms) ms.innerHTML = 'MODE <strong>' + C.mode.toUpperCase() + '</strong>';
+    if (ms) ms.innerHTML  = 'MODE <strong>' + C.mode.toUpperCase() + '</strong>';
     if (sc) sc.textContent = C.stars.length + ' STARS';
     if (hint) hint.classList.toggle('hidden', C.stars.length > 0);
   }
 
-  /* ══════════════════════════════════
-     EVENT BINDING
-  ══════════════════════════════════ */
-  let _click, _move, _leave, _resize;
-
+  /* ── Events ── */
   function constBindEvents() {
-    _click = e => constHandleClick(e);
-    _move  = e => constHandleMove(e);
-    _leave = ()=> constHandleLeave();
-    _resize= ()=> constResize();
+    _click  = e => constHandleClick(e);
+    _move   = e => constHandleMove(e);
+    _leave  = ()=> constHandleLeave();
+    _resize = ()=> { constResize(); if(!C.bgStars.length) constGenBgStars(); };
 
-    canvas.addEventListener('click', _click);
+    canvas.addEventListener('click',     _click);
     canvas.addEventListener('mousemove', _move);
-    canvas.addEventListener('mouseleave', _leave);
-    window.addEventListener('resize', _resize);
-
-    if (nameInput) nameInput.addEventListener('input', () => {});
+    canvas.addEventListener('mouseleave',_leave);
+    window.addEventListener('resize',    _resize);
   }
 
   function constUnbindEvents() {
     if (canvas) {
-      canvas.removeEventListener('click', _click);
+      canvas.removeEventListener('click',     _click);
       canvas.removeEventListener('mousemove', _move);
-      canvas.removeEventListener('mouseleave', _leave);
+      canvas.removeEventListener('mouseleave',_leave);
     }
     window.removeEventListener('resize', _resize);
   }
 
-  /* ── Mouse helpers ── */
   function constPos(e) {
     const r = canvas.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
-  function constDist(a, b) {
-    return Math.hypot(a.x - b.x, a.y - b.y);
-  }
+  function constDist(a,b) { return Math.hypot(a.x-b.x, a.y-b.y); }
   function constHitStar(p) {
-    return C.stars.findIndex(s => constDist(p, s) < Math.max(s.r + 10, 16));
+    return C.stars.findIndex(s => constDist(p,s) < Math.max(s.r+10,16));
   }
 
-  /* ── Click handler ── */
   function constHandleClick(e) {
     const p = constPos(e);
     const hit = constHitStar(p);
 
     if (C.mode === 'add') {
       if (hit >= 0) return;
-      const label = prompt('Name this star (optional — press Enter to skip):') || '';
+      const label = prompt('Name this star (optional):') || '';
       C.stars.push({
-        x: p.x,
-        y: p.y,
-        r: Math.random() * 2.8 + 2.2,
+        x: p.x, y: p.y,
+        r: Math.random()*2.8+2.2,
         c: C.color,
         label: label.trim(),
-        pts: Math.floor(Math.random() * 3) + 4
+        pts: Math.floor(Math.random()*3)+4
       });
       constSave();
     } else {
-      /* Connect mode */
-      if (hit < 0) {
-        C.connecting = null;
-        C.selStar = null;
-        return;
-      }
+      if (hit < 0) { C.connecting = null; C.selStar = null; return; }
       if (C.connecting === null) {
-        C.connecting = hit;
-        C.selStar = hit;
+        C.connecting = hit; C.selStar = hit;
       } else {
         if (C.connecting !== hit) {
           const exists = C.lines.find(l =>
-            (l.a === C.connecting && l.b === hit) ||
-            (l.a === hit && l.b === C.connecting)
-          );
-          if (!exists) {
-            C.lines.push({ a: C.connecting, b: hit, c: C.color });
-            constSave();
-          }
+            (l.a===C.connecting&&l.b===hit)||(l.a===hit&&l.b===C.connecting));
+          if (!exists) { C.lines.push({a:C.connecting,b:hit,c:C.color}); constSave(); }
         }
-        C.connecting = null;
-        C.selStar = null;
+        C.connecting = null; C.selStar = null;
       }
     }
   }
 
-  /* ── Move handler ── */
   function constHandleMove(e) {
     const p = constPos(e);
     C.mousePos = p;
     const hit = constHitStar(p);
-    const prev = C.hovStar;
     C.hovStar = hit >= 0 ? C.stars[hit] : null;
-    canvas.style.cursor = C.hovStar
-      ? (C.mode === 'connect' ? 'pointer' : 'grab')
-      : 'crosshair';
-
-    /* Tooltip */
-    if (C.hovStar) {
-      tooltip.textContent = C.hovStar.label || ('Star #' + (C.stars.indexOf(C.hovStar) + 1));
-      tooltip.style.opacity = '1';
-      tooltip.style.left = (p.x + 18) + 'px';
-      tooltip.style.top  = (p.y - 10) + 'px';
-    } else {
-      tooltip.style.opacity = '0';
+    canvas.style.cursor = C.hovStar ? (C.mode==='connect'?'pointer':'grab') : 'crosshair';
+    if (tooltip) {
+      if (C.hovStar) {
+        tooltip.textContent = C.hovStar.label || ('Star #'+(C.stars.indexOf(C.hovStar)+1));
+        tooltip.style.opacity = '1';
+        tooltip.style.left = (p.x+18)+'px';
+        tooltip.style.top  = (p.y-10)+'px';
+      } else { tooltip.style.opacity = '0'; }
     }
   }
 
-  /* ── Leave handler ── */
   function constHandleLeave() {
-    C.hovStar = null;
-    C.mousePos = null;
+    C.hovStar = null; C.mousePos = null;
     if (tooltip) tooltip.style.opacity = '0';
   }
 
-  /* ══════════════════════════════════
-     PUBLIC CONTROLS
-  ══════════════════════════════════ */
+  /* ── Public controls ── */
   window.constSetColor = function(el) {
     document.querySelectorAll('.const-color-dot').forEach(d => d.classList.remove('sel'));
     el.classList.add('sel');
@@ -4962,79 +4882,52 @@ function openDebateMode() {
 
   window.constSetMode = function(mode) {
     C.mode = mode;
-    C.connecting = null;
-    C.selStar = null;
-    document.getElementById('constModeAdd').classList.toggle('active', mode === 'add');
-    document.getElementById('constModeConnect').classList.toggle('active', mode === 'connect');
+    C.connecting = null; C.selStar = null;
+    document.getElementById('constModeAdd')?.classList.toggle('active', mode==='add');
+    document.getElementById('constModeConnect')?.classList.toggle('active', mode==='connect');
   };
 
   window.constUndo = function() {
-    if (C.mode === 'connect' && C.lines.length) {
-      C.lines.pop();
-    } else if (C.stars.length) {
-      const i = C.stars.length - 1;
-      C.lines = C.lines.filter(l => l.a !== i && l.b !== i);
+    if (C.mode==='connect' && C.lines.length) { C.lines.pop(); }
+    else if (C.stars.length) {
+      const i = C.stars.length-1;
+      C.lines = C.lines.filter(l => l.a!==i && l.b!==i);
       C.stars.pop();
     }
-    C.connecting = null;
-    C.selStar = null;
+    C.connecting = null; C.selStar = null;
     constSave();
   };
 
   window.constClear = function() {
-    if (!confirm('Clear your entire constellation?')) return;
-    C.stars = [];
-    C.lines = [];
-    C.connecting = null;
-    C.selStar = null;
-    const ni = document.getElementById('constName');
-    if (ni) ni.value = '';
+    if (!confirm('Clear your constellation?')) return;
+    C.stars = []; C.lines = [];
+    C.connecting = null; C.selStar = null;
+    if (nameInput) nameInput.value = '';
     constSave();
   };
 
   window.constDownload = function() {
-    /* Merge bg + main canvas into one image */
     const out = document.createElement('canvas');
-    out.width = C.W;
-    out.height = C.H;
+    out.width = C.W; out.height = C.H;
     const oc = out.getContext('2d');
-
-    /* Space background */
-    const bg = oc.createLinearGradient(0, 0, C.W, C.H);
-    bg.addColorStop(0, '#030c28');
-    bg.addColorStop(0.5, '#060f34');
-    bg.addColorStop(1, '#04081e');
-    oc.fillStyle = bg;
-    oc.fillRect(0, 0, C.W, C.H);
-
-    /* Nebula overlays */
+    const bg = oc.createLinearGradient(0,0,C.W,C.H);
+    bg.addColorStop(0,'#030c28'); bg.addColorStop(.5,'#060f34'); bg.addColorStop(1,'#04081e');
+    oc.fillStyle = bg; oc.fillRect(0,0,C.W,C.H);
     const n1 = oc.createRadialGradient(C.W*.15,C.H*.2,0,C.W*.15,C.H*.2,C.W*.45);
-    n1.addColorStop(0,'rgba(0,80,200,.20)');n1.addColorStop(1,'transparent');
-    oc.fillStyle=n1;oc.fillRect(0,0,C.W,C.H);
-    const n2 = oc.createRadialGradient(C.W*.85,C.H*.78,0,C.W*.85,C.H*.78,C.W*.4);
-    n2.addColorStop(0,'rgba(100,20,200,.16)');n2.addColorStop(1,'transparent');
-    oc.fillStyle=n2;oc.fillRect(0,0,C.W,C.H);
-
-    /* Paste main canvas */
-    oc.drawImage(canvas, 0, 0);
-
-    const name = (document.getElementById('constName')?.value || 'my-constellation')
-      .replace(/\s+/g, '-').toLowerCase();
+    n1.addColorStop(0,'rgba(0,80,200,.20)'); n1.addColorStop(1,'transparent');
+    oc.fillStyle=n1; oc.fillRect(0,0,C.W,C.H);
+    oc.drawImage(canvas,0,0);
+    const nm = (nameInput?.value||'my-constellation').replace(/\s+/g,'-').toLowerCase();
     const a = document.createElement('a');
-    a.download = name + '.png';
-    a.href = out.toDataURL('image/png');
-    a.click();
+    a.download = nm+'.png'; a.href = out.toDataURL('image/png'); a.click();
   };
 
-  /* ══════════════════════════════════
-     PERSIST TO LOCALSTORAGE
-  ══════════════════════════════════ */
+  /* ── Persist ── */
   function constSave() {
     try {
       localStorage.setItem('candy_constellation', JSON.stringify({
-        stars: C.stars,
-        lines: C.lines,
-        name: document.getElementById('constName')?.value || ''
+        stars: C.stars, lines: C.lines,
+        name: nameInput?.value||''
       }));
     } catch(e) {}
   }
@@ -5044,21 +4937,14 @@ function openDebateMode() {
       const raw = localStorage.getItem('candy_constellation');
       if (!raw) return;
       const data = JSON.parse(raw);
-      C.stars = data.stars || [];
-      C.lines = data.lines || [];
-      const ni = document.getElementById('constName');
-      if (ni && data.name) ni.value = data.name;
+      C.stars = data.stars||[]; C.lines = data.lines||[];
+      if (nameInput && data.name) nameInput.value = data.name;
     } catch(e) {}
   }
 
-  /* ══════════════════════════════════
-     UTILITY
-  ══════════════════════════════════ */
   function hexA(hex, a) {
-    if (!hex || hex.length < 7) return `rgba(0,212,255,${a})`;
-    const r = parseInt(hex.slice(1,3),16);
-    const g = parseInt(hex.slice(3,5),16);
-    const b = parseInt(hex.slice(5,7),16);
+    if (!hex||hex.length<7) return `rgba(0,212,255,${a})`;
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
     return `rgba(${r},${g},${b},${a})`;
   }
 
