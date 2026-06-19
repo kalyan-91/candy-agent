@@ -1674,7 +1674,7 @@ const visitorSession = {
   msgsEl.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { inpEl.value = c.dataset.q; go(); } });
   document.getElementById('starters').addEventListener('click', e => { const b = e.target.closest('.starter'); if (b) { inpEl.value = b.dataset.q; go(); } });
 
-
+/* ── Admin overlay open/close (now inside the same DOMContentLoaded) ── */
   document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
   const pass = document.getElementById('adminPassInput').value;
   if (pass === ADMIN_PASS) {
@@ -1715,10 +1715,8 @@ if (adminTrigger && adminOverlay) {
     document.body.style.overflow = '';
   }
 }
-});
 
-/* ── Admin overlay open/close (now inside the same DOMContentLoaded) ── */
- 
+
 
 /* ══════════ THEME ══════════ */
 function applyTheme(t) {
