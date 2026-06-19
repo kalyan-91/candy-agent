@@ -1674,7 +1674,8 @@ const visitorSession = {
   msgsEl.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { inpEl.value = c.dataset.q; go(); } });
   document.getElementById('starters').addEventListener('click', e => { const b = e.target.closest('.starter'); if (b) { inpEl.value = b.dataset.q; go(); } });
 
- document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
+
+  document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
   const pass = document.getElementById('adminPassInput').value;
   if (pass === ADMIN_PASS) {
     adminUnlocked = true;
@@ -1696,7 +1697,27 @@ document.getElementById('apClose')?.addEventListener('click', () => {
   adminUnlocked = false;
   document.getElementById('adminPassInput').value = '';
 });
-});
+
+/* ── Admin overlay open/close (now inside the same DOMContentLoaded) ── */
+const adminTrigger = document.getElementById('adminTrigger');
+const adminOverlay = document.getElementById('adminOverlay');
+if (adminTrigger && adminOverlay) {
+  adminTrigger.addEventListener('click', () => {
+    adminOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('adminPassInput')?.focus(), 200);
+  });
+  adminOverlay.addEventListener('click', e => {
+    if (e.target === adminOverlay) closeAdminOverlay();
+  });
+  document.getElementById('apClose')?.addEventListener('click', closeAdminOverlay);
+  function closeAdminOverlay() {
+    adminOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+}); // ← this closes your original DOMContentLoaded wrapper
+
 
 /* ══════════ THEME ══════════ */
 function applyTheme(t) {
