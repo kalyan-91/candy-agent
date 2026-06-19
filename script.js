@@ -1805,7 +1805,6 @@ appendMessage('assistant',
         </svg>
         Take a Portfolio Tour
       </button>
-       // In appendWelcome() add this button:
        <button onclick="openDebateMode()" class="portbtn">
        Candy vs Shadow Candy
        </button>
