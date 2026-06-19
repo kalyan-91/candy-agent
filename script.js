@@ -4332,3 +4332,356 @@ function openDebateMode() {
     }
   }
 }
+
+
+/* ═══════════════════════════════════════════════
+   CANDY AI — BUILD YOUR OWN CONSTELLATION
+   Every message = a star. Topic = star color.
+   Visitor names & downloads their constellation.
+═══════════════════════════════════════════════ */
+(function ConstellationEngine() {
+  'use strict';
+
+  /* ── Star color by topic ── */
+  const TOPIC_COLORS = {
+    project:   { color: '#00d4ff', name: 'Discovery',  glow: 'rgba(0,212,255,0.8)'   },
+    skill:     { color: '#a78bfa', name: 'Wisdom',     glow: 'rgba(167,139,250,0.8)' },
+    hire:      { color: '#fbbf24', name: 'Opportunity',glow: 'rgba(251,191,36,0.8)'  },
+    personal:  { color: '#f472b6', name: 'Connection', glow: 'rgba(244,114,182,0.8)' },
+    ai:        { color: '#7dd3fc', name: 'Intelligence',glow: 'rgba(125,211,252,0.8)'},
+    general:   { color: '#c4b5fd', name: 'Curiosity',  glow: 'rgba(196,181,253,0.8)' },
+  };
+
+  const TOPIC_KEYWORDS = {
+    project:  /project|sparms|inventoryiq|digit|netflix|attrition|zomato|built|demo|github/i,
+    skill:    /skill|python|sql|java|power bi|excel|pandas|tensorflow|ml|machine learning/i,
+    hire:     /hire|hiring|job|intern|recruit|role|opportunity|available|salary/i,
+    personal: /story|journey|background|family|dream|goal|personal|first|proud|passion/i,
+    ai:       /ai|agent|llm|groq|candy|neural|model|intelligence|automation/i,
+  };
+
+  /* ── State ── */
+  const stars = [];
+  let constellationName = '';
+  let canvasEl = null;
+  let animRAF = null;
+  let panelVisible = false;
+
+  /* ── Detect topic from message ── */
+  function detectTopic(text) {
+    for (const [topic, regex] of Object.entries(TOPIC_KEYWORDS)) {
+      if (regex.test(text)) return topic;
+    }
+    return 'general';
+  }
+
+  /* ── Add a star from a message ── */
+  function addStar(text) {
+    const topic = detectTopic(text);
+    const cfg   = TOPIC_COLORS[topic];
+    stars.push({
+      x:      0.1 + Math.random() * 0.8,
+      y:      0.1 + Math.random() * 0.8,
+      r:      2.5 + Math.random() * 3,
+      color:  cfg.color,
+      glow:   cfg.glow,
+      topic,
+      topicName: cfg.name,
+      label:  text.slice(0, 18) + (text.length > 18 ? '…' : ''),
+      pulse:  Math.random() * Math.PI * 2,
+      twinkle: 0.006 + Math.random() * 0.01,
+    });
+    if (panelVisible) redraw();
+  }
+
+  /* ── Draw canvas ── */
+  function redraw() {
+    if (!canvasEl) return;
+    const ctx = canvasEl.getContext('2d');
+    const W = canvasEl.width, H = canvasEl.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    const bg = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W/1.4);
+    bg.addColorStop(0, '#030818');
+    bg.addColorStop(1, '#000408');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Background micro-stars
+    for (let i = 0; i < 80; i++) {
+      const bx = ((i * 137.5) % 100) / 100 * W;
+      const by = ((i * 97.3) % 100) / 100 * H;
+      ctx.beginPath();
+      ctx.arc(bx, by, 0.5 + (i % 3) * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${0.08 + (i % 5) * 0.04})`;
+      ctx.fill();
+    }
+
+    if (stars.length === 0) {
+      ctx.font = '13px JetBrains Mono, monospace';
+      ctx.fillStyle = 'rgba(100,116,139,0.6)';
+      ctx.textAlign = 'center';
+      ctx.fillText('Your constellation will grow with each message', W / 2, H / 2 - 10);
+      ctx.font = '11px JetBrains Mono, monospace';
+      ctx.fillStyle = 'rgba(100,116,139,0.4)';
+      ctx.fillText('Send a message to plant your first star ✦', W / 2, H / 2 + 14);
+      return;
+    }
+
+    // Connection lines between stars
+    for (let i = 0; i < stars.length - 1; i++) {
+      const a = stars[i], b = stars[i + 1];
+      const ax = a.x * W, ay = a.y * H;
+      const bx = b.x * W, by = b.y * H;
+      const grad = ctx.createLinearGradient(ax, ay, bx, by);
+      grad.addColorStop(0, a.color + '44');
+      grad.addColorStop(1, b.color + '44');
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+
+    // Stars
+    const now = Date.now() / 1000;
+    stars.forEach((s, idx) => {
+      const sx = s.x * W, sy = s.y * H;
+      const pulse = Math.sin(now * 2 + s.pulse) * 0.5 + 0.5;
+      const r = s.r + pulse * 1.2;
+
+      // Outer glow
+      const grd = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 4);
+      grd.addColorStop(0, s.color + 'cc');
+      grd.addColorStop(0.4, s.color + '44');
+      grd.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(sx, sy, r * 4, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // Star body
+      ctx.beginPath();
+      ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      const sg = ctx.createRadialGradient(sx - r * 0.3, sy - r * 0.3, 0, sx, sy, r);
+      sg.addColorStop(0, '#ffffff');
+      sg.addColorStop(0.4, s.color);
+      sg.addColorStop(1, s.color + '88');
+      ctx.fillStyle = sg;
+      ctx.shadowColor = s.color;
+      ctx.shadowBlur = 12 + pulse * 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Cross sparkle on bright stars
+      if (s.r > 3.5) {
+        const sp = r * 2.5;
+        ctx.strokeStyle = s.color + '66';
+        ctx.lineWidth = 0.6;
+        ctx.beginPath();
+        ctx.moveTo(sx - sp, sy); ctx.lineTo(sx + sp, sy);
+        ctx.moveTo(sx, sy - sp); ctx.lineTo(sx, sy + sp);
+        ctx.stroke();
+      }
+
+      // Star number
+      ctx.font = `bold ${9 + (idx === stars.length - 1 ? 1 : 0)}px JetBrains Mono, monospace`;
+      ctx.fillStyle = s.color;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = s.color;
+      ctx.shadowBlur = 6;
+      ctx.fillText(idx + 1, sx, sy - r - 10);
+      ctx.shadowBlur = 0;
+
+      // Label on hover-like last star highlight
+      if (idx === stars.length - 1) {
+        ctx.font = '8px JetBrains Mono, monospace';
+        ctx.fillStyle = 'rgba(196,181,253,0.7)';
+        ctx.textAlign = sx > W * 0.7 ? 'right' : 'left';
+        ctx.fillText(s.label, sx + (sx > W * 0.7 ? -r - 6 : r + 6), sy);
+      }
+    });
+
+    // Constellation name
+    if (constellationName) {
+      ctx.font = 'bold 13px Space Grotesk, sans-serif';
+      ctx.fillStyle = 'rgba(196,181,253,0.85)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.shadowColor = '#a78bfa';
+      ctx.shadowBlur = 12;
+      ctx.fillText(`✦ ${constellationName} ✦`, W / 2, H - 12);
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  /* ── Animate loop ── */
+  function startAnimate() {
+    if (animRAF) cancelAnimationFrame(animRAF);
+    function loop() {
+      redraw();
+      animRAF = requestAnimationFrame(loop);
+    }
+    loop();
+  }
+  function stopAnimate() {
+    if (animRAF) { cancelAnimationFrame(animRAF); animRAF = null; }
+  }
+
+  /* ── Build legend ── */
+  function buildLegend(container) {
+    const counts = {};
+    stars.forEach(s => { counts[s.topic] = (counts[s.topic] || 0) + 1; });
+    const items = Object.entries(counts).map(([topic, count]) => {
+      const cfg = TOPIC_COLORS[topic];
+      return `<div class="const-legend-item">
+        <span class="const-legend-dot" style="background:${cfg.color};box-shadow:0 0 6px ${cfg.color}"></span>
+        <span class="const-legend-name">${cfg.name}</span>
+        <span class="const-legend-count">${count}</span>
+      </div>`;
+    }).join('');
+    container.innerHTML = items;
+  }
+
+  /* ── Show constellation panel in chat ── */
+  function showPanel() {
+    if (panelVisible) return;
+    panelVisible = true;
+
+    const msgsEl = document.getElementById('msgs');
+    if (!msgsEl) return;
+
+    const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const row = document.createElement('div');
+    row.className = 'mrow const-panel-row';
+    row.id = 'constellationPanel';
+    row.innerHTML = `
+      <div class="mav" style="background:linear-gradient(135deg,#a78bfa,#00d4ff);font-size:.75rem">✦</div>
+      <div class="const-panel">
+        <div class="const-panel-header">
+          <div class="const-header-left">
+            <div class="const-title-tag">YOUR CONSTELLATION</div>
+            <div class="const-title">
+              <span id="constNameDisplay">${constellationName || 'Unnamed Constellation'}</span>
+            </div>
+          </div>
+          <div class="const-header-right">
+            <div class="const-star-count"><span id="constStarCount">${stars.length}</span> stars</div>
+          </div>
+        </div>
+
+        <canvas id="constCanvas" class="const-canvas"></canvas>
+
+        <div class="const-legend" id="constLegend"></div>
+
+        <div class="const-name-row">
+          <input type="text" id="constNameInput" class="const-name-input"
+            placeholder="Name your constellation..."
+            value="${constellationName}"
+            maxlength="30"/>
+          <button class="const-name-btn" id="constNameBtn">✦ Name It</button>
+        </div>
+
+        <div class="const-actions">
+          <button class="const-btn const-btn-dl" id="constDownload">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Constellation
+          </button>
+          <button class="const-btn const-btn-clear" id="constClear">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 .49-3.3"/>
+            </svg>
+            Reset
+          </button>
+          <button class="const-btn const-btn-close" id="constClose">✕ Close</button>
+        </div>
+        <div class="const-mt">${t}</div>
+      </div>`;
+
+    msgsEl.appendChild(row);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    // Setup canvas
+    canvasEl = document.getElementById('constCanvas');
+    canvasEl.width  = canvasEl.offsetWidth  || 500;
+    canvasEl.height = canvasEl.offsetHeight || 280;
+    new ResizeObserver(() => {
+      canvasEl.width  = canvasEl.offsetWidth;
+      canvasEl.height = canvasEl.offsetHeight || 280;
+    }).observe(canvasEl);
+
+    buildLegend(document.getElementById('constLegend'));
+    startAnimate();
+
+    // Name button
+    document.getElementById('constNameBtn').addEventListener('click', () => {
+      const val = document.getElementById('constNameInput').value.trim();
+      if (val) {
+        constellationName = val;
+        document.getElementById('constNameDisplay').textContent = val;
+        redraw();
+        if (typeof showToast === 'function') showToast(`✦ Named: ${val}`);
+      }
+    });
+    document.getElementById('constNameInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('constNameBtn').click();
+    });
+
+    // Download
+    document.getElementById('constDownload').addEventListener('click', () => {
+      redraw();
+      const link = document.createElement('a');
+      link.download = `${constellationName || 'my-constellation'}.png`;
+      link.href = canvasEl.toDataURL('image/png');
+      link.click();
+      if (typeof showToast === 'function') showToast('Constellation saved!');
+    });
+
+    // Reset
+    document.getElementById('constClear').addEventListener('click', () => {
+      stars.length = 0;
+      constellationName = '';
+      document.getElementById('constNameInput').value = '';
+      document.getElementById('constNameDisplay').textContent = 'Unnamed Constellation';
+      document.getElementById('constStarCount').textContent = '0';
+      buildLegend(document.getElementById('constLegend'));
+      redraw();
+      if (typeof showToast === 'function') showToast('Constellation reset');
+    });
+
+    // Close
+    document.getElementById('constClose').addEventListener('click', () => {
+      stopAnimate();
+      panelVisible = false;
+      canvasEl = null;
+      row.remove();
+    });
+  }
+
+  /* ── Update panel if open ── */
+  function updatePanel() {
+    const countEl = document.getElementById('constStarCount');
+    if (countEl) countEl.textContent = stars.length;
+    const legendEl = document.getElementById('constLegend');
+    if (legendEl) buildLegend(legendEl);
+  }
+
+  /* ── Public API ── */
+  window.ConstellationEngine = {
+    addStar(text) {
+      addStar(text);
+      updatePanel();
+    },
+    show: showPanel,
+    stars,
+  };
+
+})();
