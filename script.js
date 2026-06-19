@@ -4685,3 +4685,19 @@ function openDebateMode() {
   };
 
 })();
+
+/* ── Init button after DOM ready ── */
+function initConstBtn() {
+  const btn = document.getElementById('constLaunchBtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      if (window.ConstellationEngine) window.ConstellationEngine.show();
+    });
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initConstBtn);
+} else {
+  initConstBtn();
+}
