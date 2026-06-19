@@ -1674,8 +1674,8 @@ const visitorSession = {
   msgsEl.addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { inpEl.value = c.dataset.q; go(); } });
   document.getElementById('starters').addEventListener('click', e => { const b = e.target.closest('.starter'); if (b) { inpEl.value = b.dataset.q; go(); } });
 
-/* ── Admin overlay open/close (now inside the same DOMContentLoaded) ── */
-  document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
+ /* ── Admin login/logout wiring ── */
+document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
   const pass = document.getElementById('adminPassInput').value;
   if (pass === ADMIN_PASS) {
     adminUnlocked = true;
@@ -1688,16 +1688,19 @@ const visitorSession = {
     document.getElementById('adminPassInput').value = '';
   }
 });
+
 document.getElementById('adminPassInput')?.addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('adminLoginBtn')?.click();
 });
+
 document.getElementById('apClose')?.addEventListener('click', () => {
   document.getElementById('adminPanel').style.display = 'none';
   document.getElementById('adminLogin').style.display = 'block';
   adminUnlocked = false;
   document.getElementById('adminPassInput').value = '';
+});
 
-  /* ── Admin overlay open/close ── */
+/* ── Admin overlay open/close ── */
 const adminTrigger = document.getElementById('adminTrigger');
 const adminOverlay = document.getElementById('adminOverlay');
 if (adminTrigger && adminOverlay) {
@@ -1715,8 +1718,7 @@ if (adminTrigger && adminOverlay) {
     document.body.style.overflow = '';
   }
 }
-
-
+});   // ← closes window.addEventListener('DOMContentLoaded', ...)
 
 /* ══════════ THEME ══════════ */
 function applyTheme(t) {
