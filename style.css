@@ -3970,3 +3970,10 @@ body.light .persona-label { color: #6b64a0; }
   .const-name-input { width: 120px; }
   .const-color-dot { width: 18px; height: 18px; }
 }
+
+
+#constellationPanel {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 999999 !important;
+}
