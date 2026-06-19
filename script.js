@@ -4362,7 +4362,7 @@ function openDebateMode() {
    Paste at the bottom of your script.js
 ═══════════════════════════════════════════ */
 
-(function() {
+ (function() {
 
   const C = {
     stars: [], lines: [], mode: 'add', color: '#00d4ff',
@@ -4374,12 +4374,7 @@ function openDebateMode() {
   let panel, canvas, ctx, bgCanvas, bgCtx, tooltip, hint, nameInput;
   let _click, _move, _leave, _resize;
 
-  /* ── Open ── */
   window.openConstellation = function() {
-    /* Hide the spaceship main screen and show constellation panel */
-    const ssMain = document.getElementById('ssMain');
-    const ssHud  = document.getElementById('spaceshipOverlay');
-
     panel     = document.getElementById('constellationPanel');
     canvas    = document.getElementById('constCanvas');
     bgCanvas  = document.getElementById('constBgCanvas');
@@ -4405,7 +4400,6 @@ function openDebateMode() {
     }, 50);
   };
 
-  /* ── Close ── */
   window.closeConstellation = function() {
     if (panel) panel.classList.remove('active');
     document.body.style.overflow = '';
@@ -4415,7 +4409,6 @@ function openDebateMode() {
     constSave();
   };
 
-  /* ── Resize ── */
   function constResize() {
     if (!canvas) return;
     const wrap = canvas.parentElement;
@@ -4425,7 +4418,6 @@ function openDebateMode() {
     C.bgH = bgCanvas.height = window.innerHeight;
   }
 
-  /* ── Background stars ── */
   const BG_COLS = ['rgba(255,255,255,','rgba(180,220,255,','rgba(200,190,255,','rgba(255,240,200,'];
 
   function constGenBgStars() {
@@ -4458,7 +4450,6 @@ function openDebateMode() {
     C.bgFrame = requestAnimationFrame(constBgLoop);
   }
 
-  /* ── Main draw loop ── */
   function constDrawLoop() {
     constDraw();
     C.animFrame = requestAnimationFrame(constDrawLoop);
@@ -4468,7 +4459,6 @@ function openDebateMode() {
     if (!ctx || !C.W) return;
     ctx.clearRect(0, 0, C.W, C.H);
 
-    /* Lines */
     C.lines.forEach(l => {
       const a = C.stars[l.a], b = C.stars[l.b];
       if (!a || !b) return;
@@ -4481,13 +4471,11 @@ function openDebateMode() {
       ctx.strokeStyle = lg; ctx.lineWidth = 1.3;
       ctx.shadowColor = l.c || a.c; ctx.shadowBlur = 8;
       ctx.stroke(); ctx.shadowBlur = 0;
-      /* midpoint dot */
       const mx = (a.x+b.x)/2, my = (a.y+b.y)/2;
       ctx.beginPath(); ctx.arc(mx, my, 2, 0, Math.PI*2);
       ctx.fillStyle = hexA(l.c||a.c, 0.6); ctx.fill();
     });
 
-    /* Preview line while connecting */
     if (C.connecting !== null && C.mousePos) {
       const a = C.stars[C.connecting];
       ctx.beginPath(); ctx.moveTo(a.x, a.y);
@@ -4496,24 +4484,20 @@ function openDebateMode() {
       ctx.lineWidth = 1; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
     }
 
-    /* Stars */
     C.stars.forEach((s, i) => {
       const isHov = s === C.hovStar, isSel = i === C.selStar;
 
-      /* Aura */
       const aura = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*6);
       aura.addColorStop(0, hexA(s.c, 0.18)); aura.addColorStop(1,'transparent');
       ctx.fillStyle = aura; ctx.beginPath();
       ctx.arc(s.x, s.y, s.r*6, 0, Math.PI*2); ctx.fill();
 
-      /* Selection ring */
       if (isSel || isHov) {
         ctx.beginPath(); ctx.arc(s.x, s.y, s.r+9, 0, Math.PI*2);
         ctx.strokeStyle = hexA(s.c, isHov ? 0.7 : 0.5);
         ctx.lineWidth = 1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
       }
 
-      /* Rays */
       const rays = s.pts || 6;
       for (let r = 0; r < rays; r++) {
         const ang = (Math.PI*2/rays)*r;
@@ -4523,7 +4507,6 @@ function openDebateMode() {
         ctx.strokeStyle = hexA(s.c, 0.45); ctx.lineWidth = 0.8; ctx.stroke();
       }
 
-      /* Body */
       const sg = ctx.createRadialGradient(s.x-s.r*.3,s.y-s.r*.3,0,s.x,s.y,s.r);
       sg.addColorStop(0,'#fff'); sg.addColorStop(0.35,hexA(s.c,1)); sg.addColorStop(1,hexA(s.c,0.6));
       ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
@@ -4531,7 +4514,6 @@ function openDebateMode() {
       ctx.shadowColor = s.c; ctx.shadowBlur = isSel ? 24 : 14;
       ctx.fill(); ctx.shadowBlur = 0;
 
-      /* Label */
       if (s.label) {
         ctx.font = '500 11px Inter,sans-serif';
         ctx.fillStyle = hexA(s.c, 0.9);
@@ -4540,7 +4522,6 @@ function openDebateMode() {
       }
     });
 
-    /* Name watermark */
     const nm = nameInput ? nameInput.value : '';
     if (nm && C.stars.length) {
       ctx.font = '500 13px Inter,sans-serif';
@@ -4552,7 +4533,6 @@ function openDebateMode() {
     constUpdateHUD();
   }
 
-  /* ── HUD ── */
   function constUpdateHUD() {
     const sn = document.getElementById('constStarNum');
     const ln = document.getElementById('constLineNum');
@@ -4565,7 +4545,6 @@ function openDebateMode() {
     if (hint) hint.classList.toggle('hidden', C.stars.length > 0);
   }
 
-  /* ── Events ── */
   function constBindEvents() {
     _click  = e => constHandleClick(e);
     _move   = e => constHandleMove(e);
@@ -4647,7 +4626,6 @@ function openDebateMode() {
     if (tooltip) tooltip.style.opacity = '0';
   }
 
-  /* ── Public controls ── */
   window.constSetColor = function(el) {
     document.querySelectorAll('.const-color-dot').forEach(d => d.classList.remove('sel'));
     el.classList.add('sel');
@@ -4696,7 +4674,6 @@ function openDebateMode() {
     a.download = nm+'.png'; a.href = out.toDataURL('image/png'); a.click();
   };
 
-  /* ── Persist ── */
   function constSave() {
     try {
       localStorage.setItem('candy_constellation', JSON.stringify({
