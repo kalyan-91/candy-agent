@@ -3972,8 +3972,101 @@ body.light .persona-label { color: #6b64a0; }
 }
 
 
-#constellationPanel {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 999999 !important;
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #020208;
+    color: #ffffff;
+}
+
+/* Container spanning the whole screen */
+.space-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, #0a0a28 0%, #02020c 100%);
+}
+
+/* Canvas takes up full background */
+#constellationCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* UI Overlay placed on top of canvas */
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none; /* Allows clicks to pass through to the canvas */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 1rem;
+    color: #8a8ab0;
+    letter-spacing: 1px;
+}
+
+.controls {
+    margin-top: auto;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* Interactive elements need pointer-events restored */
+button {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 28px;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+button:hover {
+    background: #ffffff;
+    color: #02020c;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
 }
