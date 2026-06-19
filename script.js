@@ -3535,11 +3535,11 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
 
   /* ── Build hidden trigger + gate + room DOM ── */
   function buildDOM() {
-    // Hidden trigger
+    // Hidden trigger — bottom right corner, always on top
     const trigger = document.createElement('div');
     trigger.className = 'train-trigger';
     trigger.id = 'trainTrigger';
-    trigger.title = '';
+    trigger.title = 'Training Room';
     trigger.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.2 4.2l4.2 4.2m7.2 7.2l4.2 4.2M1 12h6m10 0h6M4.2 19.8l4.2-4.2m7.2-7.2l4.2-4.2"/></svg>`;
     document.body.appendChild(trigger);
 
@@ -3568,94 +3568,96 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
     room.className = 'train-room';
     room.id = 'trainRoom';
     room.innerHTML = `
-  <canvas class="train-particle-canvas" id="trainParticleCanvas"></canvas>
-  <div class="train-nebula train-neb1"></div>
-  <div class="train-nebula train-neb2"></div>
-  <div class="train-nebula train-neb3"></div>
-  <div class="train-nebula train-neb4"></div>
-  <div class="train-nebula train-neb5"></div>
-  <div class="train-aurora train-aurora-1"></div>
-  <div class="train-aurora train-aurora-2"></div>
-  <div class="train-cosmos-grid"></div>
-  <div class="train-header">
-    <div class="train-header-left">
-      <div class="train-link-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
-        </svg>
-      </div>
-      <div>
-        <div class="train-title">Training Room<span class="priv-tag">PRIVATE</span></div>
-        <div class="train-sub"><span class="train-live-dot"></span>Pavan ↔ Candy · facts taught here update her knowledge</div>
-      </div>
-    </div>
-    <div class="train-header-acts">
-      <div class="train-stat-pill" id="trainFactCount">0 facts taught</div>
-      <button class="train-close-btn" id="trainCloseBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Close
-      </button>
-    </div>
-  </div>
-  <div class="train-body">
-    <div class="train-chat-col">
-      <div class="train-messages" id="trainMessages"></div>
-      <div class="train-input-area">
-        <div class="train-input-row">
-          <textarea class="train-textarea" id="trainTextarea" placeholder="Tell Candy something new, or correct something she got wrong..." rows="1"></textarea>
-          <button class="train-send-btn" id="trainSendBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      <canvas class="train-particle-canvas" id="trainParticleCanvas"></canvas>
+      <div class="train-nebula train-neb1"></div>
+      <div class="train-nebula train-neb2"></div>
+      <div class="train-nebula train-neb3"></div>
+      <div class="train-nebula train-neb4"></div>
+      <div class="train-nebula train-neb5"></div>
+      <div class="train-cosmos-grid"></div>
+      <div class="train-header">
+        <div class="train-header-left">
+          <div class="train-link-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
+          <div>
+            <div class="train-title">Training Room<span class="priv-tag">PRIVATE</span></div>
+            <div class="train-sub"><span class="train-live-dot"></span>Pavan ↔ Candy · facts taught here update her knowledge</div>
+          </div>
+        </div>
+        <div class="train-header-acts">
+          <div class="train-stat-pill" id="trainFactCount">0 facts taught</div>
+          <button class="train-close-btn" id="trainCloseBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Close
           </button>
         </div>
-        <div class="train-input-hint">Facts you approve get queued for Candy's permanent knowledge</div>
       </div>
-    </div>
-    <div class="train-facts-col">
-      <div class="train-facts-header"><div class="train-facts-title">Learned this session</div></div>
-      <div class="train-facts-list" id="trainFactsList">
-        <div class="train-facts-empty" id="trainFactsEmpty">No facts taught yet.<br>Chat naturally — Candy will flag anything new she should remember.</div>
-      </div>
-      <div class="train-facts-footer">
-        <button class="train-export-btn" id="trainExportBtn">Export Learned Facts</button>
-      </div>
-    </div>
-  </div>`;
+      <div class="train-body">
+        <div class="train-chat-col">
+          <div class="train-messages" id="trainMessages"></div>
+          <div class="train-input-area">
+            <div class="train-input-row">
+              <textarea class="train-textarea" id="trainTextarea" placeholder="Tell Candy something new, or correct something she got wrong..." rows="1"></textarea>
+              <button class="train-send-btn" id="trainSendBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+            <div class="train-input-hint">Facts you approve get queued for Candy's permanent knowledge</div>
+          </div>
+        </div>
+        <div class="train-facts-col">
+          <div class="train-facts-header"><div class="train-facts-title">Learned this session</div></div>
+          <div class="train-facts-list" id="trainFactsList">
+            <div class="train-facts-empty" id="trainFactsEmpty">No facts taught yet.<br>Chat naturally — Candy will flag anything new she should remember.</div>
+          </div>
+          <div class="train-facts-footer">
+            <button class="train-export-btn" id="trainExportBtn">Export Learned Facts</button>
+          </div>
+        </div>
+      </div>`;
     document.body.appendChild(room);
   }
 
-  /* ── Particle canvas (subtle drifting dots) ── */
+  /* ── Particle canvas (colorful twinkling stars) ── */
   function startParticles() {
     const canvas = document.getElementById('trainParticleCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let W, H, particles = [];
+    const cols = ['#ddd6fe','#a5f3fc','#fde68a','#fda4af','#ffffff','#c7d2fe','#99f6e4','#fbcfe8'];
+
     function resize() {
       W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
       particles = [];
-      const n = Math.floor((W * H) / 9000);
+      const n = Math.floor((W * H) / 6500);
       for (let i = 0; i < n; i++) {
         particles.push({
           x: Math.random() * W, y: Math.random() * H,
-          r: Math.random() * 1.4 + 0.3,
-          a: Math.random() * 0.4 + 0.1,
-          da: (Math.random() - 0.5) * 0.006,
-          vy: Math.random() * 0.15 + 0.03,
+          r: Math.random() * 1.8 + 0.4,
+          a: Math.random(),
+          da: (Math.random() - 0.5) * 0.01,
+          col: cols[Math.floor(Math.random() * cols.length)],
         });
       }
     }
     function draw() {
       ctx.clearRect(0, 0, W, H);
       particles.forEach(p => {
-        p.a += p.da;
-        if (p.a <= 0.05 || p.a >= 0.55) p.da *= -1;
-        p.y += p.vy;
-        if (p.y > H) { p.y = 0; p.x = Math.random() * W; }
+        p.a = Math.max(0.1, Math.min(1, p.a + p.da));
+        if (p.a <= 0.1 || p.a >= 1) p.da *= -1;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(196,181,253,${p.a})`;
+        ctx.fillStyle = p.col;
+        ctx.globalAlpha = p.a;
+        ctx.shadowColor = p.col;
+        ctx.shadowBlur = p.r > 1.2 ? 8 : 4;
         ctx.fill();
       });
+      ctx.globalAlpha = 1;
       requestAnimationFrame(draw);
     }
     window.addEventListener('resize', resize);
@@ -3698,50 +3700,6 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
     document.getElementById('trainRoom').classList.remove('active');
     document.body.style.overflow = '';
   }
-
-
-function startParticles() {
-  const canvas = document.getElementById('trainParticleCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let W, H, particles = [];
-  const cols = ['#ddd6fe','#a5f3fc','#fde68a','#fda4af','#ffffff','#c7d2fe','#99f6e4','#fbcfe8'];
-
-  function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-    particles = [];
-    const n = Math.floor((W * H) / 6500);
-    for (let i = 0; i < n; i++) {
-      particles.push({
-        x: Math.random() * W, y: Math.random() * H,
-        r: Math.random() * 1.8 + 0.4,
-        a: Math.random(),
-        da: (Math.random() - 0.5) * 0.01,
-        col: cols[Math.floor(Math.random() * cols.length)],
-      });
-    }
-  }
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    particles.forEach(p => {
-      p.a = Math.max(0.1, Math.min(1, p.a + p.da));
-      if (p.a <= 0.1 || p.a >= 1) p.da *= -1;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.col;
-      ctx.globalAlpha = p.a;
-      ctx.shadowColor = p.col;
-      ctx.shadowBlur = p.r > 1.2 ? 8 : 4;
-      ctx.fill();
-    });
-    ctx.globalAlpha = 1;
-    requestAnimationFrame(draw);
-  }
-  window.addEventListener('resize', resize);
-  resize(); draw();
-}
-  
 
   /* ── Chat rendering ── */
   function appendTrainMsg(who, text) {
@@ -3790,7 +3748,6 @@ function startParticles() {
     const fact = { id: 'lf-' + Date.now(), text };
     learnedFacts.push(fact);
     renderFactsList();
-    // Queue for backend persistence (see setupWorkerStorage below — no-op until Worker route exists)
     sendFactToWorker(fact);
   }
 
@@ -3828,8 +3785,6 @@ function startParticles() {
         body: JSON.stringify({ fact: fact.text, key: TRAIN_PASSWORD }),
       });
     } catch (e) {
-      // Worker route doesn't exist yet — fails silently for now.
-      // Once /learn is built on the Worker, this will actually persist.
       console.log('[TrainingRoom] Worker not yet configured for /learn:', e.message);
     }
   }
@@ -3858,7 +3813,7 @@ function startParticles() {
 
     const typingRow = appendTrainMsg('candy', `<div style="display:flex;gap:5px"><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:trainBlink 1s infinite"></span><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:trainBlink 1s infinite .2s"></span><span style="width:5px;height:5px;border-radius:50%;background:#a78bfa;animation:trainBlink 1s infinite .4s"></span></div>`);
 
-    const TRAIN_SYS = `You are Candy, but right now you are talking ONLY to Pavan in a private training session — not a regular visitor. He may teach you new facts about himself, correct things you got wrong, or just chat. 
+    const TRAIN_SYS = `You are Candy, but right now you are talking ONLY to Pavan in a private training session — not a regular visitor. He may teach you new facts about himself, correct things you got wrong, or just chat.
 
 When Pavan tells you something that sounds like a new fact or correction worth remembering permanently (a new project, a changed detail, a new skill, a preference, a correction to existing info), respond conversationally AND end your reply with a line in this EXACT format on its own line:
 FACT::<the fact, written as a clean standalone sentence in third person about Pavan>
@@ -3881,7 +3836,6 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
       const reply = data.choices?.[0]?.message?.content?.trim() || "Got it.";
       typingRow.remove();
 
-      // Split out FACT:: line if present
       const factMatch = reply.match(/FACT::\s*(.+)/);
       const cleanReply = reply.replace(/FACT::\s*.+/, '').trim();
 
