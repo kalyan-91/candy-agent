@@ -3568,50 +3568,58 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
     room.className = 'train-room';
     room.id = 'trainRoom';
     room.innerHTML = `
-      <canvas class="train-particle-canvas" id="trainParticleCanvas"></canvas>
-      <div class="train-header">
-        <div class="train-header-left">
-          <div class="train-link-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
-            </svg>
-          </div>
-          <div>
-            <div class="train-title">Training Room<span class="priv-tag">PRIVATE</span></div>
-            <div class="train-sub"><span class="train-live-dot"></span>Pavan ↔ Candy · facts taught here update her knowledge</div>
-          </div>
-        </div>
-        <div class="train-header-acts">
-          <div class="train-stat-pill" id="trainFactCount">0 facts taught</div>
-          <button class="train-close-btn" id="trainCloseBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            Close
+  <canvas class="train-particle-canvas" id="trainParticleCanvas"></canvas>
+  <div class="train-nebula train-neb1"></div>
+  <div class="train-nebula train-neb2"></div>
+  <div class="train-nebula train-neb3"></div>
+  <div class="train-nebula train-neb4"></div>
+  <div class="train-nebula train-neb5"></div>
+  <div class="train-aurora train-aurora-1"></div>
+  <div class="train-aurora train-aurora-2"></div>
+  <div class="train-cosmos-grid"></div>
+  <div class="train-header">
+    <div class="train-header-left">
+      <div class="train-link-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+        </svg>
+      </div>
+      <div>
+        <div class="train-title">Training Room<span class="priv-tag">PRIVATE</span></div>
+        <div class="train-sub"><span class="train-live-dot"></span>Pavan ↔ Candy · facts taught here update her knowledge</div>
+      </div>
+    </div>
+    <div class="train-header-acts">
+      <div class="train-stat-pill" id="trainFactCount">0 facts taught</div>
+      <button class="train-close-btn" id="trainCloseBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Close
+      </button>
+    </div>
+  </div>
+  <div class="train-body">
+    <div class="train-chat-col">
+      <div class="train-messages" id="trainMessages"></div>
+      <div class="train-input-area">
+        <div class="train-input-row">
+          <textarea class="train-textarea" id="trainTextarea" placeholder="Tell Candy something new, or correct something she got wrong..." rows="1"></textarea>
+          <button class="train-send-btn" id="trainSendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
+        <div class="train-input-hint">Facts you approve get queued for Candy's permanent knowledge</div>
       </div>
-      <div class="train-body">
-        <div class="train-chat-col">
-          <div class="train-messages" id="trainMessages"></div>
-          <div class="train-input-area">
-            <div class="train-input-row">
-              <textarea class="train-textarea" id="trainTextarea" placeholder="Tell Candy something new, or correct something she got wrong..." rows="1"></textarea>
-              <button class="train-send-btn" id="trainSendBtn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-              </button>
-            </div>
-            <div class="train-input-hint">Facts you approve get queued for Candy's permanent knowledge</div>
-          </div>
-        </div>
-        <div class="train-facts-col">
-          <div class="train-facts-header"><div class="train-facts-title">Learned this session</div></div>
-          <div class="train-facts-list" id="trainFactsList">
-            <div class="train-facts-empty" id="trainFactsEmpty">No facts taught yet.<br>Chat naturally — Candy will flag anything new she should remember.</div>
-          </div>
-          <div class="train-facts-footer">
-            <button class="train-export-btn" id="trainExportBtn">Export Learned Facts</button>
-          </div>
-        </div>
-      </div>`;
+    </div>
+    <div class="train-facts-col">
+      <div class="train-facts-header"><div class="train-facts-title">Learned this session</div></div>
+      <div class="train-facts-list" id="trainFactsList">
+        <div class="train-facts-empty" id="trainFactsEmpty">No facts taught yet.<br>Chat naturally — Candy will flag anything new she should remember.</div>
+      </div>
+      <div class="train-facts-footer">
+        <button class="train-export-btn" id="trainExportBtn">Export Learned Facts</button>
+      </div>
+    </div>
+  </div>`;
     document.body.appendChild(room);
   }
 
