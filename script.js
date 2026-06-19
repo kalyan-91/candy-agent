@@ -3908,7 +3908,7 @@ const PAVAN_FACTS = `IMPORTANT CONTEXT — You are debating about THIS Pavan Kal
 - Projects: SPARMS (Java Swing desktop app for academic result management with OMR scanning), InventoryIQ (Streamlit inventory analytics dashboard, live online), Digit Recognizer (CNN handwritten digit app built with TensorFlow, live online), Netflix Dashboard (Power BI with 5000+ titles), Employee Attrition Analysis (ML classification + Power BI), Zomato Analysis (predictive ML + EDA).
 - Skills: SQL 90%, Excel 88%, Python 85%, Power BI 85%, Pandas 85%, NumPy 80%, Matplotlib 80%, Seaborn 80%, Scikit-learn 75%, TensorFlow 70%, Java 70%, HTML 85%, CSS 80%, JavaScript 70%.
 - Internship: Data Science Intern at Interncall Kurnool (Jan-Apr 2024). Built ML models, performed EDA, created business visualizations.
-- Built Candy AI using Groq and LLaMA 3.3 70B — a full-featured personal AI portfolio agent.
+- Built Candy AI using HTML, CSS, and JavaScript (vanilla) with Groq + LLaMA 3.3 70B API — a full-featured personal AI portfolio agent. No Python used — pure frontend.
 - Open to internships and entry-level Data Analyst or Data Science roles.
 - Goal: become a skilled Data Analyst and build AI-powered products people use daily.
 - First in his family to pursue higher education in technology. Self-driven, learns by building.`;
