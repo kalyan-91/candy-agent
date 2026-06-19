@@ -3237,18 +3237,6 @@ body.light .persona-label { color: #6b64a0; }
   50%    { transform: translate(-30px,20px) scale(1.05); }
 }
 
-/* Cosmos grid */
-.train-cosmos-grid {
-  position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(124,107,255,0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124,107,255,0.045) 1px, transparent 1px),
-    linear-gradient(rgba(45,212,191,0.022) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45,212,191,0.022) 1px, transparent 1px);
-  background-size: 55px 55px, 55px 55px, 165px 165px, 165px 165px;
-  mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black, transparent);
-}
-
 /* ── Header ── */
 .train-header {
   position: relative; z-index: 10;
