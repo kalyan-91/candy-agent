@@ -4700,3 +4700,90 @@ function openDebateMode() {
   }
 
 })();
+
+
+
+const canvas = document.getElementById('constellationCanvas');
+const ctx = canvas.getContext('2d');
+const clearBtn = document.getElementById('clearBtn');
+const saveBtn = document.getElementById('saveBtn');
+
+let stars = [];
+
+// 1. Resize Canvas to fit window perfectly
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    drawConstellation(); // Redraw if screen sizes change
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// 2. Click event to add a new star
+canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Randomize star sizes slightly for visual depth
+    const radius = Math.random() * 3 + 2; 
+
+    stars.push({ x, y, radius });
+    drawConstellation();
+});
+
+// 3. The Drawing Engine
+function drawConstellation() {
+    // Clear canvas for fresh render
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (stars.length === 0) return;
+
+    // --- Draw Connecting Lines ---
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(150, 180, 255, 0.25)'; // Faint, cosmic blue/white lines
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]); // Gives it a nice chart/map aesthetic
+
+    ctx.moveTo(stars[0].x, stars[0].y);
+    for (let i = 1; i < stars.length; i++) {
+        ctx.lineTo(stars[i].x, stars[i].y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]); // Reset line dash
+
+    // --- Draw Stars ---
+    stars.forEach((star) => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        
+        // Star Glow Effect
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ffffff';
+        ctx.fillStyle = '#ffffff';
+        
+        ctx.fill();
+    });
+
+    // Reset shadow blur so it doesn't degrade performance elsewhere
+    ctx.shadowBlur = 0;
+}
+
+// 4. UI Button Actions
+clearBtn.addEventListener('click', () => {
+    stars = [];
+    drawConstellation();
+});
+
+saveBtn.addEventListener('click', () => {
+    if (stars.length === 0) {
+        alert("Your sky is empty! Click around to create a constellation first.");
+        return;
+    }
+    
+    const name = prompt("What will you name your constellation?");
+    if (name) {
+        alert(`"${name}" has been mapped to the night sky!`);
+        // Here you could send the 'stars' array and 'name' to a backend database
+    }
+});
