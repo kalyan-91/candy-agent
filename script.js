@@ -1696,6 +1696,25 @@ document.getElementById('apClose')?.addEventListener('click', () => {
   document.getElementById('adminLogin').style.display = 'block';
   adminUnlocked = false;
   document.getElementById('adminPassInput').value = '';
+
+  /* ── Admin overlay open/close ── */
+const adminTrigger = document.getElementById('adminTrigger');
+const adminOverlay = document.getElementById('adminOverlay');
+if (adminTrigger && adminOverlay) {
+  adminTrigger.addEventListener('click', () => {
+    adminOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('adminPassInput')?.focus(), 200);
+  });
+  adminOverlay.addEventListener('click', e => {
+    if (e.target === adminOverlay) closeAdminOverlay();
+  });
+  document.getElementById('apClose')?.addEventListener('click', closeAdminOverlay);
+  function closeAdminOverlay() {
+    adminOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
 });
 
 /* ── Admin overlay open/close (now inside the same DOMContentLoaded) ── */
