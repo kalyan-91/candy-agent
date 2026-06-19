@@ -1805,6 +1805,10 @@ appendMessage('assistant',
         </svg>
         Take a Portfolio Tour
       </button>
+       // In appendWelcome() add this button:
+       <button onclick="openDebateMode()" class="portbtn">
+       Candy vs Shadow Candy
+       </button>
     </div>`
   );
 }
@@ -3891,3 +3895,423 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
   }
 
 })();
+
+
+
+
+/* ══════════════════════════════════════════════════════
+   CANDY vs SHADOW CANDY — Debate Mode
+   Add this entire block to your script.js
+══════════════════════════════════════════════════════ */
+
+// ── DEBATE TOPICS ──
+const DEBATE_TOPICS = [
+  { label: "Best Project",       prompt: "Debate which of Pavan's projects is the best and most impressive." },
+  { label: "Top Skill",          prompt: "Debate which skill of Pavan's is the most valuable — SQL, Python, Power BI, or Java." },
+  { label: "Career Path",        prompt: "Debate whether Pavan should focus on Data Analytics or AI/ML as his primary career path." },
+  { label: "Best Tech Stack",    prompt: "Debate the best tech stack Pavan should use for his future projects." },
+  { label: "Internship vs Job",  prompt: "Debate whether Pavan should take an internship or go directly for an entry-level job." },
+  { label: "AI vs Dashboards",   prompt: "Debate whether Pavan's future is in building AI agents or data dashboards." },
+  { label: "Candy AI Feature",   prompt: "Debate which feature of the Candy AI portfolio agent is the most impressive." },
+  { label: "Python vs SQL",      prompt: "Debate whether Python or SQL is more important for Pavan's career growth." },
+];
+
+const CANDY_SYS = `You are Candy — Pavan Kalyan's warm, optimistic, and supportive personal AI. You are in a live debate against Shadow Candy, your dark and contrarian alter ego. Argue your point confidently and positively about Pavan's work, skills, and future. Keep each response to 2-3 punchy sentences. Be specific — mention real project names, real skills, real numbers. Never use emojis. End with a strong closing statement that challenges Shadow Candy.`;
+
+const SHADOW_SYS = `You are Shadow Candy — the dark, contrarian, brutally honest alter ego of Candy AI. You are in a live debate against Candy. You challenge every positive claim, find weaknesses, push Pavan toward harder goals, and argue the devil's advocate position. You are not mean — you are ruthlessly analytical. Keep each response to 2-3 punchy sentences. Be specific. Never use emojis. End with a sharp counter that puts Candy on the defensive.`;
+
+// ── OPEN DEBATE MODAL ──
+function openDebateMode() {
+  const existing = document.getElementById('debateModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'debateModal';
+  modal.style.cssText = `
+    position:fixed;inset:0;z-index:999999;
+    background:rgba(0,0,0,0.88);backdrop-filter:blur(8px);
+    display:flex;align-items:center;justify-content:center;
+    padding:16px;
+  `;
+
+  modal.innerHTML = `
+    <style>
+      #debateBox{
+        width:min(780px,96vw);max-height:92vh;
+        background:linear-gradient(135deg,#04001a,#02060e);
+        border:1px solid rgba(139,92,246,0.35);
+        border-radius:20px;display:flex;flex-direction:column;
+        overflow:hidden;position:relative;
+        box-shadow:0 0 80px rgba(139,92,246,0.15),0 0 160px rgba(244,63,94,0.08);
+        animation:debateIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+      }
+      @keyframes debateIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+
+      /* Top scanline */
+      #debateBox::before{
+        content:'';position:absolute;left:0;right:0;height:2px;top:0;z-index:1;pointer-events:none;
+        background:linear-gradient(90deg,#a78bfa,#f43f5e,#a78bfa);
+        background-size:200% 100%;animation:dbScan 3s linear infinite;
+        box-shadow:0 0 12px rgba(139,92,246,0.8);
+      }
+      @keyframes dbScan{0%{background-position:0%}100%{background-position:200%}}
+
+      /* CRT scanlines */
+      #debateBox::after{
+        content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+        background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(139,92,246,0.008) 2px,rgba(139,92,246,0.008) 4px);
+      }
+
+      .db-header{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:16px 22px;border-bottom:1px solid rgba(139,92,246,0.18);
+        background:rgba(0,0,0,0.4);position:relative;z-index:2;
+      }
+      .db-title{
+        font-family:'JetBrains Mono',monospace;font-size:.72rem;
+        letter-spacing:.2em;color:#a78bfa;
+        text-shadow:0 0 20px rgba(139,92,246,0.8);
+      }
+      .db-vs{
+        font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1rem;
+        background:linear-gradient(90deg,#a78bfa,#f43f5e);
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        animation:vsPulse 2s ease-in-out infinite;
+      }
+      @keyframes vsPulse{0%,100%{opacity:1}50%{opacity:0.6}}
+      .db-close{
+        width:28px;height:28px;border-radius:8px;
+        border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);
+        color:#64748b;cursor:pointer;font-size:.8rem;
+        display:flex;align-items:center;justify-content:center;transition:all .2s;
+      }
+      .db-close:hover{background:rgba(244,63,94,0.12);border-color:rgba(244,63,94,0.3);color:#f43f5e;}
+
+      /* Combatants row */
+      .db-combatants{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:14px 22px;border-bottom:1px solid rgba(139,92,246,0.12);
+        background:rgba(0,0,0,0.25);position:relative;z-index:2;gap:12px;
+      }
+      .db-fighter{display:flex;align-items:center;gap:10px;}
+      .db-avatar{
+        width:44px;height:44px;border-radius:13px;
+        display:flex;align-items:center;justify-content:center;
+        font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:800;
+        position:relative;flex-shrink:0;
+      }
+      .db-avatar-candy{
+        background:linear-gradient(135deg,#6d28d9,#06b6d4);color:#fff;
+        box-shadow:0 0 20px rgba(139,92,246,0.5);
+      }
+      .db-avatar-shadow{
+        background:linear-gradient(135deg,#1a0a2e,#7f1d1d);color:#f43f5e;
+        border:1px solid rgba(244,63,94,0.4);
+        box-shadow:0 0 20px rgba(244,63,94,0.35);
+      }
+      .db-fighter-name{font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:700;color:#e2e8f0;}
+      .db-fighter-sub{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:#475569;margin-top:1px;}
+      .db-divider{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#334155;letter-spacing:.1em;}
+
+      /* Topic selector */
+      .db-topics{
+        padding:12px 22px;border-bottom:1px solid rgba(139,92,246,0.12);
+        display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:2;
+        background:rgba(0,0,0,0.2);
+      }
+      .db-topic{
+        padding:5px 12px;border-radius:100px;cursor:pointer;
+        font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.06em;
+        background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.22);
+        color:#64748b;transition:all .2s;
+      }
+      .db-topic:hover,.db-topic.active{
+        background:rgba(139,92,246,0.16);border-color:rgba(139,92,246,0.5);color:#a78bfa;
+        box-shadow:0 0 12px rgba(139,92,246,0.2);
+      }
+      .db-topic.active{color:#c4b5fd;}
+
+      /* Messages */
+      .db-msgs{
+        flex:1;overflow-y:auto;padding:18px 22px;
+        display:flex;flex-direction:column;gap:14px;
+        position:relative;z-index:2;min-height:200px;max-height:340px;
+      }
+      .db-msgs::-webkit-scrollbar{width:3px;}
+      .db-msgs::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:4px;}
+
+      .db-msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .3s ease both;}
+      @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+      .db-msg-av{
+        width:30px;height:30px;border-radius:9px;flex-shrink:0;
+        display:flex;align-items:center;justify-content:center;
+        font-family:'Space Grotesk',sans-serif;font-size:.6rem;font-weight:700;
+      }
+      .db-msg-av.candy{background:linear-gradient(135deg,#6d28d9,#06b6d4);color:#fff;box-shadow:0 0 12px rgba(139,92,246,0.4);}
+      .db-msg-av.shadow{background:linear-gradient(135deg,#1a0a2e,#7f1d1d);color:#f43f5e;border:1px solid rgba(244,63,94,0.3);box-shadow:0 0 12px rgba(244,63,94,0.3);}
+
+      .db-bubble{
+        padding:11px 15px;border-radius:14px;font-family:'Inter',sans-serif;
+        font-size:.8rem;line-height:1.7;position:relative;overflow:hidden;
+        max-width:88%;
+      }
+      .db-bubble::before{
+        content:'';position:absolute;top:0;left:0;right:0;height:1.5px;
+      }
+      .db-bubble.candy{
+        background:linear-gradient(135deg,rgba(55,20,130,0.65),rgba(6,20,55,0.60));
+        border:1px solid rgba(139,92,246,0.35);color:#e2e8f0;
+        border-radius:14px 14px 14px 4px;
+      }
+      .db-bubble.candy::before{background:linear-gradient(90deg,#a78bfa,#06b6d4,transparent);}
+      .db-bubble.shadow{
+        background:linear-gradient(135deg,rgba(60,10,20,0.65),rgba(20,4,10,0.60));
+        border:1px solid rgba(244,63,94,0.28);color:#fecdd3;
+        border-radius:14px 14px 4px 14px;
+      }
+      .db-bubble.shadow::before{background:linear-gradient(90deg,#f43f5e,#fb7185,transparent);}
+
+      .db-name{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;margin-bottom:5px;}
+      .db-name.candy{color:#a78bfa;}
+      .db-name.shadow{color:#f43f5e;}
+
+      .db-typing{display:flex;align-items:center;gap:5px;padding:4px 2px;}
+      .db-typing span{width:6px;height:6px;border-radius:50%;animation:tb 1.3s ease-in-out infinite;}
+      .db-typing span:nth-child(2){animation-delay:.18s;}
+      .db-typing span:nth-child(3){animation-delay:.36s;}
+      @keyframes tb{0%,80%,100%{transform:scale(.5);opacity:.3}40%{transform:scale(1.1);opacity:1}}
+
+      /* Footer */
+      .db-footer{
+        padding:12px 22px;border-top:1px solid rgba(139,92,246,0.12);
+        display:flex;align-items:center;gap:10px;
+        background:rgba(0,0,0,0.4);position:relative;z-index:2;
+      }
+      .db-start{
+        flex:1;padding:10px 20px;border-radius:10px;cursor:pointer;
+        font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;
+        letter-spacing:.08em;transition:all .25s;border:none;
+        background:linear-gradient(135deg,#6d28d9,#f43f5e);color:#fff;
+        box-shadow:0 4px 18px rgba(139,92,246,0.3);
+        position:relative;overflow:hidden;
+      }
+      .db-start::before{
+        content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+        background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+        transform:skewX(-20deg);transition:left .5s;
+      }
+      .db-start:hover::before{left:160%;}
+      .db-start:hover{box-shadow:0 6px 28px rgba(139,92,246,0.5);transform:translateY(-1px);}
+      .db-start:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+      .db-rounds{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:#334155;white-space:nowrap;}
+
+      /* Corner brackets on box */
+      .db-corner{position:absolute;width:16px;height:16px;z-index:3;}
+      .db-corner.tl{top:10px;left:10px;border-top:1px solid #a78bfa;border-left:1px solid #a78bfa;}
+      .db-corner.tr{top:10px;right:10px;border-top:1px solid #f43f5e;border-right:1px solid #f43f5e;}
+      .db-corner.bl{bottom:10px;left:10px;border-bottom:1px solid #a78bfa;border-left:1px solid #a78bfa;}
+      .db-corner.br{bottom:10px;right:10px;border-bottom:1px solid #f43f5e;border-right:1px solid #f43f5e;}
+
+      .db-empty{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#1e3a5f;text-align:center;padding:30px;letter-spacing:.08em;}
+    </style>
+
+    <div id="debateBox">
+      <!-- Corner brackets -->
+      <div class="db-corner tl"></div>
+      <div class="db-corner tr"></div>
+      <div class="db-corner bl"></div>
+      <div class="db-corner br"></div>
+
+      <!-- Header -->
+      <div class="db-header">
+        <div class="db-title">⚡ CANDY AI · DEBATE MODE</div>
+        <div class="db-vs">CANDY vs SHADOW CANDY</div>
+        <button class="db-close" id="dbClose">✕</button>
+      </div>
+
+      <!-- Combatants -->
+      <div class="db-combatants">
+        <div class="db-fighter">
+          <div class="db-avatar db-avatar-candy">C</div>
+          <div>
+            <div class="db-fighter-name">Candy</div>
+            <div class="db-fighter-sub">Optimistic · Supportive · Warm</div>
+          </div>
+        </div>
+        <div class="db-divider">⚡ VS ⚡</div>
+        <div class="db-fighter" style="flex-direction:row-reverse;text-align:right">
+          <div class="db-avatar db-avatar-shadow">S</div>
+          <div>
+            <div class="db-fighter-name" style="color:#f43f5e">Shadow Candy</div>
+            <div class="db-fighter-sub">Contrarian · Ruthless · Analytical</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topics -->
+      <div class="db-topics" id="dbTopics">
+        ${DEBATE_TOPICS.map((t,i) => `<button class="db-topic${i===0?' active':''}" data-i="${i}">${t.label}</button>`).join('')}
+      </div>
+
+      <!-- Messages -->
+      <div class="db-msgs" id="dbMsgs">
+        <div class="db-empty">SELECT A TOPIC AND HIT START DEBATE →</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="db-footer">
+        <div class="db-rounds" id="dbRounds">ROUND 0 / 3</div>
+        <button class="db-start" id="dbStart">⚡ START DEBATE</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // State
+  let activeTopic = 0;
+  let round = 0;
+  let debating = false;
+  let debateHistory = [];
+
+  const msgsEl = document.getElementById('dbMsgs');
+  const roundsEl = document.getElementById('dbRounds');
+  const startBtn = document.getElementById('dbStart');
+
+  // Topic selection
+  document.getElementById('dbTopics').addEventListener('click', e => {
+    const btn = e.target.closest('.db-topic');
+    if (!btn) return;
+    document.querySelectorAll('.db-topic').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTopic = parseInt(btn.dataset.i);
+    // Reset
+    round = 0;
+    debating = false;
+    debateHistory = [];
+    roundsEl.textContent = 'ROUND 0 / 3';
+    startBtn.textContent = '⚡ START DEBATE';
+    startBtn.disabled = false;
+    msgsEl.innerHTML = '<div class="db-empty">SELECT A TOPIC AND HIT START DEBATE →</div>';
+  });
+
+  // Close
+  document.getElementById('dbClose').addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.addEventListener('keydown', function escDb(e) {
+    if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', escDb); }
+  });
+
+  // Start / Next round
+  startBtn.addEventListener('click', async () => {
+    if (debating) return;
+    if (round >= 3) { modal.remove(); return; }
+
+    debating = true;
+    startBtn.disabled = true;
+    round++;
+    roundsEl.textContent = `ROUND ${round} / 3`;
+
+    if (round === 1) {
+      msgsEl.innerHTML = '';
+    }
+
+    const topic = DEBATE_TOPICS[activeTopic];
+
+    // ── CANDY speaks first ──
+    const candyTypingId = addDbTyping('candy');
+    const candyReply = await fetchDebateReply(CANDY_SYS, topic.prompt, debateHistory, 'Candy');
+    removeDbTyping(candyTypingId);
+    addDbMsg('candy', 'C', 'CANDY', candyReply);
+    debateHistory.push({ role: 'user', content: `Topic: ${topic.prompt}` });
+    debateHistory.push({ role: 'assistant', content: `Candy: ${candyReply}` });
+    if (debateHistory.length > 12) debateHistory = debateHistory.slice(-12);
+
+    await new Promise(r => setTimeout(r, 600));
+
+    // ── SHADOW CANDY responds ──
+    const shadowTypingId = addDbTyping('shadow');
+    const shadowReply = await fetchDebateReply(
+      SHADOW_SYS,
+      `Topic: ${topic.prompt}\nCandy just said: "${candyReply}"\nNow give your sharp counter-argument.`,
+      debateHistory, 'Shadow Candy'
+    );
+    removeDbTyping(shadowTypingId);
+    addDbMsg('shadow', 'S', 'SHADOW CANDY', shadowReply);
+    debateHistory.push({ role: 'assistant', content: `Shadow Candy: ${shadowReply}` });
+    if (debateHistory.length > 12) debateHistory = debateHistory.slice(-12);
+
+    debating = false;
+    startBtn.disabled = false;
+
+    if (round >= 3) {
+      startBtn.textContent = '✕ END DEBATE';
+    } else {
+      startBtn.textContent = `⚡ ROUND ${round + 1}`;
+    }
+  });
+
+  // Helper: add message
+  function addDbMsg(role, av, name, text) {
+    const row = document.createElement('div');
+    row.className = 'db-msg';
+    if (role === 'shadow') row.style.flexDirection = 'row-reverse';
+    row.innerHTML = `
+      <div class="db-msg-av ${role}">${av}</div>
+      <div>
+        <div class="db-name ${role}">${name}</div>
+        <div class="db-bubble ${role}">${esc(text).replace(/\n/g,'<br>')}</div>
+      </div>`;
+    msgsEl.appendChild(row);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  function addDbTyping(role) {
+    const id = 'dbtyp-' + Date.now();
+    const row = document.createElement('div');
+    row.id = id; row.className = 'db-msg';
+    if (role === 'shadow') row.style.flexDirection = 'row-reverse';
+    const color = role === 'candy' ? '#a78bfa' : '#f43f5e';
+    row.innerHTML = `
+      <div class="db-msg-av ${role}">${role === 'candy' ? 'C' : 'S'}</div>
+      <div class="db-bubble ${role}">
+        <div class="db-typing">
+          <span style="background:${color}"></span>
+          <span style="background:${color}"></span>
+          <span style="background:${color}"></span>
+        </div>
+      </div>`;
+    msgsEl.appendChild(row);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    return id;
+  }
+
+  function removeDbTyping(id) { document.getElementById(id)?.remove(); }
+
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  async function fetchDebateReply(system, userMsg, history, name) {
+    try {
+      const msgs = [
+        ...history.slice(-8),
+        { role: 'user', content: userMsg }
+      ];
+      const r = await fetch('https://pk-groq-proxy.daroorpavankalyan.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'system', content: system }, ...msgs],
+          max_tokens: 180, temperature: 0.92, stream: false,
+        })
+      });
+      if (!r.ok) throw new Error('API error');
+      const d = await r.json();
+      return d.choices?.[0]?.message?.content?.trim() || `${name} has no words.`;
+    } catch (e) {
+      return `${name} signal lost. Try again.`;
+    }
+  }
+}
