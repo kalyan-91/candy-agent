@@ -3641,7 +3641,7 @@ body.light .persona-label { color: #6b64a0; }
    Paste at the bottom of your style.css
 ═══════════════════════════════════════════ */
 
-/* ── Panel ── */
+ /* ── Panel ── */
 .const-panel {
   position: fixed;
   inset: 0;
@@ -3784,9 +3784,7 @@ body.light .persona-label { color: #6b64a0; }
 .const-hint.hidden { display: none; }
 @keyframes constHintPulse { 0%,100%{opacity:0.35} 50%{opacity:0.9} }
 
-/* ══════════════════════════════════════
-   CONTROLS BAR — Interactive Redesign
-══════════════════════════════════════ */
+/* ── Controls bar ── */
 .const-controls {
   position: relative; z-index: 10;
   display: flex; align-items: center; flex-wrap: wrap; gap: 0;
@@ -3804,7 +3802,6 @@ body.light .persona-label { color: #6b64a0; }
     transparent, rgba(167,139,250,0.4) 30%, rgba(0,212,255,0.4) 70%, transparent);
 }
 
-/* Each control segment */
 .const-ctrl-group {
   display: flex; align-items: center; gap: 10px;
   padding: 14px 20px;
@@ -3821,10 +3818,9 @@ body.light .persona-label { color: #6b64a0; }
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.48rem; color: rgba(167,139,250,0.45);
   letter-spacing: 0.14em; text-transform: uppercase;
-  flex-shrink: 0; writing-mode: horizontal-tb;
+  flex-shrink: 0;
 }
 
-/* ── Color dots — bigger, glowing ── */
 .const-colors { display: flex; align-items: center; gap: 8px; }
 .const-color-dot {
   width: 22px; height: 22px; border-radius: 50%;
@@ -3847,7 +3843,6 @@ body.light .persona-label { color: #6b64a0; }
   transform: scale(1.32);
   box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 0 14px currentColor;
 }
-/* Pulse ring on selected */
 .const-color-dot.sel::after {
   content: ''; position: absolute; inset: -5px; border-radius: 50%;
   border: 1px solid currentColor; opacity: 0.5;
@@ -3858,7 +3853,6 @@ body.light .persona-label { color: #6b64a0; }
   100%{transform:scale(1.5);opacity:0}
 }
 
-/* ── Mode buttons — pill toggle ── */
 .const-mode-btns {
   display: flex; gap: 0;
   background: rgba(0,20,70,0.5);
@@ -3882,7 +3876,6 @@ body.light .persona-label { color: #6b64a0; }
   box-shadow: 0 0 16px rgba(167,139,250,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
-/* ── Name input — glowing on focus ── */
 .const-name-input {
   background: rgba(0,20,80,0.45);
   border: 1px solid rgba(167,139,250,0.20);
@@ -3900,7 +3893,6 @@ body.light .persona-label { color: #6b64a0; }
 }
 .const-name-input::placeholder { color: rgba(120,140,200,0.28); }
 
-/* ── Action buttons ── */
 .const-actions { margin-left: auto; gap: 8px; }
 .const-action-btn {
   padding: 8px 16px; border-radius: 9px;
@@ -3970,7 +3962,6 @@ body.light .persona-label { color: #6b64a0; }
   font-size: 0.49rem; color: rgba(100,120,180,0.32); letter-spacing: 0.07em;
 }
 
-/* ── Mobile ── */
 @media (max-width: 640px) {
   .const-topbar, .const-statusbar { padding-left: 16px; padding-right: 16px; }
   .const-ctrl-group { padding: 10px 12px; }
