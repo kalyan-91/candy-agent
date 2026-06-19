@@ -3575,3 +3575,253 @@ body.light .persona-label { color: #6b64a0; }
   .train-stat-pill  { display: none; }
   .tbubble, .fact-card { max-width: 88%; }
 }
+
+
+/* ═══════════════════════════════════════════════
+   CANDY AI — CONSTELLATION ENGINE STYLES
+═══════════════════════════════════════════════ */
+
+/* ── Sidebar button ── */
+.const-launch-wrap {
+  padding: 14px 18px;
+}
+.const-launch-btn {
+  width: 100%;
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 15px; border-radius: 13px;
+  background: rgba(167,139,250,0.06);
+  border: 1px solid rgba(167,139,250,0.22);
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: all 0.25s;
+}
+.const-launch-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    transparent, rgba(167,139,250,0.08), transparent);
+  transform: translateX(-100%);
+  animation: constSweep 4s linear infinite;
+}
+@keyframes constSweep { to { transform: translateX(200%); } }
+.const-launch-btn:hover {
+  border-color: rgba(167,139,250,0.5);
+  box-shadow: 0 0 24px rgba(167,139,250,0.15);
+  transform: translateY(-1px);
+}
+.const-icon {
+  font-size: 1.2rem; flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(167,139,250,0.7));
+  animation: constTwinkle 3s ease-in-out infinite;
+}
+@keyframes constTwinkle {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.2); opacity: 0.7; }
+}
+.const-btn-text { flex: 1; text-align: left; }
+.const-btn-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem; font-weight: 700; color: #e2e8f0;
+}
+.const-btn-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem; color: #64748b;
+  letter-spacing: 0.06em; margin-top: 2px;
+}
+.const-star-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52rem; padding: 3px 9px;
+  border-radius: 100px;
+  background: rgba(167,139,250,0.10);
+  border: 1px solid rgba(167,139,250,0.28);
+  color: #a78bfa;
+  animation: badgePulse 2.5s ease-in-out infinite;
+}
+
+/* ── Chat panel ── */
+.const-panel-row { animation: mIn .35s ease both; }
+
+.const-panel {
+  max-width: 92%;
+  border-radius: 20px 20px 20px 4px;
+  background: linear-gradient(160deg, #020a1a 0%, #010610 60%, #030112 100%);
+  border: 1px solid rgba(167,139,250,0.28);
+  overflow: hidden;
+  box-shadow:
+    0 0 60px rgba(167,139,250,0.12),
+    0 0 120px rgba(0,212,255,0.06),
+    inset 0 0 40px rgba(167,139,250,0.03);
+  position: relative;
+}
+.const-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #a78bfa, #00d4ff, #f472b6, transparent);
+  animation: constBeam 3s linear infinite;
+}
+@keyframes constBeam {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.const-panel-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(167,139,250,0.10);
+}
+.const-header-left { display: flex; flex-direction: column; gap: 5px; }
+.const-header-right { display: flex; align-items: center; }
+.const-title-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.52rem; letter-spacing: 0.22em;
+  color: #a78bfa; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.const-title-tag::before {
+  content: ''; width: 14px; height: 1px;
+  background: linear-gradient(90deg, #a78bfa, transparent);
+  box-shadow: 0 0 6px rgba(167,139,250,0.5);
+}
+.const-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem; font-weight: 700; color: #fff;
+  text-shadow: 0 0 20px rgba(167,139,250,0.4);
+}
+.const-star-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; color: #a78bfa;
+  background: rgba(167,139,250,0.08);
+  border: 1px solid rgba(167,139,250,0.22);
+  padding: 4px 12px; border-radius: 100px;
+}
+.const-star-count span {
+  font-weight: 700; font-size: 0.78rem;
+}
+
+/* ── Canvas ── */
+.const-canvas {
+  width: 100%; height: 280px;
+  display: block;
+  border-bottom: 1px solid rgba(167,139,250,0.08);
+}
+
+/* ── Legend ── */
+.const-legend {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(167,139,250,0.08);
+  min-height: 38px;
+}
+.const-legend-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 100px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+}
+.const-legend-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+.const-legend-name { color: #94a3b8; }
+.const-legend-count {
+  color: #475569; font-size: 0.52rem;
+}
+
+/* ── Name input ── */
+.const-name-row {
+  display: flex; gap: 8px; padding: 12px 18px;
+  border-bottom: 1px solid rgba(167,139,250,0.08);
+}
+.const-name-input {
+  flex: 1; background: rgba(167,139,250,0.05);
+  border: 1px solid rgba(167,139,250,0.18);
+  border-radius: 10px; padding: 8px 14px;
+  color: #e2e8f0; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.const-name-input:focus {
+  border-color: rgba(167,139,250,0.5);
+  box-shadow: 0 0 0 3px rgba(167,139,250,0.08);
+}
+.const-name-input::placeholder { color: rgba(100,116,139,0.5); }
+.const-name-btn {
+  padding: 8px 16px; border-radius: 10px;
+  background: rgba(167,139,250,0.12);
+  border: 1px solid rgba(167,139,250,0.32);
+  color: #a78bfa; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; cursor: pointer;
+  transition: all 0.22s; white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+.const-name-btn:hover {
+  background: rgba(167,139,250,0.22);
+  border-color: rgba(167,139,250,0.55);
+  box-shadow: 0 0 16px rgba(167,139,250,0.25);
+}
+
+/* ── Action buttons ── */
+.const-actions {
+  display: flex; gap: 8px; padding: 12px 18px;
+  flex-wrap: wrap;
+}
+.const-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 15px; border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem; cursor: pointer;
+  transition: all 0.22s; letter-spacing: 0.04em;
+  border: 1px solid;
+}
+.const-btn-dl {
+  background: rgba(0,212,255,0.07);
+  border-color: rgba(0,212,255,0.28);
+  color: #00d4ff;
+}
+.const-btn-dl:hover {
+  background: rgba(0,212,255,0.14);
+  border-color: rgba(0,212,255,0.55);
+  box-shadow: 0 0 16px rgba(0,212,255,0.2);
+}
+.const-btn-clear {
+  background: rgba(251,191,36,0.06);
+  border-color: rgba(251,191,36,0.22);
+  color: #fbbf24;
+}
+.const-btn-clear:hover {
+  background: rgba(251,191,36,0.12);
+  border-color: rgba(251,191,36,0.45);
+}
+.const-btn-close {
+  background: rgba(244,63,94,0.06);
+  border-color: rgba(244,63,94,0.22);
+  color: #f43f5e; margin-left: auto;
+}
+.const-btn-close:hover {
+  background: rgba(244,63,94,0.12);
+  border-color: rgba(244,63,94,0.45);
+}
+
+.const-mt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.53rem; color: #1e2a45;
+  padding: 0 18px 14px; text-align: right;
+}
+
+/* Light mode */
+body.light .const-panel {
+  background: linear-gradient(160deg,
+    rgba(240,235,255,0.95), rgba(230,228,255,0.92));
+  border-color: rgba(109,40,217,0.20);
+}
+body.light .const-title { color: var(--text); }
+body.light .const-name-input {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(109,40,217,0.18);
+  color: var(--text);
+}
+body.light .const-legend-item {
+  background: rgba(109,40,217,0.04);
+  border-color: rgba(109,40,217,0.10);
+}
+body.light .const-legend-name { color: var(--muted); }
