@@ -1699,6 +1699,7 @@ document.getElementById('apClose')?.addEventListener('click', () => {
 });
 
 /* ── Admin overlay open/close (now inside the same DOMContentLoaded) ── */
+ /* ── Admin overlay open/close ── */
 const adminTrigger = document.getElementById('adminTrigger');
 const adminOverlay = document.getElementById('adminOverlay');
 if (adminTrigger && adminOverlay) {
@@ -1716,8 +1717,6 @@ if (adminTrigger && adminOverlay) {
     document.body.style.overflow = '';
   }
 }
-}); // ← this closes your original DOMContentLoaded wrapper
-
 
 /* ══════════ THEME ══════════ */
 function applyTheme(t) {
