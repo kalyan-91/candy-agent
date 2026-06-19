@@ -3167,11 +3167,9 @@ body.light .persona-label { color: #6b64a0; }
 .train-room {
   position: fixed; inset: 0; z-index: 99999;
   background:
-    radial-gradient(ellipse 120% 70% at 0% 0%, rgba(109,40,217,0.50) 0%, transparent 52%),
-    radial-gradient(ellipse 90% 60% at 100% 0%, rgba(6,182,212,0.35) 0%, transparent 50%),
-    radial-gradient(ellipse 80% 70% at 100% 100%, rgba(236,72,153,0.24) 0%, transparent 50%),
-    radial-gradient(ellipse 70% 60% at 0% 100%, rgba(79,70,229,0.32) 0%, transparent 50%),
-    linear-gradient(165deg, #100838 0%, #0a0428 35%, #060220 65%, #0c0432 100%);
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(60,40,110,0.45) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 80% 90%, rgba(40,30,90,0.35) 0%, transparent 55%),
+    linear-gradient(165deg, #1a1238 0%, #120c2c 30%, #0a0820 55%, #060414 80%, #03020a 100%);
   display: flex; flex-direction: column;
   opacity: 0; pointer-events: none;
   transition: opacity 0.4s ease; overflow: hidden;
