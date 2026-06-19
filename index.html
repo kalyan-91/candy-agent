@@ -439,6 +439,20 @@
         </div>
       </button>
 
+
+      <!-- Trigger button (add to your sector cards) -->
+ <button class="ss-sector-btn" id="constellationTrigger" onclick="openConstellation()"
+  style="--sector-color:#a78bfa;--sector-border:rgba(167,139,250,0.2);--sector-glow:rgba(167,139,250,0.08);--sector-shadow:rgba(167,139,250,0.18)">
+  <div class="ss-sector-icon">✦</div>
+  <div class="ss-sector-info">
+    <div class="ss-sector-code">SECTOR ε · COSMOS</div>
+    <div class="ss-sector-name">Constellation Builder</div>
+    <div class="ss-sector-desc">Leave your mark in the stars</div>
+  </div>
+  <div class="ss-sector-arrow">›</div>
+</button>
+
+
     </div>
 
     <!-- Warp flash overlay -->
@@ -508,6 +522,108 @@
   </div>
 
 </div><!-- /spaceship-overlay -->
+
+
+    
+    
+    <!-- ═══════════════════════════════════════
+   CONSTELLATION BUILDER — HTML SNIPPET
+   Add this inside your spaceship overlay
+   or as a new sector panel
+═══════════════════════════════════════ -->
+
+<!-- ═══ CONSTELLATION OVERLAY PANEL ═══ -->
+<div id="constellationPanel" class="const-panel">
+
+  <!-- Background canvas (stars + nebula) -->
+  <canvas id="constBgCanvas" class="const-bg-canvas"></canvas>
+
+  <!-- Top bar -->
+  <div class="const-topbar">
+    <button class="const-back-btn" onclick="closeConstellation()">◀ BRIDGE</button>
+    <div class="const-topbar-center">
+      <div class="const-topbar-dot"></div>
+      <div>
+        <div class="const-topbar-title">Constellation <span>Builder</span></div>
+        <div class="const-topbar-sub">SECTOR ε · COSMOS</div>
+      </div>
+    </div>
+    <div class="const-topbar-badge">
+      <div class="const-badge-dot"></div>
+      <span id="constStarCount">0 STARS</span>
+    </div>
+  </div>
+
+  <!-- Main canvas -->
+  <div class="const-canvas-wrap">
+    <canvas id="constCanvas" class="const-canvas"></canvas>
+    <div id="constTooltip" class="const-tooltip"></div>
+
+    <!-- Floating hint -->
+    <div class="const-hint" id="constHint">
+      ✦ Click anywhere to place your first star
+    </div>
+  </div>
+
+  <!-- Controls bar -->
+  <div class="const-controls">
+
+    <!-- Color picker -->
+    <div class="const-ctrl-group">
+      <span class="const-ctrl-label">COLOR</span>
+      <div class="const-colors" id="constColors">
+        <div class="const-color-dot sel" data-c="#00d4ff" onclick="constSetColor(this)" title="Cyan"></div>
+        <div class="const-color-dot" data-c="#a855f7" onclick="constSetColor(this)" title="Violet"></div>
+        <div class="const-color-dot" data-c="#fbbf24" onclick="constSetColor(this)" title="Gold"></div>
+        <div class="const-color-dot" data-c="#4ade80" onclick="constSetColor(this)" title="Green"></div>
+        <div class="const-color-dot" data-c="#f87171" onclick="constSetColor(this)" title="Red"></div>
+        <div class="const-color-dot" data-c="#fb923c" onclick="constSetColor(this)" title="Orange"></div>
+        <div class="const-color-dot" data-c="#f0abfc" onclick="constSetColor(this)" title="Pink"></div>
+        <div class="const-color-dot" data-c="#ffffff" onclick="constSetColor(this)" title="White"></div>
+      </div>
+    </div>
+
+    <!-- Mode toggle -->
+    <div class="const-ctrl-group">
+      <span class="const-ctrl-label">MODE</span>
+      <div class="const-mode-btns">
+        <button class="const-mode-btn active" id="constModeAdd" onclick="constSetMode('add')">+ Add Stars</button>
+        <button class="const-mode-btn" id="constModeConnect" onclick="constSetMode('connect')">⟶ Connect</button>
+      </div>
+    </div>
+
+    <!-- Name input -->
+    <div class="const-ctrl-group">
+      <span class="const-ctrl-label">NAME</span>
+      <input class="const-name-input" id="constName" placeholder="My Constellation..." maxlength="32">
+    </div>
+
+    <!-- Actions -->
+    <div class="const-ctrl-group const-actions">
+      <button class="const-action-btn const-undo-btn" onclick="constUndo()" title="Undo last action">↩ Undo</button>
+      <button class="const-action-btn const-save-btn" onclick="constDownload()">↓ Save PNG</button>
+      <button class="const-action-btn const-clear-btn" onclick="constClear()">✕ Clear</button>
+    </div>
+
+  </div>
+
+  <!-- Status bar -->
+  <div class="const-statusbar">
+    <span class="const-status-item">
+      <span class="const-status-led"></span>
+      STARS <strong id="constStarNum">0</strong>
+    </span>
+    <span class="const-status-item">
+      <span class="const-status-led" style="background:#a78bfa"></span>
+      LINES <strong id="constLineNum">0</strong>
+    </span>
+    <span class="const-status-item" id="constModeStatus">
+      MODE <strong>ADD</strong>
+    </span>
+    <span class="const-status-tip">Click star → star to connect in Connect mode</span>
+  </div>
+
+</div>
 
 
     
