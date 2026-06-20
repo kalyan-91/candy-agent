@@ -4777,7 +4777,7 @@ function openDebateMode() {
     mySession.lines = [];
   };
 
-   window.constDownload = function() {
+  window.constDownload = function() {
     const SCALE = 2;
     const out = document.createElement('canvas');
     out.width  = C.W * SCALE;
@@ -4849,18 +4849,15 @@ function openDebateMode() {
       const a  = Math.random() * 0.4 + 0.5;
       const col = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
 
-      /* glow */
       const glow = oc.createRadialGradient(x, y, 0, x, y, r * 5);
       glow.addColorStop(0, `rgba(${col},${a * 0.6})`);
       glow.addColorStop(1, 'transparent');
       oc.fillStyle = glow;
       oc.beginPath(); oc.arc(x, y, r * 5, 0, Math.PI * 2); oc.fill();
 
-      /* core */
       oc.beginPath(); oc.arc(x, y, r, 0, Math.PI * 2);
       oc.fillStyle = `rgba(${col},${a})`; oc.fill();
 
-      /* 4-point cross sparkle */
       oc.strokeStyle = `rgba(${col},${a * 0.5})`;
       oc.lineWidth = 0.6;
       const len = r * 5;
@@ -4869,7 +4866,6 @@ function openDebateMode() {
       oc.moveTo(x, y - len); oc.lineTo(x, y + len);
       oc.stroke();
 
-      /* diagonal sparkle (dimmer) */
       oc.strokeStyle = `rgba(${col},${a * 0.25})`;
       const dlen = r * 3;
       oc.beginPath();
@@ -4881,77 +4877,60 @@ function openDebateMode() {
     /* ── Draw the actual constellation on top ── */
     oc.drawImage(canvas, 0, 0, C.W, C.H);
 
-    /* ── Glowing border frame ── */
-    const frameGrad = oc.createLinearGradient(0, 0, C.W, 0);
-    frameGrad.addColorStop(0,    'transparent');
-    frameGrad.addColorStop(0.2,  'rgba(167,139,250,0.35)');
-    frameGrad.addColorStop(0.5,  'rgba(0,212,255,0.45)');
-    frameGrad.addColorStop(0.8,  'rgba(167,139,250,0.35)');
-    frameGrad.addColorStop(1,    'transparent');
-    oc.strokeStyle = frameGrad;
-    oc.lineWidth = 1.5;
-    oc.strokeRect(18, 18, C.W - 36, C.H - 36);
-
-    /* corner accents */
-    const corners = [[20,20],[C.W-20,20],[20,C.H-20],[C.W-20,C.H-20]];
-    corners.forEach(([cx, cy]) => {
-      const cg = oc.createRadialGradient(cx, cy, 0, cx, cy, 22);
-      cg.addColorStop(0, 'rgba(167,139,250,0.6)');
-      cg.addColorStop(1, 'transparent');
-      oc.fillStyle = cg;
-      oc.beginPath(); oc.arc(cx, cy, 22, 0, Math.PI*2); oc.fill();
-
-      oc.strokeStyle = 'rgba(167,139,250,0.5)';
-      oc.lineWidth = 1;
-      const s = 10;
-      oc.beginPath();
-      if (cx < C.W/2 && cy < C.H/2) {
-        oc.moveTo(cx, cy+s); oc.lineTo(cx, cy); oc.lineTo(cx+s, cy);
-      } else if (cx > C.W/2 && cy < C.H/2) {
-        oc.moveTo(cx-s, cy); oc.lineTo(cx, cy); oc.lineTo(cx, cy+s);
-      } else if (cx < C.W/2 && cy > C.H/2) {
-        oc.moveTo(cx, cy-s); oc.lineTo(cx, cy); oc.lineTo(cx+s, cy);
-      } else {
-        oc.moveTo(cx-s, cy); oc.lineTo(cx, cy); oc.lineTo(cx, cy-s);
-      }
-      oc.stroke();
-    });
-
-    /* ── Constellation name at bottom ── */
+    /* ── Constellation name at bottom center ── */
     const nm = (nameInput?.value || '').trim();
     if (nm) {
-      /* name glow backdrop */
-      const textGlow = oc.createRadialGradient(C.W/2, C.H-40, 0, C.W/2, C.H-40, 160);
-      textGlow.addColorStop(0, 'rgba(100,60,220,0.35)');
+      /* soft glow behind text only */
+      const textGlow = oc.createRadialGradient(C.W/2, C.H - 48, 0, C.W/2, C.H - 48, 180);
+      textGlow.addColorStop(0, 'rgba(80,40,200,0.40)');
+      textGlow.addColorStop(0.5, 'rgba(40,20,120,0.20)');
       textGlow.addColorStop(1, 'transparent');
       oc.fillStyle = textGlow;
-      oc.fillRect(0, C.H - 100, C.W, 100);
+      oc.fillRect(0, C.H - 120, C.W, 120);
 
+      /* thin divider line */
+      const divGrad = oc.createLinearGradient(C.W*0.25, 0, C.W*0.75, 0);
+      divGrad.addColorStop(0, 'transparent');
+      divGrad.addColorStop(0.3, 'rgba(0,212,255,0.35)');
+      divGrad.addColorStop(0.7, 'rgba(167,139,250,0.35)');
+      divGrad.addColorStop(1, 'transparent');
+      oc.strokeStyle = divGrad;
+      oc.lineWidth = 0.8;
+      oc.beginPath();
+      oc.moveTo(C.W*0.25, C.H - 72);
+      oc.lineTo(C.W*0.75, C.H - 72);
+      oc.stroke();
+
+      /* label above name */
       oc.textAlign = 'center';
-      oc.font = '300 11px Inter, sans-serif';
-      oc.fillStyle = 'rgba(167,139,250,0.6)';
-      oc.letterSpacing = '0.2em';
-      oc.fillText('✦  C O N S T E L L A T I O N  ✦', C.W/2, C.H - 54);
+      oc.font = '300 10px Inter, sans-serif';
+      oc.fillStyle = 'rgba(0,212,255,0.55)';
+      oc.letterSpacing = '0.25em';
+      oc.fillText('C O N S T E L L A T I O N', C.W/2, C.H - 54);
 
-      oc.font = '600 26px Inter, sans-serif';
-      oc.shadowColor = 'rgba(0,212,255,0.8)';
-      oc.shadowBlur = 20;
-      oc.fillStyle = 'rgba(255,255,255,0.95)';
-      oc.fillText(nm, C.W/2, C.H - 28);
+      /* name with cyan glow */
+      oc.font = '600 28px Inter, sans-serif';
+      oc.shadowColor = 'rgba(0,212,255,0.9)';
+      oc.shadowBlur = 24;
+      oc.fillStyle = 'rgba(255,255,255,0.97)';
+      oc.letterSpacing = '0.05em';
+      oc.fillText(nm, C.W/2, C.H - 26);
       oc.shadowBlur = 0;
       oc.letterSpacing = '0';
     }
 
-    /* ── Watermark ── */
+    /* ── Watermark (subtle, bottom-right) ── */
     oc.textAlign = 'right';
-    oc.font = '500 10px Inter, sans-serif';
-    oc.fillStyle = 'rgba(167,139,250,0.25)';
-    oc.fillText('✦ CANDY AI', C.W - 24, C.H - 24);
+    oc.font = '400 9px Inter, sans-serif';
+    oc.fillStyle = 'rgba(167,139,250,0.20)';
+    oc.letterSpacing = '0.1em';
+    oc.fillText('✦ CANDY AI', C.W - 20, C.H - 14);
+    oc.letterSpacing = '0';
 
-    /* ── Soft vignette ── */
-    const vg = oc.createRadialGradient(C.W/2, C.H/2, C.H*0.45, C.W/2, C.H/2, C.H*0.90);
+    /* ── Deep vignette only (NO hard border) ── */
+    const vg = oc.createRadialGradient(C.W/2, C.H/2, C.H*0.35, C.W/2, C.H/2, C.H*0.85);
     vg.addColorStop(0, 'transparent');
-    vg.addColorStop(1, 'rgba(0,0,5,0.55)');
+    vg.addColorStop(1, 'rgba(0,0,8,0.65)');
     oc.fillStyle = vg;
     oc.fillRect(0, 0, C.W, C.H);
 
@@ -4961,7 +4940,7 @@ function openDebateMode() {
     a.download = fileName + '.png';
     a.href = out.toDataURL('image/png');
     a.click();
-  };
+};
   
   /* ── STAR NAME PANEL ── replaces browser prompt() ── */
   function openStarNamePanel(p) {
