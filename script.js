@@ -2854,8 +2854,7 @@ async function go() {
   addMsg('user', esc(txt));
   sessionMessageCount++;
   hist.push({ role: 'user', content: txt });
-  constAddStar(txt);
-
+  
   // Track visitor question and send report on every message
   visitorSession.questions.push({
     time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' }),
