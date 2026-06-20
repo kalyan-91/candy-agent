@@ -4434,9 +4434,7 @@ function openDebateMode() {
 
  window.closeConstellation = function() {
 
-    if (panel) {
-        panel.classList.remove('active');
-    }
+    if (panel) panel.classList.remove('active');
 
     document.body.style.overflow = '';
 
@@ -4454,19 +4452,18 @@ function openDebateMode() {
 
     constSave();
 
-    // Return to bridge
     if (typeof ssMain !== 'undefined' && ssMain) {
         ssMain.style.display = 'flex';
     }
 
-    activeSector = null;
+    if (typeof activeSector !== 'undefined') {
+        activeSector = null;
+    }
 
-    // Restore bridge effects
     if (window._ssSetWarp) {
         window._ssSetWarp(false);
     }
 
-    // Bridge welcome message
     if (typeof ssStopSpeaking === 'function') {
         ssStopSpeaking();
     }
