@@ -4402,13 +4402,35 @@ function openDebateMode() {
   }
 }
 
-
  /* ═══════════════════════════════════════════
-   CONSTELLATION BUILDER — Fixed JS
+   CONSTELLATION BUILDER — Firebase Shared Version
    Paste at the bottom of your script.js
+
+   REQUIRES — add these BEFORE this file loads, in your HTML:
+   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 ═══════════════════════════════════════════ */
 
- (function() {
+(function() {
+
+  /* ── FIREBASE SETUP ── */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCJOLDMD_laNbyGmCYvjfZPyJz0TuOtv9w",
+    authDomain: "candy-constellation.firebaseapp.com",
+    databaseURL: "https://candy-constellation-default-rtdb.firebaseio.com",
+    projectId: "candy-constellation",
+    storageBucket: "candy-constellation.firebasestorage.app",
+    messagingSenderId: "1063058892921",
+    appId: "1:1063058892921:web:c5ddf7230e0d3341f64ca8"
+  };
+
+  if (!firebase.apps || !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db       = firebase.database();
+  const starsRef = db.ref('sharedConstellation/stars');
+  const linesRef = db.ref('sharedConstellation/lines');
+  const nameRef  = db.ref('sharedConstellation/name');
 
   const C = {
     stars: [], lines: [], mode: 'add', color: '#00d4ff',
@@ -4417,8 +4439,13 @@ function openDebateMode() {
     W: 0, H: 0, bgW: 0, bgH: 0, mousePos: null
   };
 
+  // Tracks ONLY what *this visitor* added this session, so Undo/Clear
+  // never touch other people's stars — only your own.
+  const mySession = { stars: [], lines: [] };
+
   let panel, canvas, ctx, bgCanvas, bgCtx, tooltip, hint, nameInput;
-  let _click, _move, _leave, _resize;
+  let _click, _move, _leave, _resize, _nameInput;
+  let firebaseListenersBound = false;
 
   window.openConstellation = function() {
     panel     = document.getElementById('constellationPanel');
@@ -4447,17 +4474,16 @@ function openDebateMode() {
       constBindEvents();
       constBgLoop();
       constDrawLoop();
-      constLoad();
+      constListenShared();
     }, 50);
   };
 
- window.closeConstellation = function() {
+  window.closeConstellation = function() {
     if (panel) panel.classList.remove('active');
     document.body.style.overflow = '';
     constUnbindEvents();
     if (C.animFrame) { cancelAnimationFrame(C.animFrame); C.animFrame = null; }
     if (C.bgFrame)   { cancelAnimationFrame(C.bgFrame);   C.bgFrame = null; }
-    constSave();
 
     if (window._ssReturnToBridge) window._ssReturnToBridge();
     if (window._ssSetWarp) window._ssSetWarp(false);
@@ -4468,7 +4494,37 @@ function openDebateMode() {
             window.ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
         }, 400);
     }
-};
+  };
+
+  /* ── FIREBASE LIVE SYNC ──
+     Replaces the old localStorage save/load. Anyone's additions show up
+     for everyone, live, without a page refresh. */
+  function constListenShared() {
+    if (firebaseListenersBound) return; // only attach once, even if panel reopens
+    firebaseListenersBound = true;
+
+    starsRef.on('value', snap => {
+      const data = snap.val() || {};
+      C.stars = Object.keys(data).map(key => ({ ...data[key], _key: key }));
+    });
+
+    linesRef.on('value', snap => {
+      const data = snap.val() || {};
+      C.lines = Object.keys(data).map(key => ({ ...data[key], _key: key }));
+    });
+
+    nameRef.on('value', snap => {
+      const val = snap.val();
+      if (nameInput && val !== null && document.activeElement !== nameInput) {
+        nameInput.value = val;
+      }
+    });
+
+    if (nameInput && !_nameInput) {
+      _nameInput = () => nameRef.set(nameInput.value);
+      nameInput.addEventListener('input', _nameInput);
+    }
+  }
 
   function constResize() {
     if (!canvas) return;
@@ -4521,7 +4577,8 @@ function openDebateMode() {
     ctx.clearRect(0, 0, C.W, C.H);
 
     C.lines.forEach(l => {
-      const a = C.stars[l.a], b = C.stars[l.b];
+      const a = C.stars.find(s => s._key === l.aKey);
+      const b = C.stars.find(s => s._key === l.bKey);
       if (!a || !b) return;
       const lg = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
       lg.addColorStop(0,   hexA(a.c, 0.5));
@@ -4538,11 +4595,13 @@ function openDebateMode() {
     });
 
     if (C.connecting !== null && C.mousePos) {
-      const a = C.stars[C.connecting];
-      ctx.beginPath(); ctx.moveTo(a.x, a.y);
-      ctx.lineTo(C.mousePos.x, C.mousePos.y);
-      ctx.strokeStyle = hexA(C.color, 0.4);
-      ctx.lineWidth = 1; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
+      const a = C.stars.find(s => s._key === C.connecting);
+      if (a) {
+        ctx.beginPath(); ctx.moveTo(a.x, a.y);
+        ctx.lineTo(C.mousePos.x, C.mousePos.y);
+        ctx.strokeStyle = hexA(C.color, 0.4);
+        ctx.lineWidth = 1; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
+      }
     }
 
     C.stars.forEach((s, i) => {
@@ -4643,23 +4702,27 @@ function openDebateMode() {
     if (C.mode === 'add') {
       if (hit >= 0) return;
       const label = prompt('Name this star (optional):') || '';
-      C.stars.push({
+      const newRef = starsRef.push({
         x: p.x, y: p.y,
         r: Math.random()*2.8+2.2,
         c: C.color,
         label: label.trim(),
         pts: Math.floor(Math.random()*3)+4
       });
-      constSave();
+      mySession.stars.push(newRef.key);
     } else {
       if (hit < 0) { C.connecting = null; C.selStar = null; return; }
+      const hitKey = C.stars[hit]._key;
       if (C.connecting === null) {
-        C.connecting = hit; C.selStar = hit;
+        C.connecting = hitKey; C.selStar = hit;
       } else {
-        if (C.connecting !== hit) {
+        if (C.connecting !== hitKey) {
           const exists = C.lines.find(l =>
-            (l.a===C.connecting&&l.b===hit)||(l.a===hit&&l.b===C.connecting));
-          if (!exists) { C.lines.push({a:C.connecting,b:hit,c:C.color}); constSave(); }
+            (l.aKey===C.connecting&&l.bKey===hitKey)||(l.aKey===hitKey&&l.bKey===C.connecting));
+          if (!exists) {
+            const newLineRef = linesRef.push({ aKey: C.connecting, bKey: hitKey, c: C.color });
+            mySession.lines.push(newLineRef.key);
+          }
         }
         C.connecting = null; C.selStar = null;
       }
@@ -4700,23 +4763,36 @@ function openDebateMode() {
     document.getElementById('constModeConnect')?.classList.toggle('active', mode==='connect');
   };
 
+  /* ── UNDO ── only removes YOUR last addition this session,
+     never touches stars/lines other visitors added. */
   window.constUndo = function() {
-    if (C.mode==='connect' && C.lines.length) { C.lines.pop(); }
-    else if (C.stars.length) {
-      const i = C.stars.length-1;
-      C.lines = C.lines.filter(l => l.a!==i && l.b!==i);
-      C.stars.pop();
+    if (C.mode === 'connect') {
+      const key = mySession.lines.pop();
+      if (key) linesRef.child(key).remove();
+    } else if (mySession.stars.length) {
+      const key = mySession.stars.pop();
+      starsRef.child(key).remove();
+      // also remove any lines (mine or not) that were attached to this star,
+      // so we don't leave dangling/broken connections behind
+      C.lines
+        .filter(l => l.aKey === key || l.bKey === key)
+        .forEach(l => linesRef.child(l._key).remove());
     }
     C.connecting = null; C.selStar = null;
-    constSave();
   };
 
+  /* ── CLEAR ── only clears stars/lines YOU added this session.
+     Everyone else's stars stay exactly where they are. */
   window.constClear = function() {
-    if (!confirm('Clear your constellation?')) return;
-    C.stars = []; C.lines = [];
-    C.connecting = null; C.selStar = null;
-    if (nameInput) nameInput.value = '';
-    constSave();
+    if (!mySession.stars.length && !mySession.lines.length) {
+      alert("You haven't added any stars yet this session.");
+      return;
+    }
+    if (!confirm('Remove only the stars and lines YOU added? (Other visitors\' stars will stay.)')) return;
+    mySession.stars.forEach(key => starsRef.child(key).remove());
+    mySession.lines.forEach(key => linesRef.child(key).remove());
+    mySession.stars = [];
+    mySession.lines = [];
   };
 
   window.constDownload = function() {
@@ -4735,25 +4811,6 @@ function openDebateMode() {
     a.download = nm+'.png'; a.href = out.toDataURL('image/png'); a.click();
   };
 
-  function constSave() {
-    try {
-      localStorage.setItem('candy_constellation', JSON.stringify({
-        stars: C.stars, lines: C.lines,
-        name: nameInput?.value||''
-      }));
-    } catch(e) {}
-  }
-
-  function constLoad() {
-    try {
-      const raw = localStorage.getItem('candy_constellation');
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      C.stars = data.stars||[]; C.lines = data.lines||[];
-      if (nameInput && data.name) nameInput.value = data.name;
-    } catch(e) {}
-  }
-
   function hexA(hex, a) {
     if (!hex||hex.length<7) return `rgba(0,212,255,${a})`;
     const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
@@ -4761,7 +4818,3 @@ function openDebateMode() {
   }
 
 })();
-
-
-
- 
