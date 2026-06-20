@@ -4330,3 +4330,83 @@ body.light .persona-label { color: #6b64a0; }
   letter-spacing: 0.07em;
   padding: 0 16px 14px;
 }
+
+
+/* ── Candy Share Message ── */
+#candyShareMsg {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  width: 420px;
+  background: linear-gradient(135deg, rgba(45,20,80,0.98) 0%, rgba(60,25,100,0.98) 50%, rgba(40,15,75,0.98) 100%);
+  border: 1px solid rgba(167,139,250,0.5);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 0 20px rgba(167,139,250,0.3),
+    0 0 40px rgba(0,212,255,0.1),
+    0 8px 32px rgba(0,0,0,0.6);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#candyShareMsg.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.csm-glow {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,212,255,0.8), rgba(167,139,250,0.9), rgba(0,212,255,0.8), transparent);
+  animation: giftBarShimmer 3s ease-in-out infinite;
+}
+
+.csm-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.csm-icon {
+  font-size: 18px;
+  color: rgba(0,212,255,0.9);
+  flex-shrink: 0;
+  animation: giftDotPulse 2s ease-in-out infinite;
+}
+
+.csm-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.88);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.csm-text strong {
+  color: rgba(0,212,255,0.95);
+  font-weight: 600;
+}
+
+.csm-close {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: rgba(167,139,250,0.08);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 6px;
+  color: rgba(167,139,250,0.6);
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.csm-close:hover {
+  background: rgba(167,139,250,0.15);
+  color: rgba(167,139,250,1);
+}
