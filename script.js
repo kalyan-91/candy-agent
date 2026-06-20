@@ -5009,7 +5009,7 @@ function openDebateMode() {
   setTimeout(() => {
     const toast = document.getElementById('candyGift');
     if (toast) toast.classList.add('show');
-  }, 3000);
+  }, 8000);
 })();
 
 function closeCandyGift() {
