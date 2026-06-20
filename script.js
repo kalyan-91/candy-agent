@@ -5006,7 +5006,6 @@ function openDebateMode() {
 
 /* ── Candy Gift Toast ── */
 (function() {
-  if (localStorage.getItem('candyGiftDone')) return;
   setTimeout(() => {
     const toast = document.getElementById('candyGift');
     if (toast) toast.classList.add('show');
@@ -5019,7 +5018,6 @@ function closeCandyGift() {
     toast.style.transform = 'translateX(120%)';
     toast.style.opacity = '0';
   }
-  localStorage.setItem('candyGiftDone', '1');
 }
 
 function generateGiftConstellation() {
