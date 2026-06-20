@@ -4880,19 +4880,21 @@ function openDebateMode() {
     /* ── Constellation name at bottom center ── */
     const nm = (nameInput?.value || '').trim();
     if (nm) {
-      /* very soft purple haze — no dark fill */
-      const textGlow = oc.createRadialGradient(C.W/2, C.H - 44, 0, C.W/2, C.H - 44, 140);
-      textGlow.addColorStop(0, 'rgba(100,60,255,0.22)');
-      textGlow.addColorStop(0.6, 'rgba(60,20,160,0.10)');
+      /* pure ellipse glow — no fillRect darkness at all */
+      const textGlow = oc.createRadialGradient(C.W/2, C.H - 40, 0, C.W/2, C.H - 40, 160);
+      textGlow.addColorStop(0, 'rgba(80,40,220,0.30)');
+      textGlow.addColorStop(0.5, 'rgba(40,10,140,0.12)');
       textGlow.addColorStop(1, 'transparent');
       oc.fillStyle = textGlow;
-      oc.fillRect(0, C.H - 110, C.W, 110);
+      oc.beginPath();
+      oc.ellipse(C.W/2, C.H - 40, 200, 70, 0, 0, Math.PI * 2);
+      oc.fill();
 
       /* thin divider line */
       const divGrad = oc.createLinearGradient(C.W*0.25, 0, C.W*0.75, 0);
       divGrad.addColorStop(0, 'transparent');
-      divGrad.addColorStop(0.3, 'rgba(0,212,255,0.40)');
-      divGrad.addColorStop(0.7, 'rgba(167,139,250,0.40)');
+      divGrad.addColorStop(0.3, 'rgba(0,212,255,0.50)');
+      divGrad.addColorStop(0.7, 'rgba(167,139,250,0.50)');
       divGrad.addColorStop(1, 'transparent');
       oc.strokeStyle = divGrad;
       oc.lineWidth = 0.8;
@@ -4904,22 +4906,31 @@ function openDebateMode() {
       /* label */
       oc.textAlign = 'center';
       oc.font = '300 10px Inter, sans-serif';
-      oc.fillStyle = 'rgba(0,212,255,0.65)';
+      oc.fillStyle = 'rgba(0,212,255,0.75)';
       oc.letterSpacing = '0.25em';
       oc.fillText('C O N S T E L L A T I O N', C.W/2, C.H - 50);
+      oc.letterSpacing = '0';
 
-      /* name — bright white with strong cyan glow, no dark shadow */
-      oc.font = '600 28px Inter, sans-serif';
-      oc.shadowColor = 'rgba(0,212,255,1.0)';
-      oc.shadowBlur = 30;
-      oc.fillStyle = 'rgba(255,255,255,1.0)';
+      /* name — 3-pass glow for maximum brightness */
+      oc.textAlign = 'center';
+      oc.font = '700 30px Inter, sans-serif';
       oc.letterSpacing = '0.06em';
+
+      /* pass 1: wide outer glow */
+      oc.shadowColor = 'rgba(0,212,255,0.9)';
+      oc.shadowBlur = 40;
+      oc.fillStyle = 'rgba(255,255,255,0.5)';
       oc.fillText(nm, C.W/2, C.H - 22);
-      /* second pass for extra brightness */
-      oc.shadowBlur = 12;
-      oc.fillStyle = 'rgba(180,240,255,0.6)';
+
+      /* pass 2: tight bright glow */
+      oc.shadowBlur = 16;
+      oc.fillStyle = 'rgba(180,240,255,0.8)';
       oc.fillText(nm, C.W/2, C.H - 22);
+
+      /* pass 3: solid white core */
       oc.shadowBlur = 0;
+      oc.fillStyle = 'rgba(255,255,255,1.0)';
+      oc.fillText(nm, C.W/2, C.H - 22);
       oc.letterSpacing = '0';
     }
 
@@ -4931,16 +4942,18 @@ function openDebateMode() {
     oc.fillText('✦ CANDY AI', C.W - 20, C.H - 14);
     oc.letterSpacing = '0';
 
-    /* ── Infinity-style soft edge (two overlapping ovals, NO hard border) ── */
-    const iv1 = oc.createRadialGradient(C.W*0.30, C.H*0.50, C.H*0.10, C.W*0.30, C.H*0.50, C.H*0.52);
+    /* ── Infinity-style soft edge — gentle, balanced ── */
+    const iv1 = oc.createRadialGradient(C.W*0.28, C.H*0.50, C.H*0.20, C.W*0.28, C.H*0.50, C.H*0.60);
     iv1.addColorStop(0, 'transparent');
-    iv1.addColorStop(1, 'rgba(0,2,18,0.38)');
+    iv1.addColorStop(0.7, 'transparent');
+    iv1.addColorStop(1, 'rgba(2,8,28,0.28)');
     oc.fillStyle = iv1;
     oc.fillRect(0, 0, C.W, C.H);
 
-    const iv2 = oc.createRadialGradient(C.W*0.70, C.H*0.50, C.H*0.10, C.W*0.70, C.H*0.50, C.H*0.52);
+    const iv2 = oc.createRadialGradient(C.W*0.72, C.H*0.50, C.H*0.20, C.W*0.72, C.H*0.50, C.H*0.60);
     iv2.addColorStop(0, 'transparent');
-    iv2.addColorStop(1, 'rgba(0,2,18,0.38)');
+    iv2.addColorStop(0.7, 'transparent');
+    iv2.addColorStop(1, 'rgba(2,8,28,0.28)');
     oc.fillStyle = iv2;
     oc.fillRect(0, 0, C.W, C.H);
 
