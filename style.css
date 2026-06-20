@@ -4114,28 +4114,24 @@ body.light .persona-label { color: #6b64a0; }
   font-size: 0.49rem; color: rgba(100,120,180,0.35); letter-spacing: 0.08em;
 }
 
-/* ── Custom Scrollbar ── */
+ /* ── Custom Scrollbar ── */
 ::-webkit-scrollbar {
   width: 4px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #a78bfa, #00d4ff);
+  background: rgba(0, 0, 0, 0.45);
   border-radius: 100px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c4b5fd, #00d4ff);
-  box-shadow: 0 0 10px rgba(0,212,255,0.5);
+  background: rgba(0, 0, 0, 0.65);
+  box-shadow: 0 0 10px rgba(0,212,255,0.3);
 }
-
 * {
   scrollbar-width: thin;
-  scrollbar-color: #a78bfa transparent;
+  scrollbar-color: rgba(0,0,0,0.45) transparent;
 }
 
 @media (max-width: 640px) {
