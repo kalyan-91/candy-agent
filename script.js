@@ -5001,3 +5001,309 @@ function openDebateMode() {
   }
 
 })();
+
+
+
+/* ── Candy Gift Toast ── */
+(function() {
+  if (localStorage.getItem('candyGiftDone')) return;
+  setTimeout(() => {
+    const toast = document.getElementById('candyGift');
+    if (toast) toast.classList.add('show');
+  }, 3000);
+})();
+
+function closeCandyGift() {
+  const toast = document.getElementById('candyGift');
+  if (toast) {
+    toast.style.transform = 'translateX(120%)';
+    toast.style.opacity = '0';
+  }
+  localStorage.setItem('candyGiftDone', '1');
+}
+
+function generateGiftConstellation() {
+  const name1 = document.getElementById('giftName')?.value.trim();
+  const name2 = document.getElementById('giftLoved')?.value.trim();
+  if (!name1 || !name2) {
+    document.getElementById('giftName').focus();
+    return;
+  }
+
+  closeCandyGift();
+
+  const W = 1400, H = 700, SCALE = 2;
+  const out = document.createElement('canvas');
+  out.width = W * SCALE; out.height = H * SCALE;
+  const oc = out.getContext('2d');
+  oc.scale(SCALE, SCALE);
+
+  /* ── Background ── */
+  const bg = oc.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0,   '#020818');
+  bg.addColorStop(0.3, '#050d2e');
+  bg.addColorStop(0.6, '#080f38');
+  bg.addColorStop(1,   '#020610');
+  oc.fillStyle = bg;
+  oc.fillRect(0, 0, W, H);
+
+  /* ── Nebula clouds ── */
+  [
+    { x:W*0.18, y:H*0.28, r:W*0.32, c:'rgba(0,100,255,0.11)'   },
+    { x:W*0.78, y:H*0.55, r:W*0.30, c:'rgba(80,20,200,0.10)'   },
+    { x:W*0.50, y:H*0.12, r:W*0.28, c:'rgba(0,160,255,0.07)'   },
+    { x:W*0.85, y:H*0.20, r:W*0.22, c:'rgba(167,139,250,0.08)' },
+    { x:W*0.12, y:H*0.78, r:W*0.25, c:'rgba(0,60,180,0.08)'    },
+    { x:W*0.55, y:H*0.82, r:W*0.30, c:'rgba(0,150,255,0.06)'   },
+  ].forEach(n => {
+    const g = oc.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+    g.addColorStop(0, n.c);
+    g.addColorStop(0.5, n.c.replace(/[\d.]+\)$/, '0.03)'));
+    g.addColorStop(1, 'transparent');
+    oc.fillStyle = g;
+    oc.fillRect(0, 0, W, H);
+  });
+
+  /* ── Milky way band ── */
+  const mw = oc.createLinearGradient(0, H*0.2, W, H*0.8);
+  mw.addColorStop(0,   'transparent');
+  mw.addColorStop(0.3, 'rgba(180,160,255,0.03)');
+  mw.addColorStop(0.5, 'rgba(200,180,255,0.06)');
+  mw.addColorStop(0.7, 'rgba(180,160,255,0.03)');
+  mw.addColorStop(1,   'transparent');
+  oc.fillStyle = mw;
+  oc.fillRect(0, 0, W, H);
+
+  /* ── Background stars ── */
+  const COLS = [
+    '255,255,255','180,220,255','200,190,255',
+    '255,240,200','150,200,255','255,220,180'
+  ];
+  for (let i = 0; i < 520; i++) {
+    const x=Math.random()*W, y=Math.random()*H;
+    const r=Math.random()*0.9+0.1, a=Math.random()*0.5+0.12;
+    const c=COLS[Math.floor(Math.random()*COLS.length)];
+    oc.beginPath(); oc.arc(x,y,r,0,Math.PI*2);
+    oc.fillStyle=`rgba(${c},${a})`; oc.fill();
+  }
+
+  /* ── Bright sparkle stars ── */
+  for (let i = 0; i < 28; i++) {
+    const x=Math.random()*W, y=Math.random()*H;
+    const r=Math.random()*1.1+0.7, a=Math.random()*0.4+0.5;
+    const c=COLS[Math.floor(Math.random()*COLS.length)];
+    const glow=oc.createRadialGradient(x,y,0,x,y,r*5);
+    glow.addColorStop(0,`rgba(${c},${a*0.6})`);
+    glow.addColorStop(1,'transparent');
+    oc.fillStyle=glow;
+    oc.beginPath(); oc.arc(x,y,r*5,0,Math.PI*2); oc.fill();
+    oc.beginPath(); oc.arc(x,y,r,0,Math.PI*2);
+    oc.fillStyle=`rgba(${c},${a})`; oc.fill();
+    oc.strokeStyle=`rgba(${c},${a*0.45})`; oc.lineWidth=0.5;
+    const len=r*4.5;
+    oc.beginPath();
+    oc.moveTo(x-len,y); oc.lineTo(x+len,y);
+    oc.moveTo(x,y-len); oc.lineTo(x,y+len);
+    oc.stroke();
+  }
+
+  /* ── Seeded random from name ── */
+  const seed1 = [...name1].reduce((a,c)=>a+c.charCodeAt(0),0);
+  const seed2 = [...name2].reduce((a,c)=>a+c.charCodeAt(0),0);
+  const rand = (s,i) => Math.abs(Math.sin(s*9301 + i*49297 + 233)) % 1;
+
+  /* ── Generate star clusters ── */
+  const count1 = 10 + (seed1 % 6); // 10–15 stars
+  const count2 = 10 + (seed2 % 6); // 10–15 stars
+
+  const cluster1 = []; // left side — name1
+  const cluster2 = []; // right side — name2
+  const bridge   = []; // middle path — 4 bridge stars
+
+  /* cluster 1 — left zone */
+  for (let i = 0; i < count1; i++) {
+    cluster1.push({
+      x: W*0.05 + rand(seed1, i*2)   * W*0.30,
+      y: H*0.10 + rand(seed1, i*2+1) * H*0.78,
+      main: i === 0,
+      name: i === 0 ? name1 : null,
+      col: '0,212,255'
+    });
+  }
+
+  /* cluster 2 — right zone */
+  for (let i = 0; i < count2; i++) {
+    cluster2.push({
+      x: W*0.65 + rand(seed2, i*2)   * W*0.30,
+      y: H*0.10 + rand(seed2, i*2+1) * H*0.78,
+      main: i === 0,
+      name: i === 0 ? name2 : null,
+      col: '167,139,250'
+    });
+  }
+
+  /* bridge — 4 stars forming a path in the middle */
+  for (let i = 0; i < 4; i++) {
+    bridge.push({
+      x: W*0.36 + rand(seed1+seed2, i*3)   * W*0.28,
+      y: H*0.20 + rand(seed1+seed2, i*3+1) * H*0.60,
+      main: false, name: null, col: '100,180,255'
+    });
+  }
+
+  /* ── Draw constellation lines ── */
+  const drawLine = (x1,y1,x2,y2,col1,col2) => {
+    const lg = oc.createLinearGradient(x1,y1,x2,y2);
+    lg.addColorStop(0, `rgba(${col1},0.65)`);
+    lg.addColorStop(1, `rgba(${col2},0.65)`);
+    oc.strokeStyle = lg;
+    oc.lineWidth = 1.0;
+    oc.shadowColor = `rgba(${col1},0.4)`;
+    oc.shadowBlur = 5;
+    oc.beginPath(); oc.moveTo(x1,y1); oc.lineTo(x2,y2); oc.stroke();
+    oc.shadowBlur = 0;
+  };
+
+  /* connect cluster1 internally — chain + 2 cross links */
+  for (let i = 0; i < cluster1.length - 1; i++) {
+    drawLine(cluster1[i].x, cluster1[i].y,
+             cluster1[i+1].x, cluster1[i+1].y,
+             '0,212,255', '0,180,255');
+  }
+  /* extra cross links inside cluster1 */
+  for (let i = 0; i < Math.min(4, cluster1.length-2); i++) {
+    drawLine(cluster1[i].x, cluster1[i].y,
+             cluster1[i+2].x, cluster1[i+2].y,
+             '0,212,255', '0,150,220');
+  }
+
+  /* connect cluster2 internally */
+  for (let i = 0; i < cluster2.length - 1; i++) {
+    drawLine(cluster2[i].x, cluster2[i].y,
+             cluster2[i+1].x, cluster2[i+1].y,
+             '167,139,250', '140,100,240');
+  }
+  /* extra cross links inside cluster2 */
+  for (let i = 0; i < Math.min(4, cluster2.length-2); i++) {
+    drawLine(cluster2[i].x, cluster2[i].y,
+             cluster2[i+2].x, cluster2[i+2].y,
+             '167,139,250', '120,80,220');
+  }
+
+  /* connect bridge internally */
+  for (let i = 0; i < bridge.length - 1; i++) {
+    drawLine(bridge[i].x, bridge[i].y,
+             bridge[i+1].x, bridge[i+1].y,
+             '100,180,255', '140,120,255');
+  }
+
+  /* connect cluster1 → bridge (2 connection points) */
+  const c1last  = cluster1[cluster1.length-1];
+  const c1mid   = cluster1[Math.floor(cluster1.length/2)];
+  drawLine(c1last.x, c1last.y, bridge[0].x, bridge[0].y, '0,212,255','100,180,255');
+  drawLine(c1mid.x,  c1mid.y,  bridge[1].x, bridge[1].y, '0,200,255','100,160,255');
+
+  /* connect bridge → cluster2 (2 connection points) */
+  const c2first = cluster2[0];
+  const c2mid   = cluster2[Math.floor(cluster2.length/2)];
+  drawLine(bridge[bridge.length-1].x, bridge[bridge.length-1].y,
+           c2first.x, c2first.y, '100,180,255','167,139,250');
+  drawLine(bridge[bridge.length-2].x, bridge[bridge.length-2].y,
+           c2mid.x, c2mid.y, '100,160,255','140,100,240');
+
+  /* ── Draw all stars ── */
+  const drawStar = (s) => {
+    const r   = s.main ? 5.5 : 2.8;
+    const col = s.col;
+
+    const glow = oc.createRadialGradient(s.x,s.y,0,s.x,s.y,r*6);
+    glow.addColorStop(0, `rgba(${col},0.7)`);
+    glow.addColorStop(0.4, `rgba(${col},0.25)`);
+    glow.addColorStop(1, 'transparent');
+    oc.fillStyle = glow;
+    oc.beginPath(); oc.arc(s.x,s.y,r*6,0,Math.PI*2); oc.fill();
+
+    oc.beginPath(); oc.arc(s.x,s.y,r,0,Math.PI*2);
+    oc.fillStyle = `rgba(${col},1)`; oc.fill();
+
+    /* 4-point sparkle */
+    oc.strokeStyle = `rgba(${col},0.55)`;
+    oc.lineWidth = s.main ? 1.0 : 0.7;
+    const len = r * (s.main ? 5 : 4);
+    oc.beginPath();
+    oc.moveTo(s.x-len,s.y); oc.lineTo(s.x+len,s.y);
+    oc.moveTo(s.x,s.y-len); oc.lineTo(s.x,s.y+len);
+    oc.stroke();
+
+    /* diagonal sparkle */
+    oc.strokeStyle = `rgba(${col},0.22)`;
+    const dlen = len * 0.6;
+    oc.beginPath();
+    oc.moveTo(s.x-dlen,s.y-dlen); oc.lineTo(s.x+dlen,s.y+dlen);
+    oc.moveTo(s.x+dlen,s.y-dlen); oc.lineTo(s.x-dlen,s.y+dlen);
+    oc.stroke();
+
+    /* name label */
+    if (s.name) {
+      oc.textAlign = 'center';
+      oc.font = '600 15px Inter, sans-serif';
+      oc.shadowColor = `rgba(${col},1)`;
+      oc.shadowBlur = 16;
+      oc.fillStyle = 'rgba(255,255,255,0.97)';
+      oc.fillText(s.name, s.x, s.y - r - 12);
+      oc.shadowBlur = 0;
+    }
+  };
+
+  [...cluster1, ...bridge, ...cluster2].forEach(drawStar);
+
+  /* ── Gift message at bottom ── */
+  const giftGlow = oc.createRadialGradient(W/2,H-45,0,W/2,H-45,180);
+  giftGlow.addColorStop(0, 'rgba(80,40,220,0.25)');
+  giftGlow.addColorStop(1, 'transparent');
+  oc.fillStyle = giftGlow;
+  oc.beginPath(); oc.ellipse(W/2,H-45,240,65,0,0,Math.PI*2); oc.fill();
+
+  const divG = oc.createLinearGradient(W*0.25,0,W*0.75,0);
+  divG.addColorStop(0, 'transparent');
+  divG.addColorStop(0.3, 'rgba(0,212,255,0.50)');
+  divG.addColorStop(0.7, 'rgba(167,139,250,0.50)');
+  divG.addColorStop(1, 'transparent');
+  oc.strokeStyle = divG; oc.lineWidth = 0.8;
+  oc.beginPath(); oc.moveTo(W*0.25,H-75); oc.lineTo(W*0.75,H-75); oc.stroke();
+
+  oc.textAlign = 'center';
+  oc.font = '300 10px Inter, sans-serif';
+  oc.fillStyle = 'rgba(0,212,255,0.75)';
+  oc.letterSpacing = '0.22em';
+  oc.fillText('✦  A GIFT FROM CANDY  ✦', W/2, H-55);
+  oc.letterSpacing = '0';
+
+  /* name — 3 pass glow */
+  oc.font = '700 28px Inter, sans-serif';
+  oc.letterSpacing = '0.06em';
+  oc.shadowColor = 'rgba(0,212,255,0.9)';
+  oc.shadowBlur = 40;
+  oc.fillStyle = 'rgba(255,255,255,0.5)';
+  oc.fillText(`${name1}  ✦  ${name2}`, W/2, H-26);
+  oc.shadowBlur = 16;
+  oc.fillStyle = 'rgba(180,240,255,0.8)';
+  oc.fillText(`${name1}  ✦  ${name2}`, W/2, H-26);
+  oc.shadowBlur = 0;
+  oc.fillStyle = 'rgba(255,255,255,1.0)';
+  oc.fillText(`${name1}  ✦  ${name2}`, W/2, H-26);
+  oc.letterSpacing = '0';
+
+  /* watermark */
+  oc.textAlign = 'right';
+  oc.font = '400 9px Inter, sans-serif';
+  oc.fillStyle = 'rgba(167,139,250,0.20)';
+  oc.fillText('✦ CANDY AI', W-22, H-14);
+
+  /* ── Download ── */
+  const fname = `${name1}-${name2}-constellation`.toLowerCase().replace(/\s+/g,'-');
+  const a = document.createElement('a');
+  a.download = fname + '.png';
+  a.href = out.toDataURL('image/png');
+  a.click();
+}
