@@ -1151,16 +1151,26 @@ runLaunch();
 
   /* ── BACK TO BRIDGE ── */
   ssChatBack && ssChatBack.addEventListener('click', () => {
-    ssChatPanel.classList.remove('active');
-    ssMain.style.display = 'flex';
-    activeSector = null; ssHistory = [];
-    if (window._ssSetWarp) window._ssSetWarp(false);
-    ssStopSpeaking();
-    setTimeout(() => {
-      ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
-    }, 400);
-  });
+  // Close whichever panel-type sector might be open
+  const constPanel = document.getElementById('constellationPanel');
+  if (constPanel && constPanel.classList.contains('active')) {
+    if (typeof closeConstellation === 'function') {
+      closeConstellation();
+    } else {
+      constPanel.classList.remove('active');
+    }
+  }
 
+  ssChatPanel.classList.remove('active');
+  ssMain.style.display = 'flex';
+  activeSector = null; ssHistory = [];
+  if (window._ssSetWarp) window._ssSetWarp(false);
+  ssStopSpeaking();
+  setTimeout(() => {
+    ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
+  }, 400);
+});
+  
   /* ── ENTER SECTOR ── */
   function enterSector(sectorKey) {
   const s = SECTORS[sectorKey];
