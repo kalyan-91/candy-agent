@@ -5289,4 +5289,26 @@ function generateGiftConstellation() {
   a.download = fname + '.png';
   a.href = out.toDataURL('image/png');
   a.click();
+
+  /* ── Share message toast ── */
+  setTimeout(() => {
+    const msg = document.createElement('div');
+    msg.id = 'candyShareMsg';
+    msg.innerHTML = `
+      <div class="csm-glow"></div>
+      <div class="csm-inner">
+        <span class="csm-icon">✦</span>
+        <p class="csm-text">You can also design your own constellation manually with your favourite persons by visiting <strong>Candy Spaceship</strong>!</p>
+        <button class="csm-close" onclick="this.parentElement.parentElement.remove()">✕</button>
+      </div>
+    `;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.classList.add('show'), 100);
+    setTimeout(() => {
+      msg.style.opacity = '0';
+      msg.style.transform = 'translateY(20px)';
+      setTimeout(() => msg.remove(), 500);
+    }, 6000);
+  }, 1000);
+
 }
