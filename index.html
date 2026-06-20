@@ -931,6 +931,29 @@
 
     </div>
   </div>
+
+
+  <!-- ── Candy Gift Toast ── -->
+<div class="candy-gift-toast" id="candyGift">
+  <div class="candy-gift-glow"></div>
+  <div class="candy-gift-header">
+    <span class="candy-gift-icon">🎁</span>
+    <div>
+      <div class="candy-gift-title">✦ A small gift from Candy</div>
+      <div class="candy-gift-sub">I made something special for you</div>
+    </div>
+    <button class="candy-gift-close" onclick="closeCandyGift()">✕</button>
+  </div>
+  <div class="candy-gift-body">
+    <input class="candy-gift-input" id="giftName" placeholder="Your name..." maxlength="20"/>
+    <input class="candy-gift-input" id="giftLoved" placeholder="Someone you love..." maxlength="20"/>
+    <button class="candy-gift-btn" onclick="generateGiftConstellation()">
+      ✦ Receive Your Gift
+    </button>
+  </div>
+  <div class="candy-gift-hint">Only for you · Never shown again</div>
+</div>
+  
   
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
