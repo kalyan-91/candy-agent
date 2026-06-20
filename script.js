@@ -4882,15 +4882,18 @@ function openDebateMode() {
     oc.drawImage(canvas, 0, 0, C.W, C.H);
 
     /* ── Glowing border frame ── */
-    const frameGrad = oc.createLinearGradient(0, 0, C.W, 0);
-    frameGrad.addColorStop(0,    'transparent');
-    frameGrad.addColorStop(0.2,  'rgba(167,139,250,0.35)');
-    frameGrad.addColorStop(0.5,  'rgba(0,212,255,0.45)');
-    frameGrad.addColorStop(0.8,  'rgba(167,139,250,0.35)');
-    frameGrad.addColorStop(1,    'transparent');
-    oc.strokeStyle = frameGrad;
-    oc.lineWidth = 1.5;
-    oc.strokeRect(18, 18, C.W - 36, C.H - 36);
+    // Replace the vignette block with this:
+const vg = oc.createRadialGradient(
+  C.W * 0.45, C.H / 2, 0,
+  C.W * 0.45, C.H / 2, Math.max(C.W, C.H) * 0.75
+);
+vg.addColorStop(0, 'transparent');
+vg.addColorStop(0.6, 'transparent');
+vg.addColorStop(1, 'rgba(0,0,8,0.70)');
+oc.fillStyle = vg;
+oc.fillRect(0, 0, C.W, C.H);
+// Replace corner accent color with:
+oc.strokeStyle = 'rgba(167,139,250,0.25)';
 
     /* corner accents */
     const corners = [[20,20],[C.W-20,20],[20,C.H-20],[C.W-20,C.H-20]];
