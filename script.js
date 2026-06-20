@@ -5308,7 +5308,7 @@ function generateGiftConstellation() {
       msg.style.opacity = '0';
       msg.style.transform = 'translateY(20px)';
       setTimeout(() => msg.remove(), 500);
-    }, 6000);
+    }, 10000);
   }, 1000);
 
 }
