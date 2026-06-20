@@ -4432,8 +4432,11 @@ function openDebateMode() {
     }, 50);
   };
 
-  window.closeConstellation = function() {
-    if (panel) panel.classList.remove('active');
+ window.closeConstellation = function() {
+
+    if (panel) {
+        panel.classList.remove('active');
+    }
 
     document.body.style.overflow = '';
 
@@ -4451,11 +4454,30 @@ function openDebateMode() {
 
     constSave();
 
+    // Return to bridge
     if (typeof ssMain !== 'undefined' && ssMain) {
         ssMain.style.display = 'flex';
     }
 
     activeSector = null;
+
+    // Restore bridge effects
+    if (window._ssSetWarp) {
+        window._ssSetWarp(false);
+    }
+
+    // Bridge welcome message
+    if (typeof ssStopSpeaking === 'function') {
+        ssStopSpeaking();
+    }
+
+    if (typeof ssCandySpeak === 'function') {
+        setTimeout(() => {
+            ssCandySpeak(
+                "Welcome back to the bridge, Captain. Where shall we head next?"
+            );
+        }, 400);
+    }
 };
 
   function constResize() {
