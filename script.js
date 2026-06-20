@@ -5004,6 +5004,7 @@ function openDebateMode() {
 
 
 
+
 /* ── Candy Gift Toast ── */
 (function() {
   setTimeout(() => {
@@ -5110,19 +5111,19 @@ function generateGiftConstellation() {
   const seed2 = [...name2].reduce((a,c)=>a+c.charCodeAt(0),0);
   const rand = (s,i) => Math.abs(Math.sin(s*9301 + i*49297 + 233)) % 1;
 
-  /* ── Generate star clusters ── */
-  const count1 = 10 + (seed1 % 6); // 10–15 stars
-  const count2 = 10 + (seed2 % 6); // 10–15 stars
+  /* ── Reduce star count for cleaner look ── */
+  const count1 = 6 + (seed1 % 4); // 6–9 stars
+  const count2 = 6 + (seed2 % 4); // 6–9 stars
 
-  const cluster1 = []; // left side — name1
-  const cluster2 = []; // right side — name2
-  const bridge   = []; // middle path — 4 bridge stars
+  const cluster1 = [];
+  const cluster2 = [];
+  const bridge   = [];
 
   /* cluster 1 — left zone */
   for (let i = 0; i < count1; i++) {
     cluster1.push({
-      x: W*0.05 + rand(seed1, i*2)   * W*0.30,
-      y: H*0.10 + rand(seed1, i*2+1) * H*0.78,
+      x: W*0.06 + rand(seed1, i*2)   * W*0.26,
+      y: H*0.12 + rand(seed1, i*2+1) * H*0.74,
       main: i === 0,
       name: i === 0 ? name1 : null,
       col: '0,212,255'
@@ -5132,19 +5133,19 @@ function generateGiftConstellation() {
   /* cluster 2 — right zone */
   for (let i = 0; i < count2; i++) {
     cluster2.push({
-      x: W*0.65 + rand(seed2, i*2)   * W*0.30,
-      y: H*0.10 + rand(seed2, i*2+1) * H*0.78,
+      x: W*0.68 + rand(seed2, i*2)   * W*0.26,
+      y: H*0.12 + rand(seed2, i*2+1) * H*0.74,
       main: i === 0,
       name: i === 0 ? name2 : null,
       col: '167,139,250'
     });
   }
 
-  /* bridge — 4 stars forming a path in the middle */
-  for (let i = 0; i < 4; i++) {
+  /* bridge — 3 stars in the middle */
+  for (let i = 0; i < 3; i++) {
     bridge.push({
-      x: W*0.36 + rand(seed1+seed2, i*3)   * W*0.28,
-      y: H*0.20 + rand(seed1+seed2, i*3+1) * H*0.60,
+      x: W*0.38 + rand(seed1+seed2, i*3)   * W*0.24,
+      y: H*0.25 + rand(seed1+seed2, i*3+1) * H*0.50,
       main: false, name: null, col: '100,180,255'
     });
   }
@@ -5152,62 +5153,46 @@ function generateGiftConstellation() {
   /* ── Draw constellation lines ── */
   const drawLine = (x1,y1,x2,y2,col1,col2) => {
     const lg = oc.createLinearGradient(x1,y1,x2,y2);
-    lg.addColorStop(0, `rgba(${col1},0.65)`);
-    lg.addColorStop(1, `rgba(${col2},0.65)`);
+    lg.addColorStop(0, `rgba(${col1},0.55)`);
+    lg.addColorStop(1, `rgba(${col2},0.55)`);
     oc.strokeStyle = lg;
-    oc.lineWidth = 1.0;
-    oc.shadowColor = `rgba(${col1},0.4)`;
-    oc.shadowBlur = 5;
+    oc.lineWidth = 0.8;
+    oc.shadowColor = `rgba(${col1},0.3)`;
+    oc.shadowBlur = 4;
     oc.beginPath(); oc.moveTo(x1,y1); oc.lineTo(x2,y2); oc.stroke();
     oc.shadowBlur = 0;
   };
 
-  /* connect cluster1 internally — chain + 2 cross links */
+  /* cluster1 — simple chain only, no cross links */
   for (let i = 0; i < cluster1.length - 1; i++) {
     drawLine(cluster1[i].x, cluster1[i].y,
              cluster1[i+1].x, cluster1[i+1].y,
              '0,212,255', '0,180,255');
   }
-  /* extra cross links inside cluster1 */
-  for (let i = 0; i < Math.min(4, cluster1.length-2); i++) {
-    drawLine(cluster1[i].x, cluster1[i].y,
-             cluster1[i+2].x, cluster1[i+2].y,
-             '0,212,255', '0,150,220');
-  }
 
-  /* connect cluster2 internally */
+  /* cluster2 — simple chain only, no cross links */
   for (let i = 0; i < cluster2.length - 1; i++) {
     drawLine(cluster2[i].x, cluster2[i].y,
              cluster2[i+1].x, cluster2[i+1].y,
              '167,139,250', '140,100,240');
   }
-  /* extra cross links inside cluster2 */
-  for (let i = 0; i < Math.min(4, cluster2.length-2); i++) {
-    drawLine(cluster2[i].x, cluster2[i].y,
-             cluster2[i+2].x, cluster2[i+2].y,
-             '167,139,250', '120,80,220');
-  }
 
-  /* connect bridge internally */
+  /* bridge — simple chain */
   for (let i = 0; i < bridge.length - 1; i++) {
     drawLine(bridge[i].x, bridge[i].y,
              bridge[i+1].x, bridge[i+1].y,
              '100,180,255', '140,120,255');
   }
 
-  /* connect cluster1 → bridge (2 connection points) */
-  const c1last  = cluster1[cluster1.length-1];
-  const c1mid   = cluster1[Math.floor(cluster1.length/2)];
-  drawLine(c1last.x, c1last.y, bridge[0].x, bridge[0].y, '0,212,255','100,180,255');
-  drawLine(c1mid.x,  c1mid.y,  bridge[1].x, bridge[1].y, '0,200,255','100,160,255');
+  /* cluster1 → bridge — single connection */
+  drawLine(cluster1[cluster1.length-1].x, cluster1[cluster1.length-1].y,
+           bridge[0].x, bridge[0].y,
+           '0,212,255', '100,180,255');
 
-  /* connect bridge → cluster2 (2 connection points) */
-  const c2first = cluster2[0];
-  const c2mid   = cluster2[Math.floor(cluster2.length/2)];
+  /* bridge → cluster2 — single connection */
   drawLine(bridge[bridge.length-1].x, bridge[bridge.length-1].y,
-           c2first.x, c2first.y, '100,180,255','167,139,250');
-  drawLine(bridge[bridge.length-2].x, bridge[bridge.length-2].y,
-           c2mid.x, c2mid.y, '100,160,255','140,100,240');
+           cluster2[0].x, cluster2[0].y,
+           '100,180,255', '167,139,250');
 
   /* ── Draw all stars ── */
   const drawStar = (s) => {
