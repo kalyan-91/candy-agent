@@ -525,14 +525,14 @@
 
 
     
-    
+
     <!-- ═══════════════════════════════════════
    CONSTELLATION BUILDER — HTML SNIPPET
    Add this inside your spaceship overlay
    or as a new sector panel
 ═══════════════════════════════════════ -->
 
- <!-- ═══ CONSTELLATION OVERLAY PANEL ═══ -->
+<!-- ═══ CONSTELLATION OVERLAY PANEL ═══ -->
 <div id="constellationPanel" class="const-panel">
 
   <!-- Background canvas (stars + nebula) -->
@@ -623,7 +623,40 @@
     <span class="const-status-tip">Click star → star to connect in Connect mode</span>
   </div>
 
+  <!-- ═══ STAR NAME PANEL — replaces browser prompt() ═══ -->
+  <div class="star-name-overlay" id="starNameOverlay">
+    <div class="star-name-backdrop"></div>
+    <div class="star-name-panel">
+      <div class="star-name-indicator">
+        <div class="star-name-glow"></div>
+        <div class="star-name-eyebrow">New star placed · <span>name it</span></div>
+      </div>
+      <div class="star-name-headline">Who is this <span>star?</span></div>
+      <div class="star-name-field">
+        <label class="star-name-field-label">PERSON'S NAME — OPTIONAL</label>
+        <input class="star-name-field-input" id="starNameInput" type="text"
+               placeholder="e.g. Pavan, Priya, Rahul…" autocomplete="off" maxlength="32">
+      </div>
+      <div class="star-name-chips">
+        <div class="star-name-chip" data-name="Pavan">Pavan</div>
+        <div class="star-name-chip" data-name="Candy">Candy</div>
+        <div class="star-name-chip" data-name="Arjun">Arjun</div>
+        <div class="star-name-chip" data-name="Priya">Priya</div>
+        <div class="star-name-chip" data-name="Rahul">Rahul</div>
+        <div class="star-name-chip" data-name="Sneha">Sneha</div>
+        <div class="star-name-chip" data-name="Vikram">Vikram</div>
+        <div class="star-name-chip" data-name="Ananya">Ananya</div>
+      </div>
+      <div class="star-name-actions">
+        <button class="star-name-skip" id="starNameSkip">Skip</button>
+        <button class="star-name-confirm" id="starNameConfirm">✦ Place Star</button>
+      </div>
+      <div class="star-name-hint">Enter to confirm · Escape to skip</div>
+    </div>
+  </div>
+
 </div>
+
     
 <div class="clock-widget" id="kurnoolTime">
   <canvas id="clockCanvas" width="80" height="80"></canvas>
