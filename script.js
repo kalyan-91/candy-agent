@@ -4434,12 +4434,29 @@ function openDebateMode() {
 
   window.closeConstellation = function() {
     if (panel) panel.classList.remove('active');
+
     document.body.style.overflow = '';
+
     constUnbindEvents();
-    if (C.animFrame) { cancelAnimationFrame(C.animFrame); C.animFrame = null; }
-    if (C.bgFrame)   { cancelAnimationFrame(C.bgFrame);   C.bgFrame   = null; }
+
+    if (C.animFrame) {
+        cancelAnimationFrame(C.animFrame);
+        C.animFrame = null;
+    }
+
+    if (C.bgFrame) {
+        cancelAnimationFrame(C.bgFrame);
+        C.bgFrame = null;
+    }
+
     constSave();
-  };
+
+    if (typeof ssMain !== 'undefined' && ssMain) {
+        ssMain.style.display = 'flex';
+    }
+
+    activeSector = null;
+};
 
   function constResize() {
     if (!canvas) return;
