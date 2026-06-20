@@ -4942,20 +4942,6 @@ function openDebateMode() {
     oc.fillText('✦ CANDY AI', C.W - 20, C.H - 14);
     oc.letterSpacing = '0';
 
-    /* ── Infinity-style soft edge — gentle, balanced ── */
-    const iv1 = oc.createRadialGradient(C.W*0.28, C.H*0.50, C.H*0.20, C.W*0.28, C.H*0.50, C.H*0.60);
-    iv1.addColorStop(0, 'transparent');
-    iv1.addColorStop(0.7, 'transparent');
-    iv1.addColorStop(1, 'rgba(2,8,28,0.28)');
-    oc.fillStyle = iv1;
-    oc.fillRect(0, 0, C.W, C.H);
-
-    const iv2 = oc.createRadialGradient(C.W*0.72, C.H*0.50, C.H*0.20, C.W*0.72, C.H*0.50, C.H*0.60);
-    iv2.addColorStop(0, 'transparent');
-    iv2.addColorStop(0.7, 'transparent');
-    iv2.addColorStop(1, 'rgba(2,8,28,0.28)');
-    oc.fillStyle = iv2;
-    oc.fillRect(0, 0, C.W, C.H);
 
     /* ── Download ── */
     const fileName = (nm || 'my-constellation').replace(/\s+/g,'-').toLowerCase();
