@@ -4785,76 +4785,177 @@ function openDebateMode() {
     const oc = out.getContext('2d');
     oc.scale(SCALE, SCALE);
 
+    /* ── Deep space background ── */
     const bg = oc.createLinearGradient(0, 0, C.W, C.H);
-    bg.addColorStop(0,    '#040818');
-    bg.addColorStop(0.45, '#0a1442');
-    bg.addColorStop(1,    '#03040f');
+    bg.addColorStop(0,    '#020818');
+    bg.addColorStop(0.3,  '#050d2e');
+    bg.addColorStop(0.6,  '#080f38');
+    bg.addColorStop(1,    '#020610');
     oc.fillStyle = bg;
     oc.fillRect(0, 0, C.W, C.H);
 
+    /* ── Large soft nebula clouds ── */
     const nebulas = [
-      { x: C.W*0.18, y: C.H*0.18, r: C.W*0.5,  color: 'rgba(0,140,255,0.16)'   },
-      { x: C.W*0.85, y: C.H*0.75, r: C.W*0.45, color: 'rgba(167,139,250,0.14)' },
-      { x: C.W*0.6,  y: C.H*0.15, r: C.W*0.35, color: 'rgba(251,191,36,0.06)'  },
+      { x: C.W*0.20, y: C.H*0.25, r: C.W*0.55, color: 'rgba(0,100,255,0.12)'    },
+      { x: C.W*0.75, y: C.H*0.60, r: C.W*0.50, color: 'rgba(120,40,220,0.12)'   },
+      { x: C.W*0.50, y: C.H*0.10, r: C.W*0.40, color: 'rgba(0,180,255,0.08)'    },
+      { x: C.W*0.85, y: C.H*0.20, r: C.W*0.35, color: 'rgba(167,139,250,0.10)'  },
+      { x: C.W*0.15, y: C.H*0.80, r: C.W*0.40, color: 'rgba(60,0,180,0.10)'     },
+      { x: C.W*0.60, y: C.H*0.85, r: C.W*0.45, color: 'rgba(0,212,255,0.07)'    },
     ];
     nebulas.forEach(n => {
       const g = oc.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
       g.addColorStop(0, n.color);
+      g.addColorStop(0.5, n.color.replace(/[\d.]+\)$/, '0.04)'));
       g.addColorStop(1, 'transparent');
       oc.fillStyle = g;
       oc.fillRect(0, 0, C.W, C.H);
     });
 
-    const STAR_COLORS = ['255,255,255','180,220,255','200,190,255','255,240,200'];
-    const starCount = Math.floor((C.W * C.H) / 1800);
+    /* ── Milky way band ── */
+    const mw = oc.createLinearGradient(0, C.H*0.2, C.W, C.H*0.8);
+    mw.addColorStop(0,    'transparent');
+    mw.addColorStop(0.3,  'rgba(180,160,255,0.04)');
+    mw.addColorStop(0.5,  'rgba(200,180,255,0.07)');
+    mw.addColorStop(0.7,  'rgba(180,160,255,0.04)');
+    mw.addColorStop(1,    'transparent');
+    oc.fillStyle = mw;
+    oc.fillRect(0, 0, C.W, C.H);
+
+    /* ── Tiny background stars ── */
+    const STAR_COLORS = [
+      '255,255,255', '180,220,255', '200,190,255',
+      '255,240,200', '150,200,255', '255,220,180'
+    ];
+    const starCount = Math.floor((C.W * C.H) / 1200);
     for (let i = 0; i < starCount; i++) {
-      const x = Math.random() * C.W, y = Math.random() * C.H;
-      const r = Math.random() * 1.1 + 0.2;
-      const a = Math.random() * 0.6 + 0.15;
+      const x   = Math.random() * C.W;
+      const y   = Math.random() * C.H;
+      const r   = Math.random() * 1.0 + 0.15;
+      const a   = Math.random() * 0.55 + 0.15;
       const col = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
       oc.beginPath();
       oc.arc(x, y, r, 0, Math.PI * 2);
       oc.fillStyle = `rgba(${col},${a})`;
       oc.fill();
     }
-    const brightCount = Math.floor(starCount / 25);
+
+    /* ── Bright feature stars with 4-point sparkle ── */
+    const brightCount = Math.floor(starCount / 18);
     for (let i = 0; i < brightCount; i++) {
-      const x = Math.random() * C.W, y = Math.random() * C.H;
-      const r = Math.random() * 1 + 1;
+      const x  = Math.random() * C.W;
+      const y  = Math.random() * C.H;
+      const r  = Math.random() * 1.2 + 0.8;
+      const a  = Math.random() * 0.4 + 0.5;
+      const col = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+
+      /* glow */
+      const glow = oc.createRadialGradient(x, y, 0, x, y, r * 5);
+      glow.addColorStop(0, `rgba(${col},${a * 0.6})`);
+      glow.addColorStop(1, 'transparent');
+      oc.fillStyle = glow;
+      oc.beginPath(); oc.arc(x, y, r * 5, 0, Math.PI * 2); oc.fill();
+
+      /* core */
+      oc.beginPath(); oc.arc(x, y, r, 0, Math.PI * 2);
+      oc.fillStyle = `rgba(${col},${a})`; oc.fill();
+
+      /* 4-point cross sparkle */
+      oc.strokeStyle = `rgba(${col},${a * 0.5})`;
+      oc.lineWidth = 0.6;
+      const len = r * 5;
       oc.beginPath();
-      oc.arc(x, y, r, 0, Math.PI*2);
-      oc.fillStyle = 'rgba(255,255,255,0.8)';
-      oc.fill();
-      oc.strokeStyle = 'rgba(255,255,255,0.35)';
-      oc.lineWidth = 0.5;
+      oc.moveTo(x - len, y); oc.lineTo(x + len, y);
+      oc.moveTo(x, y - len); oc.lineTo(x, y + len);
+      oc.stroke();
+
+      /* diagonal sparkle (dimmer) */
+      oc.strokeStyle = `rgba(${col},${a * 0.25})`;
+      const dlen = r * 3;
       oc.beginPath();
-      oc.moveTo(x - r*3, y); oc.lineTo(x + r*3, y);
-      oc.moveTo(x, y - r*3); oc.lineTo(x, y + r*3);
+      oc.moveTo(x - dlen, y - dlen); oc.lineTo(x + dlen, y + dlen);
+      oc.moveTo(x + dlen, y - dlen); oc.lineTo(x - dlen, y + dlen);
       oc.stroke();
     }
 
+    /* ── Draw the actual constellation on top ── */
     oc.drawImage(canvas, 0, 0, C.W, C.H);
 
+    /* ── Glowing border frame ── */
+    const frameGrad = oc.createLinearGradient(0, 0, C.W, 0);
+    frameGrad.addColorStop(0,    'transparent');
+    frameGrad.addColorStop(0.2,  'rgba(167,139,250,0.35)');
+    frameGrad.addColorStop(0.5,  'rgba(0,212,255,0.45)');
+    frameGrad.addColorStop(0.8,  'rgba(167,139,250,0.35)');
+    frameGrad.addColorStop(1,    'transparent');
+    oc.strokeStyle = frameGrad;
+    oc.lineWidth = 1.5;
+    oc.strokeRect(18, 18, C.W - 36, C.H - 36);
+
+    /* corner accents */
+    const corners = [[20,20],[C.W-20,20],[20,C.H-20],[C.W-20,C.H-20]];
+    corners.forEach(([cx, cy]) => {
+      const cg = oc.createRadialGradient(cx, cy, 0, cx, cy, 22);
+      cg.addColorStop(0, 'rgba(167,139,250,0.6)');
+      cg.addColorStop(1, 'transparent');
+      oc.fillStyle = cg;
+      oc.beginPath(); oc.arc(cx, cy, 22, 0, Math.PI*2); oc.fill();
+
+      oc.strokeStyle = 'rgba(167,139,250,0.5)';
+      oc.lineWidth = 1;
+      const s = 10;
+      oc.beginPath();
+      if (cx < C.W/2 && cy < C.H/2) {
+        oc.moveTo(cx, cy+s); oc.lineTo(cx, cy); oc.lineTo(cx+s, cy);
+      } else if (cx > C.W/2 && cy < C.H/2) {
+        oc.moveTo(cx-s, cy); oc.lineTo(cx, cy); oc.lineTo(cx, cy+s);
+      } else if (cx < C.W/2 && cy > C.H/2) {
+        oc.moveTo(cx, cy-s); oc.lineTo(cx, cy); oc.lineTo(cx+s, cy);
+      } else {
+        oc.moveTo(cx-s, cy); oc.lineTo(cx, cy); oc.lineTo(cx, cy-s);
+      }
+      oc.stroke();
+    });
+
+    /* ── Constellation name at bottom ── */
     const nm = (nameInput?.value || '').trim();
     if (nm) {
+      /* name glow backdrop */
+      const textGlow = oc.createRadialGradient(C.W/2, C.H-40, 0, C.W/2, C.H-40, 160);
+      textGlow.addColorStop(0, 'rgba(100,60,220,0.35)');
+      textGlow.addColorStop(1, 'transparent');
+      oc.fillStyle = textGlow;
+      oc.fillRect(0, C.H - 100, C.W, 100);
+
       oc.textAlign = 'center';
-      oc.font = '600 22px Inter, sans-serif';
-      oc.shadowColor = 'rgba(125,211,252,0.6)';
-      oc.shadowBlur = 12;
-      oc.fillStyle = 'rgba(255,255,255,0.92)';
-      oc.fillText(nm, C.W/2, C.H - 36);
+      oc.font = '300 11px Inter, sans-serif';
+      oc.fillStyle = 'rgba(167,139,250,0.6)';
+      oc.letterSpacing = '0.2em';
+      oc.fillText('✦  C O N S T E L L A T I O N  ✦', C.W/2, C.H - 54);
+
+      oc.font = '600 26px Inter, sans-serif';
+      oc.shadowColor = 'rgba(0,212,255,0.8)';
+      oc.shadowBlur = 20;
+      oc.fillStyle = 'rgba(255,255,255,0.95)';
+      oc.fillText(nm, C.W/2, C.H - 28);
       oc.shadowBlur = 0;
-      oc.font = '500 11px Inter, sans-serif';
-      oc.fillStyle = 'rgba(167,139,250,0.55)';
-      oc.fillText('✦ A CONSTELLATION FROM CANDY AI ✦', C.W/2, C.H - 16);
+      oc.letterSpacing = '0';
     }
 
-    const vg = oc.createRadialGradient(C.W/2, C.H/2, C.H*0.35, C.W/2, C.H/2, C.H*0.75);
+    /* ── Watermark ── */
+    oc.textAlign = 'right';
+    oc.font = '500 10px Inter, sans-serif';
+    oc.fillStyle = 'rgba(167,139,250,0.25)';
+    oc.fillText('✦ CANDY AI', C.W - 24, C.H - 24);
+
+    /* ── Soft vignette ── */
+    const vg = oc.createRadialGradient(C.W/2, C.H/2, C.H*0.45, C.W/2, C.H/2, C.H*0.90);
     vg.addColorStop(0, 'transparent');
-    vg.addColorStop(1, 'rgba(0,0,0,0.45)');
+    vg.addColorStop(1, 'rgba(0,0,5,0.55)');
     oc.fillStyle = vg;
     oc.fillRect(0, 0, C.W, C.H);
 
+    /* ── Download ── */
     const fileName = (nm || 'my-constellation').replace(/\s+/g,'-').toLowerCase();
     const a = document.createElement('a');
     a.download = fileName + '.png';
