@@ -4402,7 +4402,7 @@ function openDebateMode() {
   }
 }
 
-/* ═══════════════════════════════════════════
+ /* ═══════════════════════════════════════════
    CONSTELLATION BUILDER — Firebase Shared Version
    Paste at the bottom of your script.js
 
@@ -4690,7 +4690,7 @@ function openDebateMode() {
     return C.stars.findIndex(s => constDist(p,s) < Math.max(s.r+10,16));
   }
 
-   function constHandleClick(e) {
+  function constHandleClick(e) {
     const p = constPos(e);
     const hit = constHitStar(p);
 
@@ -4716,7 +4716,6 @@ function openDebateMode() {
       }
     }
   }
-
 
   function constHandleMove(e) {
     const p = constPos(e);
@@ -4871,61 +4870,45 @@ function openDebateMode() {
     const skipB    = document.getElementById('starNameSkip');
     const chips    = document.querySelectorAll('.star-name-chip');
 
-    if (!overlay || !input || !confirmB || !skipB) {
-      console.error('Star name panel elements not found');
-      return;
-    }
-
     input.value = '';
     overlay.classList.add('active');
     setTimeout(() => input.focus(), 350);
 
-    function cleanup() {
-      confirmB.removeEventListener('click', onConfirm);
-      skipB.removeEventListener('click', onSkip);
-      overlay.removeEventListener('click', onBackdrop);
-      document.removeEventListener('keydown', onKey);
-      chips.forEach(c => c.removeEventListener('click', onChip));
-    }
-
     function placeStar(label) {
       overlay.classList.remove('active');
-      cleanup();
+      confirmB.removeEventListener('click', onConfirm);
+      skipB.removeEventListener('click', onSkip);
+      document.removeEventListener('keydown', onKey);
+      chips.forEach(c => c.removeEventListener('click', onChip));
+
       const newRef = starsRef.push({
         x: p.x, y: p.y,
         r: Math.random() * 2.8 + 2.2,
         c: C.color,
-        label: (label || '').trim(),
+        label: label.trim(),
         pts: Math.floor(Math.random() * 3) + 4
       });
       mySession.stars.push(newRef.key);
     }
 
-    function cancelPanel() {
-      overlay.classList.remove('active');
-      cleanup();
-    }
-
-    function onConfirm(e) { e.stopPropagation(); placeStar(input.value); }
-    function onSkip(e)    { e.stopPropagation(); placeStar(''); }
-    function onBackdrop(e) {
-      if (e.target === overlay || e.target.classList.contains('star-name-backdrop')) {
-        cancelPanel();
-      }
-    }
+    function onConfirm() { placeStar(input.value); }
+    function onSkip()    { placeStar(''); }
     function onKey(e) {
-      if (e.key === 'Enter')  { e.preventDefault(); e.stopPropagation(); placeStar(input.value); }
-      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cancelPanel(); }
+      if (e.key === 'Enter')  { e.preventDefault(); placeStar(input.value); }
+      if (e.key === 'Escape') { e.preventDefault(); placeStar(''); }
     }
-    function onChip(e) {
-      e.stopPropagation();
-      input.value = e.currentTarget.dataset.name;
-      input.focus();
-    }
+    function onChip(e) { input.value = e.currentTarget.dataset.name; input.focus(); }
 
     confirmB.addEventListener('click', onConfirm);
     skipB.addEventListener('click', onSkip);
-    overlay.addEventListener('click', onBackdrop);
     document.addEventListener('keydown', onKey);
     chips.forEach(c => c.addEventListener('click', onChip));
   }
+
+  function hexA(hex, a) {
+    if (!hex||hex.length<7) return `rgba(0,212,255,${a})`;
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+})();
