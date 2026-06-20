@@ -1151,19 +1151,29 @@ runLaunch();
 
   /* ── BACK TO BRIDGE ── */
   ssChatBack && ssChatBack.addEventListener('click', () => {
-  // Close whichever panel-type sector might be open
   const constPanel = document.getElementById('constellationPanel');
+  ssChatPanel.classList.remove('active');
+  ssHistory = [];
+
   if (constPanel && constPanel.classList.contains('active')) {
     if (typeof closeConstellation === 'function') {
-      closeConstellation();
+      closeConstellation(); // already resets ssMain, activeSector, warp,
+                             // stops speech, and speaks the welcome-back line
     } else {
       constPanel.classList.remove('active');
+      ssMain.style.display = 'flex';
+      activeSector = null;
+      if (window._ssSetWarp) window._ssSetWarp(false);
+      ssStopSpeaking();
+      setTimeout(() => {
+        ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
+      }, 400);
     }
+    return; // <-- prevents the duplicate sequence below
   }
 
-  ssChatPanel.classList.remove('active');
   ssMain.style.display = 'flex';
-  activeSector = null; ssHistory = [];
+  activeSector = null;
   if (window._ssSetWarp) window._ssSetWarp(false);
   ssStopSpeaking();
   setTimeout(() => {
