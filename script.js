@@ -4402,7 +4402,7 @@ function openDebateMode() {
   }
 }
 
- /* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    CONSTELLATION BUILDER — Firebase Shared Version
    Paste at the bottom of your script.js
 
@@ -4439,8 +4439,6 @@ function openDebateMode() {
     W: 0, H: 0, bgW: 0, bgH: 0, mousePos: null
   };
 
-  // Tracks ONLY what *this visitor* added this session, so Undo/Clear
-  // never touch other people's stars — only your own.
   const mySession = { stars: [], lines: [] };
 
   let panel, canvas, ctx, bgCanvas, bgCtx, tooltip, hint, nameInput;
@@ -4490,17 +4488,14 @@ function openDebateMode() {
     if (window.ssStopSpeaking) window.ssStopSpeaking();
 
     if (window.ssCandySpeak) {
-        setTimeout(() => {
-            window.ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
-        }, 400);
+      setTimeout(() => {
+        window.ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
+      }, 400);
     }
   };
 
-  /* ── FIREBASE LIVE SYNC ──
-     Replaces the old localStorage save/load. Anyone's additions show up
-     for everyone, live, without a page refresh. */
   function constListenShared() {
-    if (firebaseListenersBound) return; // only attach once, even if panel reopens
+    if (firebaseListenersBound) return;
     firebaseListenersBound = true;
 
     starsRef.on('value', snap => {
@@ -4701,15 +4696,8 @@ function openDebateMode() {
 
     if (C.mode === 'add') {
       if (hit >= 0) return;
-      const label = prompt('Name this star (optional):') || '';
-      const newRef = starsRef.push({
-        x: p.x, y: p.y,
-        r: Math.random()*2.8+2.2,
-        c: C.color,
-        label: label.trim(),
-        pts: Math.floor(Math.random()*3)+4
-      });
-      mySession.stars.push(newRef.key);
+      // ── Opens the custom inline panel instead of browser prompt ──
+      openStarNamePanel(p);
     } else {
       if (hit < 0) { C.connecting = null; C.selStar = null; return; }
       const hitKey = C.stars[hit]._key;
@@ -4763,8 +4751,6 @@ function openDebateMode() {
     document.getElementById('constModeConnect')?.classList.toggle('active', mode==='connect');
   };
 
-  /* ── UNDO ── only removes YOUR last addition this session,
-     never touches stars/lines other visitors added. */
   window.constUndo = function() {
     if (C.mode === 'connect') {
       const key = mySession.lines.pop();
@@ -4772,8 +4758,6 @@ function openDebateMode() {
     } else if (mySession.stars.length) {
       const key = mySession.stars.pop();
       starsRef.child(key).remove();
-      // also remove any lines (mine or not) that were attached to this star,
-      // so we don't leave dangling/broken connections behind
       C.lines
         .filter(l => l.aKey === key || l.bKey === key)
         .forEach(l => linesRef.child(l._key).remove());
@@ -4781,8 +4765,6 @@ function openDebateMode() {
     C.connecting = null; C.selStar = null;
   };
 
-  /* ── CLEAR ── only clears stars/lines YOU added this session.
-     Everyone else's stars stay exactly where they are. */
   window.constClear = function() {
     if (!mySession.stars.length && !mySession.lines.length) {
       alert("You haven't added any stars yet this session.");
@@ -4796,14 +4778,13 @@ function openDebateMode() {
   };
 
   window.constDownload = function() {
-    const SCALE = 2; // export at 2x resolution for a crisp, shareable image
+    const SCALE = 2;
     const out = document.createElement('canvas');
     out.width  = C.W * SCALE;
     out.height = C.H * SCALE;
     const oc = out.getContext('2d');
     oc.scale(SCALE, SCALE);
 
-    /* ── Rich layered background ── */
     const bg = oc.createLinearGradient(0, 0, C.W, C.H);
     bg.addColorStop(0,    '#040818');
     bg.addColorStop(0.45, '#0a1442');
@@ -4811,7 +4792,6 @@ function openDebateMode() {
     oc.fillStyle = bg;
     oc.fillRect(0, 0, C.W, C.H);
 
-    /* Soft colored nebula glows for atmosphere */
     const nebulas = [
       { x: C.W*0.18, y: C.H*0.18, r: C.W*0.5,  color: 'rgba(0,140,255,0.16)'   },
       { x: C.W*0.85, y: C.H*0.75, r: C.W*0.45, color: 'rgba(167,139,250,0.14)' },
@@ -4825,7 +4805,6 @@ function openDebateMode() {
       oc.fillRect(0, 0, C.W, C.H);
     });
 
-    /* ── Dense decorative starfield (matches the live cosmic feel) ── */
     const STAR_COLORS = ['255,255,255','180,220,255','200,190,255','255,240,200'];
     const starCount = Math.floor((C.W * C.H) / 1800);
     for (let i = 0; i < starCount; i++) {
@@ -4838,7 +4817,6 @@ function openDebateMode() {
       oc.fillStyle = `rgba(${col},${a})`;
       oc.fill();
     }
-    // A handful of brighter "feature" stars with sparkle crosses
     const brightCount = Math.floor(starCount / 25);
     for (let i = 0; i < brightCount; i++) {
       const x = Math.random() * C.W, y = Math.random() * C.H;
@@ -4855,10 +4833,8 @@ function openDebateMode() {
       oc.stroke();
     }
 
-    /* ── Your actual constellation (stars + lines) drawn on top ── */
     oc.drawImage(canvas, 0, 0, C.W, C.H);
 
-    /* ── Title treatment ── */
     const nm = (nameInput?.value || '').trim();
     if (nm) {
       oc.textAlign = 'center';
@@ -4873,7 +4849,6 @@ function openDebateMode() {
       oc.fillText('✦ A CONSTELLATION FROM CANDY AI ✦', C.W/2, C.H - 16);
     }
 
-    /* ── Vignette for a cinematic finish ── */
     const vg = oc.createRadialGradient(C.W/2, C.H/2, C.H*0.35, C.W/2, C.H/2, C.H*0.75);
     vg.addColorStop(0, 'transparent');
     vg.addColorStop(1, 'rgba(0,0,0,0.45)');
@@ -4886,6 +4861,49 @@ function openDebateMode() {
     a.href = out.toDataURL('image/png');
     a.click();
   };
+
+  /* ── STAR NAME PANEL ── replaces browser prompt() ── */
+  function openStarNamePanel(p) {
+    const overlay  = document.getElementById('starNameOverlay');
+    const input    = document.getElementById('starNameInput');
+    const confirmB = document.getElementById('starNameConfirm');
+    const skipB    = document.getElementById('starNameSkip');
+    const chips    = document.querySelectorAll('.star-name-chip');
+
+    input.value = '';
+    overlay.classList.add('active');
+    setTimeout(() => input.focus(), 350);
+
+    function placeStar(label) {
+      overlay.classList.remove('active');
+      confirmB.removeEventListener('click', onConfirm);
+      skipB.removeEventListener('click', onSkip);
+      document.removeEventListener('keydown', onKey);
+      chips.forEach(c => c.removeEventListener('click', onChip));
+
+      const newRef = starsRef.push({
+        x: p.x, y: p.y,
+        r: Math.random() * 2.8 + 2.2,
+        c: C.color,
+        label: label.trim(),
+        pts: Math.floor(Math.random() * 3) + 4
+      });
+      mySession.stars.push(newRef.key);
+    }
+
+    function onConfirm() { placeStar(input.value); }
+    function onSkip()    { placeStar(''); }
+    function onKey(e) {
+      if (e.key === 'Enter')  { e.preventDefault(); placeStar(input.value); }
+      if (e.key === 'Escape') { e.preventDefault(); placeStar(''); }
+    }
+    function onChip(e) { input.value = e.currentTarget.dataset.name; input.focus(); }
+
+    confirmB.addEventListener('click', onConfirm);
+    skipB.addEventListener('click', onSkip);
+    document.addEventListener('keydown', onKey);
+    chips.forEach(c => c.addEventListener('click', onChip));
+  }
 
   function hexA(hex, a) {
     if (!hex||hex.length<7) return `rgba(0,212,255,${a})`;
