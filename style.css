@@ -4141,16 +4141,16 @@ body.light .persona-label { color: #6b64a0; }
 }
 
 
-#candyGift {
+ #candyGift {
   position: fixed;
   bottom: 24px;
   right: 24px;
   width: 300px;
-  background: linear-gradient(135deg, rgba(255,215,0,0.95) 0%, rgba(255,255,255,0.92) 40%, rgba(255,223,50,0.95) 70%, rgba(255,255,255,0.90) 100%);
-  border: 1px solid rgba(255,215,0,0.6);
+  background: linear-gradient(135deg, rgba(15,10,45,0.97) 0%, rgba(25,15,60,0.97) 40%, rgba(30,12,55,0.97) 70%, rgba(18,8,48,0.97) 100%);
+  border: 1px solid rgba(167,139,250,0.2);
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(255,180,0,0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   z-index: 9999;
   transform: translateX(120%);
   opacity: 0;
