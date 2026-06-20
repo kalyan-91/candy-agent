@@ -4376,6 +4376,11 @@ function openDebateMode() {
 
   window.openConstellation = function() {
     panel     = document.getElementById('constellationPanel');
+
+    if (panel && panel.parentElement !== document.body) {
+      document.body.appendChild(panel);
+    }
+
     canvas    = document.getElementById('constCanvas');
     bgCanvas  = document.getElementById('constBgCanvas');
     tooltip   = document.getElementById('constTooltip');
