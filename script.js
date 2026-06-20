@@ -1335,6 +1335,15 @@ runLaunch();
     else if (window.speechSynthesis) window.speechSynthesis.cancel();
   }
 
+  /* ── EXPOSE FOR EXTERNAL SCRIPTS (e.g. constellation.js) ── */
+window.ssCandySpeak   = ssCandySpeak;
+window.ssStopSpeaking = ssStopSpeaking;
+window._ssReturnToBridge = function() {
+  ssMain.style.display = 'flex';
+  activeSector = null;
+  ssHistory = [];
+};
+
   /* ── MIC / RECOGNITION ── */
   (function setupSSMic() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -4443,46 +4452,20 @@ function openDebateMode() {
   };
 
  window.closeConstellation = function() {
-
     if (panel) panel.classList.remove('active');
-
     document.body.style.overflow = '';
-
     constUnbindEvents();
-
-    if (C.animFrame) {
-        cancelAnimationFrame(C.animFrame);
-        C.animFrame = null;
-    }
-
-    if (C.bgFrame) {
-        cancelAnimationFrame(C.bgFrame);
-        C.bgFrame = null;
-    }
-
+    if (C.animFrame) { cancelAnimationFrame(C.animFrame); C.animFrame = null; }
+    if (C.bgFrame)   { cancelAnimationFrame(C.bgFrame);   C.bgFrame = null; }
     constSave();
 
-    if (typeof ssMain !== 'undefined' && ssMain) {
-        ssMain.style.display = 'flex';
-    }
+    if (window._ssReturnToBridge) window._ssReturnToBridge();
+    if (window._ssSetWarp) window._ssSetWarp(false);
+    if (window.ssStopSpeaking) window.ssStopSpeaking();
 
-    if (typeof activeSector !== 'undefined') {
-        activeSector = null;
-    }
-
-    if (window._ssSetWarp) {
-        window._ssSetWarp(false);
-    }
-
-    if (typeof ssStopSpeaking === 'function') {
-        ssStopSpeaking();
-    }
-
-    if (typeof ssCandySpeak === 'function') {
+    if (window.ssCandySpeak) {
         setTimeout(() => {
-            ssCandySpeak(
-                "Welcome back to the bridge, Captain. Where shall we head next?"
-            );
+            window.ssCandySpeak("Welcome back to the bridge, Captain. Where shall we head next?");
         }, 400);
     }
 };
