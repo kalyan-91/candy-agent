@@ -3915,16 +3915,17 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
       const reply = data.choices?.[0]?.message?.content?.trim() || "Got it.";
       typingRow.remove();
 
-      const factMatch = reply.match(/FACT::\s*(.+)/);
-      const cleanReply = reply.replace(/FACT::\s*.+/, '').trim();
+      const factMatches = [...reply.matchAll(/FACT:+\s*(.+)/g)];
+      const cleanReply = reply.replace(/FACT:+\s*.+/g, '').trim();
 
       appendTrainMsg('candy', escTrain(cleanReply || "Noted."));
       trainHist.push({ role: 'assistant', content: reply });
       if (trainHist.length > 30) trainHist = trainHist.slice(-30);
 
-      if (factMatch && factMatch[1]) {
-        appendFactCard(escTrain(factMatch[1].trim()));
-      }
+      factMatches.forEach(m => {
+        if (m[1]) appendFactCard(escTrain(m[1].trim()));
+      });
+      
     } catch (err) {
       typingRow.remove();
       appendTrainMsg('candy', 'Connection hiccup — try again?');
