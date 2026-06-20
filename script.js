@@ -4796,19 +4796,95 @@ function openDebateMode() {
   };
 
   window.constDownload = function() {
+    const SCALE = 2; // export at 2x resolution for a crisp, shareable image
     const out = document.createElement('canvas');
-    out.width = C.W; out.height = C.H;
+    out.width  = C.W * SCALE;
+    out.height = C.H * SCALE;
     const oc = out.getContext('2d');
-    const bg = oc.createLinearGradient(0,0,C.W,C.H);
-    bg.addColorStop(0,'#030c28'); bg.addColorStop(.5,'#060f34'); bg.addColorStop(1,'#04081e');
-    oc.fillStyle = bg; oc.fillRect(0,0,C.W,C.H);
-    const n1 = oc.createRadialGradient(C.W*.15,C.H*.2,0,C.W*.15,C.H*.2,C.W*.45);
-    n1.addColorStop(0,'rgba(0,80,200,.20)'); n1.addColorStop(1,'transparent');
-    oc.fillStyle=n1; oc.fillRect(0,0,C.W,C.H);
-    oc.drawImage(canvas,0,0);
-    const nm = (nameInput?.value||'my-constellation').replace(/\s+/g,'-').toLowerCase();
+    oc.scale(SCALE, SCALE);
+
+    /* ── Rich layered background ── */
+    const bg = oc.createLinearGradient(0, 0, C.W, C.H);
+    bg.addColorStop(0,    '#040818');
+    bg.addColorStop(0.45, '#0a1442');
+    bg.addColorStop(1,    '#03040f');
+    oc.fillStyle = bg;
+    oc.fillRect(0, 0, C.W, C.H);
+
+    /* Soft colored nebula glows for atmosphere */
+    const nebulas = [
+      { x: C.W*0.18, y: C.H*0.18, r: C.W*0.5,  color: 'rgba(0,140,255,0.16)'   },
+      { x: C.W*0.85, y: C.H*0.75, r: C.W*0.45, color: 'rgba(167,139,250,0.14)' },
+      { x: C.W*0.6,  y: C.H*0.15, r: C.W*0.35, color: 'rgba(251,191,36,0.06)'  },
+    ];
+    nebulas.forEach(n => {
+      const g = oc.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+      g.addColorStop(0, n.color);
+      g.addColorStop(1, 'transparent');
+      oc.fillStyle = g;
+      oc.fillRect(0, 0, C.W, C.H);
+    });
+
+    /* ── Dense decorative starfield (matches the live cosmic feel) ── */
+    const STAR_COLORS = ['255,255,255','180,220,255','200,190,255','255,240,200'];
+    const starCount = Math.floor((C.W * C.H) / 1800);
+    for (let i = 0; i < starCount; i++) {
+      const x = Math.random() * C.W, y = Math.random() * C.H;
+      const r = Math.random() * 1.1 + 0.2;
+      const a = Math.random() * 0.6 + 0.15;
+      const col = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+      oc.beginPath();
+      oc.arc(x, y, r, 0, Math.PI * 2);
+      oc.fillStyle = `rgba(${col},${a})`;
+      oc.fill();
+    }
+    // A handful of brighter "feature" stars with sparkle crosses
+    const brightCount = Math.floor(starCount / 25);
+    for (let i = 0; i < brightCount; i++) {
+      const x = Math.random() * C.W, y = Math.random() * C.H;
+      const r = Math.random() * 1 + 1;
+      oc.beginPath();
+      oc.arc(x, y, r, 0, Math.PI*2);
+      oc.fillStyle = 'rgba(255,255,255,0.8)';
+      oc.fill();
+      oc.strokeStyle = 'rgba(255,255,255,0.35)';
+      oc.lineWidth = 0.5;
+      oc.beginPath();
+      oc.moveTo(x - r*3, y); oc.lineTo(x + r*3, y);
+      oc.moveTo(x, y - r*3); oc.lineTo(x, y + r*3);
+      oc.stroke();
+    }
+
+    /* ── Your actual constellation (stars + lines) drawn on top ── */
+    oc.drawImage(canvas, 0, 0, C.W, C.H);
+
+    /* ── Title treatment ── */
+    const nm = (nameInput?.value || '').trim();
+    if (nm) {
+      oc.textAlign = 'center';
+      oc.font = '600 22px Inter, sans-serif';
+      oc.shadowColor = 'rgba(125,211,252,0.6)';
+      oc.shadowBlur = 12;
+      oc.fillStyle = 'rgba(255,255,255,0.92)';
+      oc.fillText(nm, C.W/2, C.H - 36);
+      oc.shadowBlur = 0;
+      oc.font = '500 11px Inter, sans-serif';
+      oc.fillStyle = 'rgba(167,139,250,0.55)';
+      oc.fillText('✦ A CONSTELLATION FROM CANDY AI ✦', C.W/2, C.H - 16);
+    }
+
+    /* ── Vignette for a cinematic finish ── */
+    const vg = oc.createRadialGradient(C.W/2, C.H/2, C.H*0.35, C.W/2, C.H/2, C.H*0.75);
+    vg.addColorStop(0, 'transparent');
+    vg.addColorStop(1, 'rgba(0,0,0,0.45)');
+    oc.fillStyle = vg;
+    oc.fillRect(0, 0, C.W, C.H);
+
+    const fileName = (nm || 'my-constellation').replace(/\s+/g,'-').toLowerCase();
     const a = document.createElement('a');
-    a.download = nm+'.png'; a.href = out.toDataURL('image/png'); a.click();
+    a.download = fileName + '.png';
+    a.href = out.toDataURL('image/png');
+    a.click();
   };
 
   function hexA(hex, a) {
