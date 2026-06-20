@@ -959,6 +959,18 @@ runLaunch();
       systemPrompt: `You are Candy, the AI of a spaceship. The captain is exploring the FUTURE SECTOR — Pavan's goals, ambitions and vision. Speak with inspiration and forward-looking energy. Use space metaphors: "long-range scan", "mission objective", "trajectory". Never use emojis. Max 5 sentences. Pavan's future: become a skilled Data Analyst, build AI-powered products people use daily, advance in ML and AI, create SaaS and automation products, combine analytics + AI + software into real tools. Open to internships and entry-level Data Analyst roles now.`,
       chips: ["Captain's mission objectives", 'Long-range career trajectory', 'Open to crew recruitment?', 'What missions are next?'],
     },
+
+
+    constellation: {
+  name: 'Constellation Builder',
+  code: 'SECTOR ε · COSMOS',
+  color: '#a78bfa',
+  warpMsg: 'WARPING TO CONSTELLATION SECTOR...',
+  arrivalMsg: 'Captain, welcome to the <strong>Constellation Builder</strong>. Leave your mark in the stars — place them, connect them, and save your own piece of this universe.',
+  arrivalSpeak: "Captain, welcome to the Constellation Builder. Leave your mark in the stars. Place them, connect them, and save your own piece of this universe.",
+  isPanel: true, // flag: this sector opens a different panel, not the chat
+},
+    
   };
 
   /* ── STATE ── */
@@ -1151,34 +1163,39 @@ runLaunch();
 
   /* ── ENTER SECTOR ── */
   function enterSector(sectorKey) {
-    const s = SECTORS[sectorKey];
-    if (!s) return;
-    activeSector = sectorKey;
-    ssHistory = [];
+  const s = SECTORS[sectorKey];
+  if (!s) return;
+  activeSector = sectorKey;
+  ssHistory = [];
 
-    // Update CSS color var
-    ssChatPanel.style.setProperty('--active-sector-color', s.color);
-    if (ssSectorDot)  { ssSectorDot.style.background = s.color; ssSectorDot.style.boxShadow = `0 0 8px ${s.color}`; }
-    if (ssSectorName) ssSectorName.textContent = s.name;
-    if (ssSectorCode) ssSectorCode.textContent  = s.code;
+  ssChatPanel.style.setProperty('--active-sector-color', s.color);
+  if (ssSectorDot)  { ssSectorDot.style.background = s.color; ssSectorDot.style.boxShadow = `0 0 8px ${s.color}`; }
+  if (ssSectorName) ssSectorName.textContent = s.name;
+  if (ssSectorCode) ssSectorCode.textContent  = s.code;
 
-    // Status
-    if (ssStatusCenter) ssStatusCenter.textContent = `NAVIGATING TO ${s.name.toUpperCase()}`;
+  if (ssStatusCenter) ssStatusCenter.textContent = `NAVIGATING TO ${s.name.toUpperCase()}`;
 
-    // Warp sequence
-    ssWarp(s.warpMsg, () => {
-      // Show chat
+  ssWarp(s.warpMsg, () => {
+    if (s.isPanel) {
+      // Panel-type sector (like Constellation Builder) — speak arrival, then open its panel instead of chat
       ssMain.style.display = 'none';
-      ssMessages.innerHTML = '';
-      ssChatPanel.classList.add('active');
       if (ssStatusCenter) ssStatusCenter.textContent = s.name.toUpperCase() + ' · ARRIVED';
-
-      // Arrival message with chips
-      const chips = s.chips.map(c => `<button class="ss-chip" data-q="${c}">${c}</button>`).join('');
-      addSSMsg('ai', `${s.arrivalMsg}<div class="ss-chips-row">${chips}</div>`);
       ssCandySpeak(s.arrivalSpeak);
-    });
-  }
+      openConstellation();
+      return;
+    }
+
+    // Normal chat-type sector
+    ssMain.style.display = 'none';
+    ssMessages.innerHTML = '';
+    ssChatPanel.classList.add('active');
+    if (ssStatusCenter) ssStatusCenter.textContent = s.name.toUpperCase() + ' · ARRIVED';
+
+    const chips = s.chips.map(c => `<button class="ss-chip" data-q="${c}">${c}</button>`).join('');
+    addSSMsg('ai', `${s.arrivalMsg}<div class="ss-chips-row">${chips}</div>`);
+    ssCandySpeak(s.arrivalSpeak);
+  });
+}
 
   /* ── WARP ANIMATION ── */
   function ssWarp(msg, callback) {
