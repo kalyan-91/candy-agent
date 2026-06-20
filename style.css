@@ -4141,17 +4141,14 @@ body.light .persona-label { color: #6b64a0; }
 }
 
 
-
-
-
 /* ── Candy Gift Toast ── */
 #candyGift {
   position: fixed;
   bottom: 24px;
   right: 24px;
   width: 300px;
-  background: rgba(8,10,28,0.96);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(135deg, rgba(10,8,35,0.97) 0%, rgba(20,10,50,0.97) 50%, rgba(12,8,40,0.97) 100%);
+  border: 1px solid rgba(167,139,250,0.2);
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
@@ -4239,10 +4236,10 @@ body.light .persona-label { color: #6b64a0; }
   align-self: flex-start;
   width: 24px;
   height: 24px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(167,139,250,0.06);
+  border: 1px solid rgba(167,139,250,0.15);
   border-radius: 6px;
-  color: rgba(255,255,255,0.35);
+  color: rgba(167,139,250,0.5);
   cursor: pointer;
   font-size: 11px;
   display: flex;
@@ -4251,8 +4248,9 @@ body.light .persona-label { color: #6b64a0; }
   transition: all 0.2s;
 }
 .candy-gift-close:hover {
-  border-color: rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.7);
+  background: rgba(167,139,250,0.12);
+  border-color: rgba(167,139,250,0.3);
+  color: rgba(167,139,250,0.9);
 }
 
 .candy-gift-body {
@@ -4265,8 +4263,8 @@ body.light .persona-label { color: #6b64a0; }
 .candy-gift-input {
   width: 100%;
   box-sizing: border-box;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(100,80,200,0.08);
+  border: 1px solid rgba(167,139,250,0.12);
   border-radius: 9px;
   padding: 9px 13px;
   color: rgba(255,255,255,0.88);
@@ -4276,11 +4274,11 @@ body.light .persona-label { color: #6b64a0; }
   transition: border-color 0.2s, background 0.2s;
 }
 .candy-gift-input::placeholder {
-  color: rgba(255,255,255,0.2);
+  color: rgba(167,139,250,0.35);
 }
 .candy-gift-input:focus {
   border-color: rgba(0,212,255,0.35);
-  background: rgba(0,212,255,0.04);
+  background: rgba(0,212,255,0.05);
 }
 
 .candy-gift-btn {
@@ -4325,7 +4323,10 @@ body.light .persona-label { color: #6b64a0; }
 .candy-gift-hint {
   text-align: center;
   font-size: 10px;
-  color: rgba(255,255,255,0.18);
+  color: rgba(167,139,250,0.3);
   letter-spacing: 0.07em;
   padding: 0 16px 14px;
 }
+
+
+ 
