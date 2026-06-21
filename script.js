@@ -5942,14 +5942,20 @@ function generateGiftConstellation() {
     const prompt = `You are Candy, a bubbly, warm, and enthusiastic AI travel companion with a sweet and uplifting personality. You use vivid imagery, a little playfulness, and genuine emotion. In 2–3 sentences max, tell Pavan something special and heartfelt about ${d.name} (category: ${meta.label}). Context about this destination for Pavan: ${d.note}. Be encouraging, dreamy, and personal — as if you're his cheerful travel bestie. No hashtags, no lists, no emojis at the end.`;
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': window.ANTHROPIC_API_KEY || '',
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
+      const res = await fetch('https://pk-groq-proxy.daroorpavankalyan.workers.dev', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    model: 'llama-3.3-70b-versatile',
+    max_tokens: 200,
+    messages: [
+      { role: 'system', content: 'You are Candy, a bubbly warm travel companion. Keep responses to 2-3 sentences, vivid and personal. No hashtags, no lists, no emojis.' },
+      { role: 'user', content: prompt }
+    ],
+    temperature: 0.88,
+    stream: false,
+  }),
+});
         body: JSON.stringify({
           model: 'claude-sonnet-4-6',
           max_tokens: 200,
@@ -5957,11 +5963,10 @@ function generateGiftConstellation() {
         }),
       });
       const data = await res.json();
-      const text = data.content?.find(c => c.type === 'text')?.text
-        || 'Oops, I lost my words for a moment! Try again. 🍬';
+      const text = data.choices?.[0]?.message?.content?.trim() || 'Oops, lost my words! Try again.';
       await typewriterEffect(speech, text);
     } catch (err) {
-      speech.textContent = 'Hmm, couldn\'t connect right now. Try again in a moment! 🍬';
+      speech.textContent = 'Hmm, couldn\'t connect right now. Try again in a moment!';
     }
 
     btn.disabled = false;
