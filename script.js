@@ -3716,23 +3716,48 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
     style.id = 'trainVoiceStyles';
     style.textContent = `
       .train-mic-btn {
-        width: 38px; height: 38px; border-radius: 50%;
-        border: 1px solid rgba(167,139,250,0.3);
-        background: rgba(167,139,250,0.08);
-        color: #a78bfa;
+        width: 44px; height: 44px; border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, rgba(167,139,250,0.18), rgba(6,182,212,0.12));
+        box-shadow: 0 0 0 1px rgba(167,139,250,0.35) inset,
+                    0 2px 10px rgba(139,92,246,0.18);
+        color: #c4b5fd;
         display: flex; align-items: center; justify-content: center;
-        cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+        cursor: pointer; flex-shrink: 0; position: relative;
+        transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
       }
-      .train-mic-btn:hover { background: rgba(167,139,250,0.18); }
+      .train-mic-btn svg { width: 18px; height: 18px; position: relative; z-index: 2; }
+      .train-mic-btn::before {
+        content: '';
+        position: absolute; inset: -3px; border-radius: 50%;
+        background: linear-gradient(135deg, #a78bfa, #06b6d4);
+        opacity: 0; transition: opacity 0.3s; z-index: 0;
+        filter: blur(6px);
+      }
+      .train-mic-btn:hover {
+        transform: translateY(-1px) scale(1.04);
+        box-shadow: 0 0 0 1px rgba(167,139,250,0.55) inset,
+                    0 4px 16px rgba(139,92,246,0.32);
+        color: #fff;
+      }
+      .train-mic-btn:hover::before { opacity: 0.35; }
+      .train-mic-btn:active { transform: scale(0.96); }
+
       .train-mic-btn.listening {
-        background: rgba(244,63,94,0.18);
-        border-color: rgba(244,63,94,0.5);
-        color: #f43f5e;
-        animation: trainMicPulse 1s infinite;
+        background: linear-gradient(135deg, rgba(244,63,94,0.22), rgba(251,113,133,0.15));
+        box-shadow: 0 0 0 1px rgba(244,63,94,0.55) inset,
+                    0 4px 18px rgba(244,63,94,0.35);
+        color: #fda4af;
+        animation: trainMicPulse 1.4s ease-out infinite;
+      }
+      .train-mic-btn.listening::before {
+        background: linear-gradient(135deg, #f43f5e, #fb7185);
+        opacity: 0.4;
       }
       @keyframes trainMicPulse {
-        0%,100% { box-shadow: 0 0 0 0 rgba(244,63,94,0.4); }
-        50% { box-shadow: 0 0 0 8px rgba(244,63,94,0); }
+        0%   { box-shadow: 0 0 0 0 rgba(244,63,94,0.45), 0 0 0 1px rgba(244,63,94,0.55) inset; }
+        70%  { box-shadow: 0 0 0 12px rgba(244,63,94,0), 0 0 0 1px rgba(244,63,94,0.55) inset; }
+        100% { box-shadow: 0 0 0 0 rgba(244,63,94,0), 0 0 0 1px rgba(244,63,94,0.55) inset; }
       }
       .train-voice-toggle {
         display: flex; align-items: center; gap: 6px;
@@ -4096,7 +4121,6 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
   }
 
 })();
-
 
 /* ══════════════════════════════════════════════════════
    CANDY vs SHADOW CANDY — Debate Mode (Full Version)
