@@ -5529,7 +5529,8 @@ function generateGiftConstellation() {
     { name: 'Vrindavan',    lat: 27.5794, lng: 77.6964, type: 'spiritual', note: 'Where Krishna spent his childhood — a place Pavan feels pulled toward spiritually.' },
     { name: 'Dwarka',       lat: 22.2373, lng: 68.9679, type: 'spiritual', note: 'Krishna\'s legendary kingdom by the sea — another essential stop on Pavan\'s spiritual journey.' },
     { name: 'Ayodhya',      lat: 26.7922, lng: 82.1998, type: 'spiritual', note: 'Sacred to the Ramayana — ties into Pavan\'s deep love for Indian mythology.' },
-    { name: 'Araku Valley', lat: 18.3273, lng: 82.8758, type: 'nature',    note: 'Misty hills and coffee plantations in Andhra Pradesh — a nature escape close to home.' },
+    { name: 'Araku Valley',    lat: 18.3273, lng: 82.8758, type: 'nature',    note: 'Misty hills and coffee plantations in Andhra Pradesh — a nature escape close to home.' },
+    { name: 'Visakhapatnam', lat: 17.6868, lng: 83.2185, type: 'nature',    note: 'The City of Destiny — beautiful beaches, Araku hills nearby, and a vibrant coastal energy that Pavan loves.' },
     { name: 'Kurnool',      lat: 15.8281, lng: 78.0373, type: 'culture',   note: 'Home — and endlessly rich in the traditions, festivals, and history Pavan loves exploring.' },
     { name: 'Japan',        lat: 35.6762, lng: 139.6503, type: 'travel',   note: 'A dream travel destination — a striking mix of tradition and futuristic technology.' },
     { name: 'Europe',       lat: 48.8566, lng:  2.3522,  type: 'travel',   note: 'On Pavan\'s world tour wishlist — history, architecture, and culture in one place.' },
@@ -5628,10 +5629,7 @@ function generateGiftConstellation() {
       }
       #dmMapEl { width: 100%; height: 100%; }
 
-      /* ── DARK MAP FILTER applied to tile layer pane only ── */
-      #dmMapEl .leaflet-tile-pane {
-        filter: invert(1) hue-rotate(200deg) brightness(0.75) saturate(0.6);
-      }
+      /* Map tiles — keep natural white/light appearance */
 
       /* Markers */
       .dm-marker { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
@@ -5663,24 +5661,24 @@ function generateGiftConstellation() {
 
       /* Leaflet UI overrides */
       .leaflet-control-zoom a {
-        background: rgba(10,15,40,0.95) !important;
-        color: #94a3b8 !important;
-        border-color: rgba(167,139,250,0.25) !important;
+        background: rgba(255,255,255,0.95) !important;
+        color: #334155 !important;
+        border-color: rgba(0,0,0,0.15) !important;
       }
-      .leaflet-control-zoom a:hover { color: #e9d5ff !important; }
+      .leaflet-control-zoom a:hover { background: #f1f5f9 !important; }
       .leaflet-control-attribution {
-        background: rgba(2,8,24,0.8) !important;
-        color: #334155 !important; font-size: 0.58rem !important;
+        background: rgba(255,255,255,0.75) !important;
+        color: #64748b !important; font-size: 0.58rem !important;
       }
       .leaflet-control-attribution a { color: #475569 !important; }
-      .leaflet-container { background: #060d2e !important; }
+      .leaflet-container { background: #f0f0f0 !important; }
 
       /* Loading overlay */
       #dmMapLoading {
         position: absolute; inset: 0; z-index: 500;
-        background: #020818;
+        background: #f8fafc;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        gap: 12px; color: #64748b; font-size: 0.8rem;
+        gap: 12px; color: #475569; font-size: 0.8rem;
       }
       #dmMapLoading .dm-spin {
         width: 28px; height: 28px; border-radius: 50%;
