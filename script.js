@@ -3597,9 +3597,9 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
 })();
 
 
-
 /* ═══════════════════════════════════════════
    CANDY TRAINING ROOM (Private — Pavan only)
+   Now with voice input (mic) + voice output (speech)
 ═══════════════════════════════════════════ */
 (function TrainingRoom() {
   'use strict';
@@ -3611,6 +3611,8 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
   let learnedFacts = []; // [{id, text}]
   let pendingFactText = null;
   let unlocked = false;
+  let trainRecog = null;
+  let trainListening = false;
 
   /* ── Build hidden trigger + gate + room DOM ── */
   function buildDOM() {
@@ -3667,6 +3669,10 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
           </div>
         </div>
         <div class="train-header-acts">
+          <button class="train-voice-toggle" id="trainVoiceToggle" title="Toggle Candy's voice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            Voice On
+          </button>
           <div class="train-stat-pill" id="trainFactCount">0 facts taught</div>
           <button class="train-close-btn" id="trainCloseBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -3679,6 +3685,9 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
           <div class="train-messages" id="trainMessages"></div>
           <div class="train-input-area">
             <div class="train-input-row">
+              <button class="train-mic-btn" id="trainMicBtn" title="Voice input">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+              </button>
               <textarea class="train-textarea" id="trainTextarea" placeholder="Tell Candy something new, or correct something she got wrong..." rows="1"></textarea>
               <button class="train-send-btn" id="trainSendBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -3698,6 +3707,50 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
         </div>
       </div>`;
     document.body.appendChild(room);
+  }
+
+  /* ── Inject styles for mic button + voice toggle ── */
+  function injectVoiceStyles() {
+    if (document.getElementById('trainVoiceStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'trainVoiceStyles';
+    style.textContent = `
+      .train-mic-btn {
+        width: 38px; height: 38px; border-radius: 50%;
+        border: 1px solid rgba(167,139,250,0.3);
+        background: rgba(167,139,250,0.08);
+        color: #a78bfa;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+      }
+      .train-mic-btn:hover { background: rgba(167,139,250,0.18); }
+      .train-mic-btn.listening {
+        background: rgba(244,63,94,0.18);
+        border-color: rgba(244,63,94,0.5);
+        color: #f43f5e;
+        animation: trainMicPulse 1s infinite;
+      }
+      @keyframes trainMicPulse {
+        0%,100% { box-shadow: 0 0 0 0 rgba(244,63,94,0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(244,63,94,0); }
+      }
+      .train-voice-toggle {
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 100px;
+        border: 1px solid rgba(167,139,250,0.3);
+        background: rgba(167,139,250,0.08);
+        color: #a78bfa; font-size: 0.72rem; font-weight: 600;
+        cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      }
+      .train-voice-toggle:hover { background: rgba(167,139,250,0.18); }
+      .train-voice-toggle.muted {
+        background: rgba(100,116,139,0.08);
+        border-color: rgba(100,116,139,0.3);
+        color: #64748b;
+      }
+      .train-voice-toggle svg { width: 14px; height: 14px; }
+    `;
+    document.head.appendChild(style);
   }
 
   /* ── Particle canvas (colorful twinkling stars) ── */
@@ -3778,6 +3831,8 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
   function closeRoom() {
     document.getElementById('trainRoom').classList.remove('active');
     document.body.style.overflow = '';
+    trainStopSpeaking();
+    if (trainListening && trainRecog) trainRecog.stop();
   }
 
   /* ── Chat rendering ── */
@@ -3880,6 +3935,71 @@ Never use emojis. Keep responses under 5 sentences unless detail is clearly want
     document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 
+  /* ── Voice input (mic) ── */
+  let trainVoiceOn = true;
+
+  function setupTrainMic() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const micBtn = document.getElementById('trainMicBtn');
+    if (!SR || !micBtn) { if (micBtn) micBtn.style.display = 'none'; return; }
+
+    trainRecog = new SR();
+    trainRecog.continuous = false;
+    trainRecog.interimResults = true;
+    trainRecog.lang = 'en-IN';
+
+    trainRecog.onstart = () => { trainListening = true; micBtn.classList.add('listening'); };
+    trainRecog.onend   = () => { trainListening = false; micBtn.classList.remove('listening'); };
+    trainRecog.onerror = () => { trainListening = false; micBtn.classList.remove('listening'); };
+    trainRecog.onresult = e => {
+      const ta = document.getElementById('trainTextarea');
+      const t = Array.from(e.results).map(r => r[0].transcript).join('');
+      ta.value = t;
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 130) + 'px';
+      if (e.results[e.results.length - 1].isFinal) setTimeout(sendTrainMsg, 400);
+    };
+
+    micBtn.addEventListener('click', () => {
+      if (trainListening) { trainRecog.stop(); return; }
+      trainStopSpeaking();
+      try { trainRecog.start(); } catch (e) {}
+    });
+  }
+
+  /* ── Voice output (Candy speaks) ── */
+  function trainSpeak(text) {
+    if (!trainVoiceOn || !window.speechSynthesis) return;
+    const clean = text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    if (!clean) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.lang = 'en-US'; utter.rate = 1; utter.pitch = 1.05;
+    const voices = window.speechSynthesis.getVoices();
+    const pref = voices.find(v => v.name.includes('Google US English'))
+      || voices.find(v => v.lang === 'en-US' && !v.localService)
+      || voices.find(v => v.lang.startsWith('en-'));
+    if (pref) utter.voice = pref;
+    setTimeout(() => window.speechSynthesis.speak(utter), 150);
+  }
+
+  function trainStopSpeaking() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+
+  function setupTrainVoiceToggle() {
+    const btn = document.getElementById('trainVoiceToggle');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      trainVoiceOn = !trainVoiceOn;
+      btn.classList.toggle('muted', !trainVoiceOn);
+      btn.innerHTML = trainVoiceOn
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Voice On`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg> Voice Off`;
+      if (!trainVoiceOn) trainStopSpeaking();
+    });
+  }
+
   /* ── Send message to Candy (training context) ── */
   async function sendTrainMsg() {
     const ta = document.getElementById('trainTextarea');
@@ -3922,10 +4042,12 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
       trainHist.push({ role: 'assistant', content: reply });
       if (trainHist.length > 30) trainHist = trainHist.slice(-30);
 
+      trainSpeak(cleanReply || "Noted.");
+
       factMatches.forEach(m => {
         if (m[1]) appendFactCard(escTrain(m[1].trim()));
       });
-      
+
     } catch (err) {
       typingRow.remove();
       appendTrainMsg('candy', 'Connection hiccup — try again?');
@@ -3939,7 +4061,10 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
   /* ── Wire everything up ── */
   function init() {
     buildDOM();
+    injectVoiceStyles();
     startParticles();
+    setupTrainMic();
+    setupTrainVoiceToggle();
 
     document.getElementById('trainTrigger').addEventListener('click', openGate);
     document.getElementById('trainGateBtn').addEventListener('click', attemptUnlock);
@@ -3971,8 +4096,6 @@ Keep your conversational reply warm and brief — you're talking to Pavan direct
   }
 
 })();
-
-
 
 
 /* ══════════════════════════════════════════════════════
