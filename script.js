@@ -5625,7 +5625,7 @@ function generateGiftConstellation() {
         flex: 1; position: relative; min-height: 0;
         margin: 10px 16px 0;
         border: 1px solid rgba(167,139,250,0.2);
-        border-radius: 14px; overflow: hidden;
+        border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.25);
       }
       #dmMapEl { width: 100%; height: 100%; }
 
@@ -5634,17 +5634,18 @@ function generateGiftConstellation() {
       /* Markers */
       .dm-marker { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
       .dm-marker-dot {
-        width: 14px; height: 14px; border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.8);
-        transition: transform 0.15s;
+        width: 16px; height: 16px; border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        transition: transform 0.18s;
       }
-      .dm-marker-dot:hover { transform: scale(1.3); }
+      .dm-marker-dot:hover { transform: scale(1.35); }
       .dm-marker-label {
-        margin-top: 3px; font-size: 0.6rem; white-space: nowrap;
-        background: rgba(2,8,24,0.88); color: #e2e8f0;
-        padding: 2px 7px; border-radius: 100px;
-        border: 1px solid rgba(255,255,255,0.1);
-        pointer-events: none; line-height: 1.4;
+        margin-top: 4px; font-size: 0.62rem; white-space: nowrap; font-weight: 600;
+        background: #fff; color: #1e293b;
+        padding: 2px 8px; border-radius: 100px;
+        border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        pointer-events: none; line-height: 1.5; letter-spacing: 0.1px;
       }
 
       /* Info panel */
@@ -5671,7 +5672,7 @@ function generateGiftConstellation() {
         color: #64748b !important; font-size: 0.58rem !important;
       }
       .leaflet-control-attribution a { color: #475569 !important; }
-      .leaflet-container { background: #f0f0f0 !important; }
+      .leaflet-container { background: #e8e0d8 !important; }
 
       /* Loading overlay */
       #dmMapLoading {
@@ -5753,11 +5754,12 @@ function generateGiftConstellation() {
       preferCanvas: false,
     });
 
-    // OpenStreetMap — most reliable, no API key
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    // CartoDB Voyager — modern, clean, Google Maps-like style
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
       maxZoom: 19,
-      subdomains: ['a', 'b', 'c'],
+      retina: '@2x',
     }).addTo(leafletMap);
 
     // Hide loader once first tile loads
