@@ -5512,14 +5512,13 @@ function generateGiftConstellation() {
 
 
 /* ═══════════════════════════════════════════
-   DREAM DESTINATION MAP — REAL WORLD (Leaflet.js)
-   Drop-in replacement. No API key needed.
-   Paste anywhere in script.js (after DOM is ready).
+   DREAM DESTINATION MAP — REAL WORLD (Leaflet.js) v2
+   Uses OpenStreetMap tiles (most reliable).
+   Dark theme via CSS filter on tile layer.
 ═══════════════════════════════════════════ */
 (function DreamMap() {
   'use strict';
 
-  /* ── DESTINATION DATA — real lat/lng ── */
   const DESTINATIONS = [
     { name: 'Ooty',         lat: 11.4102, lng: 76.6950, type: 'nature',    note: 'A hill station escape — exactly the kind of quiet, cool, green place Pavan dreams of eventually settling down in.' },
     { name: 'Mysore',       lat: 12.2958, lng: 76.6394, type: 'culture',   note: 'Rich in Karnataka heritage and royal history — fits Pavan\'s love for Indian traditions and culture.' },
@@ -5533,56 +5532,53 @@ function generateGiftConstellation() {
     { name: 'Araku Valley', lat: 18.3273, lng: 82.8758, type: 'nature',    note: 'Misty hills and coffee plantations in Andhra Pradesh — a nature escape close to home.' },
     { name: 'Kurnool',      lat: 15.8281, lng: 78.0373, type: 'culture',   note: 'Home — and endlessly rich in the traditions, festivals, and history Pavan loves exploring.' },
     { name: 'Japan',        lat: 35.6762, lng: 139.6503, type: 'travel',   note: 'A dream travel destination — a striking mix of tradition and futuristic technology.' },
-    { name: 'Europe',       lat: 48.8566, lng:  2.3522, type: 'travel',    note: 'On Pavan\'s world tour wishlist — history, architecture, and culture in one place.' },
+    { name: 'Europe',       lat: 48.8566, lng:  2.3522,  type: 'travel',   note: 'On Pavan\'s world tour wishlist — history, architecture, and culture in one place.' },
     { name: 'USA',          lat: 38.9072, lng: -77.0369, type: 'travel',   note: 'Part of Pavan\'s long-term travel and career dreams — open to settling abroad too.' },
     { name: 'Canada',       lat: 45.4215, lng: -75.6972, type: 'travel',   note: 'Cool climates and nature — fits Pavan\'s love for cooler weather over heat.' },
   ];
 
   const TYPE_META = {
-    spiritual: { color: '#a78bfa', label: 'Spiritual',       emoji: '🕌' },
-    nature:    { color: '#34d399', label: 'Nature & Hills',  emoji: '🌿' },
-    culture:   { color: '#fbbf24', label: 'Culture & Home',  emoji: '🏛️' },
-    travel:    { color: '#06b6d4', label: 'World Tour Dream',emoji: '✈️' },
+    spiritual: { color: '#a78bfa', label: 'Spiritual',        emoji: '🕌' },
+    nature:    { color: '#34d399', label: 'Nature & Hills',   emoji: '🌿' },
+    culture:   { color: '#fbbf24', label: 'Culture & Home',   emoji: '🏛️' },
+    travel:    { color: '#06b6d4', label: 'World Tour Dream', emoji: '✈️' },
   };
 
   let panel = null, leafletMap = null, leafletLoaded = false;
 
   /* ── Load Leaflet CSS + JS lazily ── */
   function loadLeaflet(cb) {
-    if (leafletLoaded) { cb(); return; }
-    if (document.getElementById('leafletCSS')) { leafletLoaded = true; cb(); return; }
+    if (window.L && leafletLoaded) { cb(); return; }
 
-    const link = document.createElement('link');
-    link.id = 'leafletCSS';
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
+    const existingScript = document.getElementById('leafletJS');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => { leafletLoaded = true; cb(); });
+      return;
+    }
+
+    if (!document.getElementById('leafletCSS')) {
+      const link = document.createElement('link');
+      link.id = 'leafletCSS';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
 
     const script = document.createElement('script');
+    script.id = 'leafletJS';
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     script.onload = () => { leafletLoaded = true; cb(); };
+    script.onerror = () => {
+      // fallback to cdnjs
+      const s2 = document.createElement('script');
+      s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+      s2.onload = () => { leafletLoaded = true; cb(); };
+      document.head.appendChild(s2);
+    };
     document.head.appendChild(script);
   }
 
-  /* ── Trigger button ── */
-  function buildTrigger() {
-    if (document.getElementById('dreamMapTrigger')) return;
-    const btn = document.createElement('button');
-    btn.id = 'dreamMapTrigger';
-    btn.className = 'portbtn';
-    btn.innerHTML = `
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/>
-        <circle cx="12" cy="10" r="3"/>
-      </svg>
-      Dream Map
-    `;
-    btn.addEventListener('click', openDreamMap);
-    const target = document.querySelector('#starters') || document.body;
-    target.appendChild(btn);
-  }
-
-  /* ── Styles ── */
+  /* ── Inject styles ── */
   function injectStyles() {
     if (document.getElementById('dreamMapStyles')) return;
     const style = document.createElement('style');
@@ -5590,24 +5586,22 @@ function generateGiftConstellation() {
     style.textContent = `
       #dreamMapPanel {
         position: fixed; inset: 0; z-index: 99999;
-        background: linear-gradient(160deg, #020818, #050d2e 60%, #020610);
+        background: #020818;
         display: none; flex-direction: column;
         font-family: 'Inter', sans-serif;
       }
       #dreamMapPanel.active { display: flex; }
 
       .dm-header {
-        position: relative; z-index: 2;
         display: flex; align-items: center; justify-content: space-between;
-        padding: 14px 20px; border-bottom: 1px solid rgba(167,139,250,0.2);
-        background: rgba(2,8,24,0.85); backdrop-filter: blur(12px);
-        flex-shrink: 0;
+        padding: 14px 20px; flex-shrink: 0;
+        border-bottom: 1px solid rgba(167,139,250,0.2);
+        background: rgba(2,8,24,0.95);
       }
       .dm-title {
         display: flex; align-items: center; gap: 8px;
-        color: #e9d5ff; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.3px;
+        color: #e9d5ff; font-weight: 700; font-size: 0.95rem;
       }
-      .dm-title svg { opacity: 0.85; }
       .dm-close {
         width: 32px; height: 32px; border-radius: 8px;
         background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
@@ -5618,100 +5612,95 @@ function generateGiftConstellation() {
       .dm-close:hover { background: rgba(244,63,94,0.15); color: #f43f5e; border-color: rgba(244,63,94,0.4); }
 
       .dm-legend {
-        position: relative; z-index: 2;
-        display: flex; gap: 14px; flex-wrap: wrap;
+        display: flex; gap: 14px; flex-wrap: wrap; flex-shrink: 0;
         padding: 8px 20px; font-size: 0.67rem; color: #94a3b8;
-        background: rgba(2,8,24,0.75); backdrop-filter: blur(8px);
+        background: rgba(2,8,24,0.9);
         border-bottom: 1px solid rgba(167,139,250,0.1);
-        flex-shrink: 0;
       }
-      .dm-legend-item { display: flex; align-items: center; gap: 6px; }
-      .dm-legend-dot {
-        width: 9px; height: 9px; border-radius: 50%; display: inline-block;
-        box-shadow: 0 0 6px currentColor;
-      }
+      .dm-legend-item { display: flex; align-items: center; gap: 5px; }
+      .dm-legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 
       #dmMapContainer {
-        flex: 1; position: relative; z-index: 1;
+        flex: 1; position: relative; min-height: 0;
         margin: 10px 16px 0;
-        border: 1px solid rgba(167,139,250,0.18);
+        border: 1px solid rgba(167,139,250,0.2);
         border-radius: 14px; overflow: hidden;
-        min-height: 0;
       }
       #dmMapEl { width: 100%; height: 100%; }
 
-      /* Dark tile filter for the cosmic vibe */
-      #dmMapEl .leaflet-tile {
-        filter: brightness(0.65) saturate(0.5) hue-rotate(190deg);
+      /* ── DARK MAP FILTER applied to tile layer pane only ── */
+      #dmMapEl .leaflet-tile-pane {
+        filter: invert(1) hue-rotate(200deg) brightness(0.75) saturate(0.6);
       }
 
-      /* Custom marker styles */
-      .dm-marker {
-        display: flex; flex-direction: column; align-items: center;
-        cursor: pointer;
-      }
+      /* Markers */
+      .dm-marker { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
       .dm-marker-dot {
         width: 14px; height: 14px; border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.7);
-        box-shadow: 0 0 10px var(--mc), 0 0 20px var(--mc);
-        transition: transform 0.2s;
+        border: 2px solid rgba(255,255,255,0.8);
+        transition: transform 0.15s;
       }
+      .dm-marker-dot:hover { transform: scale(1.3); }
       .dm-marker-label {
         margin-top: 3px; font-size: 0.6rem; white-space: nowrap;
-        background: rgba(2,8,24,0.85); color: #e2e8f0;
-        padding: 2px 6px; border-radius: 100px;
+        background: rgba(2,8,24,0.88); color: #e2e8f0;
+        padding: 2px 7px; border-radius: 100px;
         border: 1px solid rgba(255,255,255,0.1);
-        pointer-events: none;
+        pointer-events: none; line-height: 1.4;
       }
 
+      /* Info panel */
       .dm-info {
-        position: relative; z-index: 2; flex-shrink: 0;
-        margin: 0 16px 14px; padding: 12px 16px; border-radius: 12px;
-        background: rgba(255,255,255,0.04); border: 1px solid rgba(167,139,250,0.18);
-        color: #cbd5e1; font-size: 0.81rem; line-height: 1.6;
-        min-height: 62px; transition: all 0.25s;
+        flex-shrink: 0; margin: 8px 16px 14px;
+        padding: 12px 16px; border-radius: 12px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(167,139,250,0.2);
+        color: #cbd5e1; font-size: 0.81rem; line-height: 1.6; min-height: 62px;
+        transition: all 0.25s;
       }
       .dm-info-empty { color: #475569; font-size: 0.77rem; }
       .dm-info-name { font-weight: 700; margin-bottom: 3px; display: block; }
 
-      /* Leaflet popup override to match space theme */
-      .leaflet-popup-content-wrapper {
-        background: rgba(10,12,40,0.95) !important;
-        border: 1px solid rgba(167,139,250,0.25) !important;
-        border-radius: 10px !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
-        backdrop-filter: blur(12px) !important;
-        color: #cbd5e1 !important;
-        font-size: 0.8rem !important;
-        line-height: 1.5 !important;
-      }
-      .leaflet-popup-tip-container { display: none !important; }
-      .leaflet-popup-close-button { color: #64748b !important; }
-      .leaflet-popup-close-button:hover { color: #f43f5e !important; }
-      .leaflet-container { background: #020818 !important; }
+      /* Leaflet UI overrides */
       .leaflet-control-zoom a {
-        background: rgba(10,12,40,0.9) !important;
+        background: rgba(10,15,40,0.95) !important;
         color: #94a3b8 !important;
-        border-color: rgba(167,139,250,0.2) !important;
+        border-color: rgba(167,139,250,0.25) !important;
       }
+      .leaflet-control-zoom a:hover { color: #e9d5ff !important; }
       .leaflet-control-attribution {
-        background: rgba(2,8,24,0.7) !important;
-        color: #334155 !important;
-        font-size: 0.6rem !important;
+        background: rgba(2,8,24,0.8) !important;
+        color: #334155 !important; font-size: 0.58rem !important;
       }
       .leaflet-control-attribution a { color: #475569 !important; }
+      .leaflet-container { background: #060d2e !important; }
+
+      /* Loading overlay */
+      #dmMapLoading {
+        position: absolute; inset: 0; z-index: 500;
+        background: #020818;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 12px; color: #64748b; font-size: 0.8rem;
+      }
+      #dmMapLoading .dm-spin {
+        width: 28px; height: 28px; border-radius: 50%;
+        border: 2px solid rgba(167,139,250,0.2);
+        border-top-color: #a78bfa;
+        animation: dmSpin 0.8s linear infinite;
+      }
+      @keyframes dmSpin { to { transform: rotate(360deg); } }
 
       @media (max-width: 640px) {
         .dm-legend { gap: 8px; font-size: 0.6rem; padding: 6px 12px; }
         #dmMapContainer { margin: 8px 10px 0; border-radius: 10px; }
-        .dm-info { margin: 0 10px 10px; font-size: 0.76rem; }
+        .dm-info { margin: 6px 10px 10px; font-size: 0.76rem; }
         .dm-header { padding: 12px 14px; }
       }
     `;
     document.head.appendChild(style);
   }
 
-  /* ── Build panel DOM ── */
+  /* ── Build panel HTML ── */
   function buildPanel() {
     panel = document.createElement('div');
     panel.id = 'dreamMapPanel';
@@ -5719,99 +5708,102 @@ function generateGiftConstellation() {
       <div class="dm-header">
         <div class="dm-title">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
           </svg>
           Pavan's Dream Destination Map
         </div>
         <button id="dmCloseBtn" class="dm-close">✕</button>
       </div>
+
       <div class="dm-legend">
         ${Object.entries(TYPE_META).map(([k, m]) => `
           <div class="dm-legend-item">
-            <span class="dm-legend-dot" style="background:${m.color};color:${m.color}"></span>
+            <span class="dm-legend-dot" style="background:${m.color};box-shadow:0 0 5px ${m.color}"></span>
             ${m.emoji} ${m.label}
           </div>`).join('')}
       </div>
+
       <div id="dmMapContainer">
         <div id="dmMapEl"></div>
+        <div id="dmMapLoading">
+          <div class="dm-spin"></div>
+          Loading map…
+        </div>
       </div>
+
       <div class="dm-info" id="dmInfo">
-        <div class="dm-info-empty">📍 Click any pin on the map to discover why this place matters to Pavan.</div>
+        <div class="dm-info-empty">📍 Click any pin to discover why this place matters to Pavan.</div>
       </div>
     `;
     document.body.appendChild(panel);
     document.getElementById('dmCloseBtn').addEventListener('click', closeDreamMap);
   }
 
-  /* ── Init Leaflet map with markers ── */
+  /* ── Init Leaflet ── */
   function initMap() {
     if (leafletMap) {
-      leafletMap.invalidateSize();
+      setTimeout(() => leafletMap.invalidateSize(), 100);
       return;
     }
 
-    // Center on India with a world view
     leafletMap = L.map('dmMapEl', {
       center: [22, 82],
       zoom: 4,
       zoomControl: true,
       scrollWheelZoom: true,
+      preferCanvas: false,
     });
 
-    // Dark-friendly tile layer (CartoDB dark matter)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap © CartoDB',
-      subdomains: 'abcd',
+    // OpenStreetMap — most reliable, no API key
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
+      subdomains: ['a', 'b', 'c'],
     }).addTo(leafletMap);
 
-    // Add custom markers
-    DESTINATIONS.forEach((d, i) => {
+    // Hide loader once first tile loads
+    leafletMap.once('load', hideLoader);
+    setTimeout(hideLoader, 3000); // fallback
+
+    // Add markers
+    DESTINATIONS.forEach((d) => {
       const meta = TYPE_META[d.type];
       const icon = L.divIcon({
         className: '',
-        html: `
-          <div class="dm-marker">
-            <div class="dm-marker-dot" style="--mc:${meta.color}; background:${meta.color}"></div>
-            <div class="dm-marker-label">${d.name}</div>
-          </div>`,
+        html: `<div class="dm-marker">
+          <div class="dm-marker-dot" style="background:${meta.color};box-shadow:0 0 10px ${meta.color}, 0 0 20px ${meta.color}44"></div>
+          <div class="dm-marker-label">${d.name}</div>
+        </div>`,
         iconSize: [80, 36],
         iconAnchor: [40, 14],
+        popupAnchor: [0, -16],
       });
 
-      const marker = L.marker([d.lat, d.lng], { icon }).addTo(leafletMap);
-
-      marker.on('click', () => {
-        // Fly to clicked location
+      L.marker([d.lat, d.lng], { icon }).addTo(leafletMap).on('click', () => {
         leafletMap.flyTo([d.lat, d.lng], Math.max(leafletMap.getZoom(), 6), {
-          duration: 1.2,
-          easeLinearity: 0.25,
+          duration: 1.0,
+          easeLinearity: 0.3,
         });
-
-        // Update info panel
         document.getElementById('dmInfo').innerHTML = `
-          <span class="dm-info-name" style="color:${meta.color}">
-            ${meta.emoji} ${d.name} — ${meta.label}
-          </span>
+          <span class="dm-info-name" style="color:${meta.color}">${meta.emoji} ${d.name} — ${meta.label}</span>
           ${d.note}
         `;
       });
     });
   }
 
+  function hideLoader() {
+    const el = document.getElementById('dmMapLoading');
+    if (el) el.style.display = 'none';
+  }
+
   /* ── Open / close ── */
   function openDreamMap() {
-    if (!panel) {
-      injectStyles();
-      buildPanel();
-    }
+    if (!panel) { injectStyles(); buildPanel(); }
     panel.classList.add('active');
     document.body.style.overflow = 'hidden';
-
-    loadLeaflet(() => {
-      // Wait a tick for the panel to be visible, then init map
-      setTimeout(initMap, 60);
-    });
+    loadLeaflet(() => setTimeout(initMap, 80));
   }
 
   function closeDreamMap() {
@@ -5822,7 +5814,23 @@ function generateGiftConstellation() {
   window.openDreamMap  = openDreamMap;
   window.closeDreamMap = closeDreamMap;
 
-  function init() { buildTrigger(); }
+  function init() {
+    if (!document.getElementById('dreamMapTrigger')) {
+      const btn = document.createElement('button');
+      btn.id = 'dreamMapTrigger';
+      btn.className = 'portbtn';
+      btn.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        Dream Map
+      `;
+      btn.addEventListener('click', openDreamMap);
+      const target = document.querySelector('#starters') || document.body;
+      target.appendChild(btn);
+    }
+  }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
