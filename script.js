@@ -5511,10 +5511,10 @@ function generateGiftConstellation() {
 
 
 
- /* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    DREAM DESTINATION MAP — REAL WORLD (Leaflet.js) v3
    Uses CartoDB Voyager tiles (clean, modern).
-   + Candy Voice: AI travel companion powered by Claude.
+   + Candy Voice: AI travel companion powered by Groq + Web Speech API
 ═══════════════════════════════════════════ */
 (function DreamMap() {
   'use strict';
@@ -5557,17 +5557,52 @@ function generateGiftConstellation() {
 
   let panel = null, leafletMap = null, leafletLoaded = false;
   let selectedDest = null, candySpeaking = false;
+  let currentUtterance = null;
+
+  /* ── Web Speech API helpers ── */
+  const synth = window.speechSynthesis;
+
+  function getVoice() {
+    const voices = synth.getVoices();
+    // Prefer a female English voice for Candy
+    return (
+      voices.find(v => v.name.includes('Samantha')) ||
+      voices.find(v => v.name.includes('Karen'))    ||
+      voices.find(v => v.name.includes('Moira'))    ||
+      voices.find(v => /female/i.test(v.name) && v.lang.startsWith('en')) ||
+      voices.find(v => v.lang.startsWith('en-IN'))  ||
+      voices.find(v => v.lang.startsWith('en'))     ||
+      voices[0] || null
+    );
+  }
+
+  function speakText(text, onEnd) {
+    if (!synth) { onEnd && onEnd(); return; }
+    synth.cancel(); // stop any previous speech
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice  = getVoice();
+    utter.rate   = 0.95;
+    utter.pitch  = 1.1;
+    utter.volume = 1;
+    utter.onend  = () => { currentUtterance = null; onEnd && onEnd(); };
+    utter.onerror = () => { currentUtterance = null; onEnd && onEnd(); };
+    currentUtterance = utter;
+    synth.speak(utter);
+  }
+
+  function stopSpeech() {
+    if (synth) synth.cancel();
+    currentUtterance = null;
+  }
 
   /* ── Load Leaflet CSS + JS lazily ── */
   function loadLeaflet(cb) {
     if (window.L && leafletLoaded) { cb(); return; }
-
     const existingScript = document.getElementById('leafletJS');
     if (existingScript) {
       existingScript.addEventListener('load', () => { leafletLoaded = true; cb(); });
       return;
     }
-
     if (!document.getElementById('leafletCSS')) {
       const link = document.createElement('link');
       link.id = 'leafletCSS';
@@ -5575,7 +5610,6 @@ function generateGiftConstellation() {
       link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
       document.head.appendChild(link);
     }
-
     const script = document.createElement('script');
     script.id = 'leafletJS';
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
@@ -5710,6 +5744,16 @@ function generateGiftConstellation() {
         display: flex; align-items: center; justify-content: center;
         font-size: 1.25rem; flex-shrink: 0;
         border: 1.5px solid rgba(167,139,250,0.3);
+        transition: all 0.3s;
+      }
+      #dmCandyAvatar.speaking {
+        border-color: #a78bfa;
+        box-shadow: 0 0 0 4px rgba(167,139,250,0.2), 0 0 16px rgba(167,139,250,0.4);
+        animation: avatarPulse 1.2s ease-in-out infinite;
+      }
+      @keyframes avatarPulse {
+        0%, 100% { transform: scale(1); }
+        50%       { transform: scale(1.08); }
       }
       #dmCandyText { flex: 1; min-width: 0; }
       #dmCandyName {
@@ -5725,25 +5769,51 @@ function generateGiftConstellation() {
         color: #a78bfa;
       }
       @keyframes candyBlink { 50% { opacity: 0; } }
-      #dmCandyBtn {
-        flex-shrink: 0;
+
+      /* ── Sound wave bars shown while speaking ── */
+      .dm-wave {
+        display: none; align-items: center; gap: 3px; height: 18px; margin-top: 4px;
       }
-      #dmCandyBtn button {
-        display: flex; align-items: center; gap: 6px;
+      .dm-wave.active { display: flex; }
+      .dm-wave span {
+        display: inline-block; width: 3px; border-radius: 2px;
+        background: #a78bfa; animation: waveBar 0.9s ease-in-out infinite;
+      }
+      .dm-wave span:nth-child(1) { height: 6px;  animation-delay: 0s; }
+      .dm-wave span:nth-child(2) { height: 12px; animation-delay: 0.1s; }
+      .dm-wave span:nth-child(3) { height: 18px; animation-delay: 0.2s; }
+      .dm-wave span:nth-child(4) { height: 10px; animation-delay: 0.3s; }
+      .dm-wave span:nth-child(5) { height: 14px; animation-delay: 0.15s; }
+      .dm-wave span:nth-child(6) { height: 6px;  animation-delay: 0.25s; }
+      @keyframes waveBar {
+        0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+        50%       { transform: scaleY(1);   opacity: 1; }
+      }
+
+      #dmCandyButtons { flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
+      #dmCandyButtons button {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
         padding: 7px 14px; border-radius: 8px;
         border: 1px solid rgba(167,139,250,0.5);
         background: rgba(167,139,250,0.12);
         color: #c4b5fd; font-size: 0.72rem; font-weight: 600;
         cursor: pointer; transition: all 0.18s; white-space: nowrap;
+        min-width: 120px;
       }
-      #dmCandyBtn button:hover { background: rgba(167,139,250,0.22); }
-      #dmCandyBtn button:disabled { opacity: 0.45; cursor: not-allowed; }
+      #dmCandyButtons button:hover { background: rgba(167,139,250,0.22); }
+      #dmCandyButtons button:disabled { opacity: 0.45; cursor: not-allowed; }
+      #dmStopBtn {
+        border-color: rgba(244,63,94,0.4) !important;
+        background: rgba(244,63,94,0.08) !important;
+        color: #fda4af !important;
+        display: none !important;
+      }
+      #dmStopBtn.visible { display: flex !important; }
 
       /* Leaflet UI overrides */
       .leaflet-control-zoom a {
         background: rgba(255,255,255,0.95) !important;
-        color: #334155 !important;
-        border-color: rgba(0,0,0,0.15) !important;
+        color: #334155 !important; border-color: rgba(0,0,0,0.15) !important;
       }
       .leaflet-control-zoom a:hover { background: #f1f5f9 !important; }
       .leaflet-control-attribution {
@@ -5754,15 +5824,13 @@ function generateGiftConstellation() {
       .leaflet-container { background: #e8e0d8 !important; }
 
       #dmMapLoading {
-        position: absolute; inset: 0; z-index: 500;
-        background: #f8fafc;
+        position: absolute; inset: 0; z-index: 500; background: #f8fafc;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         gap: 12px; color: #475569; font-size: 0.8rem;
       }
       #dmMapLoading .dm-spin {
         width: 28px; height: 28px; border-radius: 50%;
-        border: 2px solid rgba(167,139,250,0.2);
-        border-top-color: #a78bfa;
+        border: 2px solid rgba(167,139,250,0.2); border-top-color: #a78bfa;
         animation: dmSpin 0.8s linear infinite;
       }
       @keyframes dmSpin { to { transform: rotate(360deg); } }
@@ -5773,6 +5841,7 @@ function generateGiftConstellation() {
         .dm-info { margin: 6px 10px 0; font-size: 0.76rem; }
         #dmCandyBar { margin: 6px 10px 10px; }
         .dm-header { padding: 12px 14px; }
+        #dmCandyButtons button { min-width: 100px; padding: 6px 10px; }
       }
     `;
     document.head.appendChild(style);
@@ -5818,16 +5887,55 @@ function generateGiftConstellation() {
         <div id="dmCandyAvatar">🍬</div>
         <div id="dmCandyText">
           <div id="dmCandyName">Candy — AI Travel Voice</div>
-          <div id="dmCandySpeech">Pick a destination and hit "Ask Candy" — I'll tell you something sweet about it! ✨</div>
+          <div id="dmCandySpeech">Pick a destination and hit "Ask Candy" — I'll speak to you about it! ✨</div>
+          <div class="dm-wave" id="dmWave">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
         </div>
-        <div id="dmCandyBtn">
+        <div id="dmCandyButtons">
           <button id="dmSpeakBtn" disabled>✨ Ask Candy</button>
+          <button id="dmStopBtn">⏹ Stop</button>
         </div>
       </div>
     `;
     document.body.appendChild(panel);
     document.getElementById('dmCloseBtn').addEventListener('click', closeDreamMap);
     document.getElementById('dmSpeakBtn').addEventListener('click', onAskCandy);
+    document.getElementById('dmStopBtn').addEventListener('click', onStopCandy);
+
+    // Pre-load voices (some browsers need this trigger)
+    if (synth && synth.getVoices().length === 0) {
+      synth.addEventListener('voiceschanged', () => {}, { once: true });
+    }
+  }
+
+  /* ── Speaking UI state ── */
+  function setSpeakingUI(speaking) {
+    const avatar  = document.getElementById('dmCandyAvatar');
+    const wave    = document.getElementById('dmWave');
+    const askBtn  = document.getElementById('dmSpeakBtn');
+    const stopBtn = document.getElementById('dmStopBtn');
+
+    if (speaking) {
+      avatar.classList.add('speaking');
+      wave.classList.add('active');
+      askBtn.disabled = true;
+      stopBtn.classList.add('visible');
+    } else {
+      avatar.classList.remove('speaking');
+      wave.classList.remove('active');
+      askBtn.disabled = !selectedDest;
+      stopBtn.classList.remove('visible');
+    }
+  }
+
+  function onStopCandy() {
+    stopSpeech();
+    candySpeaking = false;
+    setSpeakingUI(false);
+    const speech = document.getElementById('dmCandySpeech');
+    speech.className = '';
+    speech.style.color = '#94a3b8';
   }
 
   /* ── Init Leaflet ── */
@@ -5856,8 +5964,7 @@ function generateGiftConstellation() {
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20,
+      subdomains: 'abcd', maxZoom: 20,
     }).addTo(leafletMap);
 
     leafletMap.once('load', hideLoader);
@@ -5878,8 +5985,8 @@ function generateGiftConstellation() {
               <div class="dm-marker-dot" style="background:${meta.color};box-shadow:0 0 10px ${meta.color}, 0 0 20px ${meta.color}44"></div>
               <div class="dm-marker-label">${d.name}</div>
             </div>`,
-        iconSize: isSettle ? [130, 48] : [80, 36],
-        iconAnchor: isSettle ? [65, 20] : [40, 14],
+        iconSize:   isSettle ? [130, 48] : [80, 36],
+        iconAnchor: isSettle ? [65, 20]  : [40, 14],
         popupAnchor: [0, -16],
       });
 
@@ -5890,6 +5997,9 @@ function generateGiftConstellation() {
   }
 
   function selectDestination(d, isSettle, meta) {
+    // Stop any ongoing speech when switching destinations
+    if (candySpeaking) onStopCandy();
+
     selectedDest = d;
     leafletMap.setView([d.lat, d.lng], Math.max(leafletMap.getZoom(), 6), {
       animate: true, duration: 0.3,
@@ -5909,13 +6019,11 @@ function generateGiftConstellation() {
       ${d.note}
     `;
 
-    const btn = document.getElementById('dmSpeakBtn');
-    btn.disabled = false;
-
+    document.getElementById('dmSpeakBtn').disabled = false;
     const speech = document.getElementById('dmCandySpeech');
     speech.className = '';
     speech.style.color = '#94a3b8';
-    speech.textContent = `Click "Ask Candy" and I'll tell you something special about ${d.name}! ✨`;
+    speech.textContent = `Click "Ask Candy" and I'll speak about ${d.name}! ✨`;
   }
 
   function hideLoader() {
@@ -5927,19 +6035,16 @@ function generateGiftConstellation() {
   async function onAskCandy() {
     if (!selectedDest || candySpeaking) return;
     candySpeaking = true;
-
-    const btn = document.getElementById('dmSpeakBtn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Thinking…';
+    setSpeakingUI(true);
 
     const speech = document.getElementById('dmCandySpeech');
-    speech.className = '';
+    speech.className = 'typing';
     speech.style.color = '#e2e8f0';
     speech.textContent = '';
 
-    const d = selectedDest;
+    const d    = selectedDest;
     const meta = TYPE_META[d.type];
-    const prompt = `You are Candy, a bubbly, warm, and enthusiastic AI travel companion with a sweet and uplifting personality. You use vivid imagery, a little playfulness, and genuine emotion. In 2–3 sentences max, tell Pavan something special and heartfelt about ${d.name} (category: ${meta.label}). Context about this destination for Pavan: ${d.note}. Be encouraging, dreamy, and personal — as if you're his cheerful travel bestie. No hashtags, no lists, no emojis at the end.`;
+    const prompt = `You are Candy, a bubbly, warm, and enthusiastic AI travel companion with a sweet and uplifting personality. You use vivid imagery, a little playfulness, and genuine emotion. In 2–3 sentences max, tell Pavan something special and heartfelt about ${d.name} (category: ${meta.label}). Context: ${d.note}. Be encouraging, dreamy, and personal — as if you're his cheerful travel bestie. No hashtags, no lists, no emojis.`;
 
     try {
       const res = await fetch('https://pk-groq-proxy.daroorpavankalyan.workers.dev', {
@@ -5956,16 +6061,40 @@ function generateGiftConstellation() {
           stream: false,
         }),
       });
+
       const data = await res.json();
-      const text = data.choices?.[0]?.message?.content?.trim() || 'Oops, lost my words! Try again.';
-      await typewriterEffect(speech, text);
+
+      // Support both Groq format and fallback formats
+      const text =
+        data?.choices?.[0]?.message?.content?.trim() ||
+        data?.content?.[0]?.text?.trim()              ||
+        data?.message?.content?.trim()                ||
+        data?.text?.trim()                            ||
+        null;
+
+      if (!text) {
+        // Log full response to console for debugging
+        console.warn('[Candy] Unexpected response shape:', JSON.stringify(data, null, 2));
+        throw new Error('Empty response');
+      }
+
+      // Typewriter + speak simultaneously
+      await Promise.all([
+        typewriterEffect(speech, text),
+        new Promise(resolve => speakText(text, resolve)),
+      ]);
+
     } catch (err) {
-      speech.textContent = 'Hmm, couldn\'t connect right now. Try again in a moment!';
+      console.error('[Candy] Error:', err);
+      const errMsg = 'Hmm, couldn\'t connect right now. Try again in a moment!';
+      speech.className = '';
+      speech.style.color = '#94a3b8';
+      speech.textContent = errMsg;
+      speakText(errMsg, () => {});
     }
 
-    btn.disabled = false;
-    btn.textContent = '✨ Ask Candy';
     candySpeaking = false;
+    setSpeakingUI(false);
   }
 
   async function typewriterEffect(el, text) {
@@ -5988,6 +6117,9 @@ function generateGiftConstellation() {
   }
 
   function closeDreamMap() {
+    stopSpeech();
+    candySpeaking = false;
+    setSpeakingUI(false);
     panel.classList.remove('active');
     document.body.style.overflow = '';
   }
