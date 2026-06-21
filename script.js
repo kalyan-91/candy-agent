@@ -5749,7 +5749,7 @@ function generateGiftConstellation() {
       center: [22, 82],
       zoom: 4,
       zoomControl: true,
-      scrollWheelZoom: true,
+      scrollWheelZoom: false,
       preferCanvas: false,
     });
 
