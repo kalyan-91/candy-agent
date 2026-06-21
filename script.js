@@ -5521,7 +5521,16 @@ function generateGiftConstellation() {
   'use strict';
 
   const DESTINATIONS = [
-    { name: 'Ooty',         lat: 11.4102, lng: 76.6950, type: 'nature',    note: 'A hill station escape — exactly the kind of quiet, cool, green place Pavan dreams of eventually settling down in.' },
+    { name: 'Ooty',            lat: 11.4102, lng: 76.6950,  type: 'settle',    note: 'A hill station escape — exactly the kind of quiet, cool, green place Pavan dreams of eventually settling down in.' },
+    { name: 'Bengaluru',       lat: 12.9716, lng: 77.5946,  type: 'settle',   note: 'The Silicon Valley of India — cool weather, tech jobs, and a green city vibe. Pavan sees Bengaluru as a real place to settle and build his AI career.' },
+    { name: 'Coorg',           lat: 12.3375, lng: 75.8069,  type: 'settle',    note: 'The Scotland of India — misty coffee estates and deep quiet. Pavan dreams of settling somewhere exactly like this, away from city noise.' },
+    { name: 'Munnar',          lat: 10.0889, lng: 77.0595,  type: 'settle',    note: 'Rolling tea gardens and cool misty mornings in Kerala — the kind of peaceful, green place Pavan imagines settling down in one day.' },
+    { name: 'Kodaikanal',      lat: 10.2381, lng: 77.4892,  type: 'settle',    note: 'The Princess of Hill Stations — serene lakes and pine forests. Pavan dreams of a quiet life in a place just like this.' },
+    { name: 'Wayanad',         lat: 11.6854, lng: 76.1320,  type: 'nature',    note: 'Deep forests and tribal heritage in Kerala — a green escape with waterfalls, wildlife, and misty valleys.' },
+    { name: 'Chikmagalur',     lat: 13.3161, lng: 75.7720,  type: 'settle',    note: 'Birthplace of Indian coffee — quiet trails, mist, and slow mornings. Exactly the peaceful life Pavan wants to settle into someday.' },
+    { name: 'Nainital',        lat: 29.3803, lng: 79.4636,  type: 'nature',    note: 'A jewel in the Kumaon hills — the lake, cool air, and colonial charm make it a classic hill station on Pavan's list.' },
+    { name: 'Shimla',          lat: 31.1048, lng: 77.1734,  type: 'nature',    note: 'The Queen of Hills — snow, colonial heritage, and crisp mountain air. A dream getaway for Pavan.' },
+    { name: 'Manali',          lat: 32.2432, lng: 77.1892,  type: 'nature',    note: 'Snow-capped peaks and adventure in the Himalayas — the kind of breathtaking place Pavan wants to experience at least once.' },
     { name: 'Mysore',       lat: 12.2958, lng: 76.6394, type: 'culture',   note: 'Rich in Karnataka heritage and royal history — fits Pavan\'s love for Indian traditions and culture.' },
     { name: 'Goa',          lat: 15.2993, lng: 74.1240, type: 'nature',    note: 'Coastal calm rather than party scene — Pavan prefers nature and quiet over nightlife, even in places known for it.' },
     { name: 'Kochi',        lat: 9.9312,  lng: 76.2673, type: 'nature',    note: 'Backwaters and coastal charm in Kerala — peaceful, green, and far from crowds.' },
@@ -5544,6 +5553,7 @@ function generateGiftConstellation() {
     nature:    { color: '#34d399', label: 'Nature & Hills',   emoji: '🌿' },
     culture:   { color: '#fbbf24', label: 'Culture & Home',   emoji: '🏛️' },
     travel:    { color: '#06b6d4', label: 'World Tour Dream', emoji: '✈️' },
+    settle:    { color: '#fb923c', label: 'Dream Settle Spot', emoji: '🏡' },
   };
 
   let panel = null, leafletMap = null, leafletLoaded = false;
@@ -5641,6 +5651,36 @@ function generateGiftConstellation() {
         transition: transform 0.18s;
       }
       .dm-marker-dot:hover { transform: scale(1.35); }
+
+      /* Dream Home / Settle marker */
+      .dm-marker-settle { position: relative; }
+      .dm-settle-ring {
+        position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+        width: 40px; height: 40px; border-radius: 50%;
+        border: 2px solid #fb923c;
+        animation: settleRing 1.8s ease-out infinite;
+        pointer-events: none;
+      }
+      @keyframes settleRing {
+        0%   { transform: translateX(-50%) scale(0.6); opacity: 1; }
+        100% { transform: translateX(-50%) scale(1.8); opacity: 0; }
+      }
+      .dm-settle-dot {
+        width: 32px; height: 32px; border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 16px rgba(251,146,60,0.6), 0 2px 8px rgba(0,0,0,0.3);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; transition: transform 0.18s;
+        position: relative; z-index: 2;
+      }
+      .dm-settle-dot:hover { transform: scale(1.2); }
+      .dm-settle-label {
+        font-weight: 700 !important;
+        background: #fff3e8 !important;
+        color: #c2410c !important;
+        border: 1.5px solid #fb923c !important;
+        box-shadow: 0 2px 10px rgba(251,146,60,0.3) !important;
+      }
       .dm-marker-label {
         margin-top: 4px; font-size: 0.62rem; white-space: nowrap; font-weight: 600;
         background: #fff; color: #1e293b;
@@ -5789,14 +5829,21 @@ function generateGiftConstellation() {
     // Add markers
     DESTINATIONS.forEach((d) => {
       const meta = TYPE_META[d.type];
+      const isSettle = d.type === 'settle';
       const icon = L.divIcon({
         className: '',
-        html: `<div class="dm-marker">
-          <div class="dm-marker-dot" style="background:${meta.color};box-shadow:0 0 10px ${meta.color}, 0 0 20px ${meta.color}44"></div>
-          <div class="dm-marker-label">${d.name}</div>
-        </div>`,
-        iconSize: [80, 36],
-        iconAnchor: [40, 14],
+        html: isSettle
+          ? `<div class="dm-marker dm-marker-settle">
+              <div class="dm-settle-ring"></div>
+              <div class="dm-settle-dot" style="background:${meta.color}">🏡</div>
+              <div class="dm-marker-label dm-settle-label">${d.name} 🏡</div>
+            </div>`
+          : `<div class="dm-marker">
+              <div class="dm-marker-dot" style="background:${meta.color};box-shadow:0 0 10px ${meta.color}, 0 0 20px ${meta.color}44"></div>
+              <div class="dm-marker-label">${d.name}</div>
+            </div>`,
+        iconSize: isSettle ? [130, 48] : [80, 36],
+        iconAnchor: isSettle ? [65, 20] : [40, 14],
         popupAnchor: [0, -16],
       });
 
@@ -5805,8 +5852,17 @@ function generateGiftConstellation() {
           animate: true,
           duration: 0.3,
         });
+        const settleTag = isSettle
+          ? `<span style="
+              display:inline-block; margin-left:8px;
+              background:#fff3e8; color:#c2410c;
+              font-size:0.65rem; font-weight:700; padding:2px 8px;
+              border-radius:100px; border:1px solid #fb923c;
+              vertical-align: middle;
+            ">🏡 Pavan's Dream Home</span>`
+          : '';
         document.getElementById('dmInfo').innerHTML = `
-          <span class="dm-info-name" style="color:${meta.color}">${meta.emoji} ${d.name} — ${meta.label}</span>
+          <span class="dm-info-name" style="color:${meta.color}">${meta.emoji} ${d.name} — ${meta.label}${settleTag}</span>
           ${d.note}
         `;
       });
