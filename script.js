@@ -5511,7 +5511,7 @@ function generateGiftConstellation() {
 
 
 
-/* ═══════════════════════════════════════════
+ /* ═══════════════════════════════════════════
    DREAM DESTINATION MAP — REAL WORLD (Leaflet.js) v3
    Uses CartoDB Voyager tiles (clean, modern).
    + Candy Voice: AI travel companion powered by Claude.
@@ -5943,23 +5943,17 @@ function generateGiftConstellation() {
 
     try {
       const res = await fetch('https://pk-groq-proxy.daroorpavankalyan.workers.dev', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    model: 'llama-3.3-70b-versatile',
-    max_tokens: 200,
-    messages: [
-      { role: 'system', content: 'You are Candy, a bubbly warm travel companion. Keep responses to 2-3 sentences, vivid and personal. No hashtags, no lists, no emojis.' },
-      { role: 'user', content: prompt }
-    ],
-    temperature: 0.88,
-    stream: false,
-  }),
-});
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
+          model: 'llama-3.3-70b-versatile',
           max_tokens: 200,
-          messages: [{ role: 'user', content: prompt }],
+          messages: [
+            { role: 'system', content: 'You are Candy, a bubbly warm travel companion. Keep responses to 2-3 sentences, vivid and personal. No hashtags, no lists, no emojis.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.88,
+          stream: false,
         }),
       });
       const data = await res.json();
