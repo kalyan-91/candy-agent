@@ -5513,50 +5513,51 @@ function generateGiftConstellation() {
 
 
 /* ═══════════════════════════════════════════
-   DREAM DESTINATION MAP — REAL WORLD (Leaflet.js) v2
-   Uses OpenStreetMap tiles (most reliable).
-   Dark theme via CSS filter on tile layer.
+   DREAM DESTINATION MAP — REAL WORLD (Leaflet.js) v3
+   Uses CartoDB Voyager tiles (clean, modern).
+   + Candy Voice: AI travel companion powered by Claude.
 ═══════════════════════════════════════════ */
 (function DreamMap() {
   'use strict';
 
   const DESTINATIONS = [
     { name: 'Ooty',            lat: 11.4102, lng: 76.6950,  type: 'settle',    note: 'A hill station escape — exactly the kind of quiet, cool, green place Pavan dreams of eventually settling down in.' },
-    { name: 'Bengaluru',       lat: 12.9716, lng: 77.5946,  type: 'settle',   note: 'The Silicon Valley of India — cool weather, tech jobs, and a green city vibe. Pavan sees Bengaluru as a real place to settle and build his AI career.' },
+    { name: 'Bengaluru',       lat: 12.9716, lng: 77.5946,  type: 'settle',    note: 'The Silicon Valley of India — cool weather, tech jobs, and a green city vibe. Pavan sees Bengaluru as a real place to settle and build his AI career.' },
     { name: 'Coorg',           lat: 12.3375, lng: 75.8069,  type: 'settle',    note: 'The Scotland of India — misty coffee estates and deep quiet. Pavan dreams of settling somewhere exactly like this, away from city noise.' },
     { name: 'Munnar',          lat: 10.0889, lng: 77.0595,  type: 'settle',    note: 'Rolling tea gardens and cool misty mornings in Kerala — the kind of peaceful, green place Pavan imagines settling down in one day.' },
     { name: 'Kodaikanal',      lat: 10.2381, lng: 77.4892,  type: 'settle',    note: 'The Princess of Hill Stations — serene lakes and pine forests. Pavan dreams of a quiet life in a place just like this.' },
     { name: 'Wayanad',         lat: 11.6854, lng: 76.1320,  type: 'nature',    note: 'Deep forests and tribal heritage in Kerala — a green escape with waterfalls, wildlife, and misty valleys.' },
     { name: 'Chikmagalur',     lat: 13.3161, lng: 75.7720,  type: 'settle',    note: 'Birthplace of Indian coffee — quiet trails, mist, and slow mornings. Exactly the peaceful life Pavan wants to settle into someday.' },
-    { name: 'Nainital',        lat: 29.3803, lng: 79.4636,  type: 'nature',    note: 'A jewel in the Kumaon hills — the lake, cool air, and colonial charm make it a classic hill station on Pavan's list.' },
+    { name: 'Nainital',        lat: 29.3803, lng: 79.4636,  type: 'nature',    note: 'A jewel in the Kumaon hills — the lake, cool air, and colonial charm make it a classic hill station on Pavan\'s list.' },
     { name: 'Shimla',          lat: 31.1048, lng: 77.1734,  type: 'nature',    note: 'The Queen of Hills — snow, colonial heritage, and crisp mountain air. A dream getaway for Pavan.' },
     { name: 'Manali',          lat: 32.2432, lng: 77.1892,  type: 'nature',    note: 'Snow-capped peaks and adventure in the Himalayas — the kind of breathtaking place Pavan wants to experience at least once.' },
-    { name: 'Mysore',       lat: 12.2958, lng: 76.6394, type: 'culture',   note: 'Rich in Karnataka heritage and royal history — fits Pavan\'s love for Indian traditions and culture.' },
-    { name: 'Goa',          lat: 15.2993, lng: 74.1240, type: 'nature',    note: 'Coastal calm rather than party scene — Pavan prefers nature and quiet over nightlife, even in places known for it.' },
-    { name: 'Kochi',        lat: 9.9312,  lng: 76.2673, type: 'nature',    note: 'Backwaters and coastal charm in Kerala — peaceful, green, and far from crowds.' },
-    { name: 'Rameswaram',   lat: 9.2876,  lng: 79.3129, type: 'spiritual', note: 'One of the holiest temple towns in India — on Pavan\'s must-visit list at least once in his life.' },
-    { name: 'Mathura',      lat: 27.4924, lng: 77.6737, type: 'spiritual', note: 'Birthplace of Lord Krishna — deeply meaningful to Pavan given his devotion to Krishna.' },
-    { name: 'Vrindavan',    lat: 27.5794, lng: 77.6964, type: 'spiritual', note: 'Where Krishna spent his childhood — a place Pavan feels pulled toward spiritually.' },
-    { name: 'Dwarka',       lat: 22.2373, lng: 68.9679, type: 'spiritual', note: 'Krishna\'s legendary kingdom by the sea — another essential stop on Pavan\'s spiritual journey.' },
-    { name: 'Ayodhya',      lat: 26.7922, lng: 82.1998, type: 'spiritual', note: 'Sacred to the Ramayana — ties into Pavan\'s deep love for Indian mythology.' },
-    { name: 'Araku Valley',    lat: 18.3273, lng: 82.8758, type: 'nature',    note: 'Misty hills and coffee plantations in Andhra Pradesh — a nature escape close to home.' },
-    { name: 'Visakhapatnam', lat: 17.6868, lng: 83.2185, type: 'nature',    note: 'The City of Destiny — beautiful beaches, Araku hills nearby, and a vibrant coastal energy that Pavan loves.' },
-    { name: 'Kurnool',      lat: 15.8281, lng: 78.0373, type: 'culture',   note: 'Home — and endlessly rich in the traditions, festivals, and history Pavan loves exploring.' },
-    { name: 'Japan',        lat: 35.6762, lng: 139.6503, type: 'travel',   note: 'A dream travel destination — a striking mix of tradition and futuristic technology.' },
-    { name: 'Europe',       lat: 48.8566, lng:  2.3522,  type: 'travel',   note: 'On Pavan\'s world tour wishlist — history, architecture, and culture in one place.' },
-    { name: 'USA',          lat: 38.9072, lng: -77.0369, type: 'travel',   note: 'Part of Pavan\'s long-term travel and career dreams — open to settling abroad too.' },
-    { name: 'Canada',       lat: 45.4215, lng: -75.6972, type: 'travel',   note: 'Cool climates and nature — fits Pavan\'s love for cooler weather over heat.' },
+    { name: 'Mysore',          lat: 12.2958, lng: 76.6394,  type: 'culture',   note: 'Rich in Karnataka heritage and royal history — fits Pavan\'s love for Indian traditions and culture.' },
+    { name: 'Goa',             lat: 15.2993, lng: 74.1240,  type: 'nature',    note: 'Coastal calm rather than party scene — Pavan prefers nature and quiet over nightlife, even in places known for it.' },
+    { name: 'Kochi',           lat: 9.9312,  lng: 76.2673,  type: 'nature',    note: 'Backwaters and coastal charm in Kerala — peaceful, green, and far from crowds.' },
+    { name: 'Rameswaram',      lat: 9.2876,  lng: 79.3129,  type: 'spiritual', note: 'One of the holiest temple towns in India — on Pavan\'s must-visit list at least once in his life.' },
+    { name: 'Mathura',         lat: 27.4924, lng: 77.6737,  type: 'spiritual', note: 'Birthplace of Lord Krishna — deeply meaningful to Pavan given his devotion to Krishna.' },
+    { name: 'Vrindavan',       lat: 27.5794, lng: 77.6964,  type: 'spiritual', note: 'Where Krishna spent his childhood — a place Pavan feels pulled toward spiritually.' },
+    { name: 'Dwarka',          lat: 22.2373, lng: 68.9679,  type: 'spiritual', note: 'Krishna\'s legendary kingdom by the sea — another essential stop on Pavan\'s spiritual journey.' },
+    { name: 'Ayodhya',         lat: 26.7922, lng: 82.1998,  type: 'spiritual', note: 'Sacred to the Ramayana — ties into Pavan\'s deep love for Indian mythology.' },
+    { name: 'Araku Valley',    lat: 18.3273, lng: 82.8758,  type: 'nature',    note: 'Misty hills and coffee plantations in Andhra Pradesh — a nature escape close to home.' },
+    { name: 'Visakhapatnam',   lat: 17.6868, lng: 83.2185,  type: 'nature',    note: 'The City of Destiny — beautiful beaches, Araku hills nearby, and a vibrant coastal energy that Pavan loves.' },
+    { name: 'Kurnool',         lat: 15.8281, lng: 78.0373,  type: 'culture',   note: 'Home — and endlessly rich in the traditions, festivals, and history Pavan loves exploring.' },
+    { name: 'Japan',           lat: 35.6762, lng: 139.6503, type: 'travel',    note: 'A dream travel destination — a striking mix of tradition and futuristic technology.' },
+    { name: 'Europe',          lat: 48.8566, lng:  2.3522,  type: 'travel',    note: 'On Pavan\'s world tour wishlist — history, architecture, and culture in one place.' },
+    { name: 'USA',             lat: 38.9072, lng: -77.0369, type: 'travel',    note: 'Part of Pavan\'s long-term travel and career dreams — open to settling abroad too.' },
+    { name: 'Canada',          lat: 45.4215, lng: -75.6972, type: 'travel',    note: 'Cool climates and nature — fits Pavan\'s love for cooler weather over heat.' },
   ];
 
   const TYPE_META = {
-    spiritual: { color: '#a78bfa', label: 'Spiritual',        emoji: '🕌' },
-    nature:    { color: '#34d399', label: 'Nature & Hills',   emoji: '🌿' },
-    culture:   { color: '#fbbf24', label: 'Culture & Home',   emoji: '🏛️' },
-    travel:    { color: '#06b6d4', label: 'World Tour Dream', emoji: '✈️' },
+    spiritual: { color: '#a78bfa', label: 'Spiritual',         emoji: '🕌' },
+    nature:    { color: '#34d399', label: 'Nature & Hills',    emoji: '🌿' },
+    culture:   { color: '#fbbf24', label: 'Culture & Home',    emoji: '🏛️' },
+    travel:    { color: '#06b6d4', label: 'World Tour Dream',  emoji: '✈️' },
     settle:    { color: '#fb923c', label: 'Dream Settle Spot', emoji: '🏡' },
   };
 
   let panel = null, leafletMap = null, leafletLoaded = false;
+  let selectedDest = null, candySpeaking = false;
 
   /* ── Load Leaflet CSS + JS lazily ── */
   function loadLeaflet(cb) {
@@ -5581,7 +5582,6 @@ function generateGiftConstellation() {
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     script.onload = () => { leafletLoaded = true; cb(); };
     script.onerror = () => {
-      // fallback to cdnjs
       const s2 = document.createElement('script');
       s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
       s2.onload = () => { leafletLoaded = true; cb(); };
@@ -5636,13 +5636,11 @@ function generateGiftConstellation() {
         flex: 1; position: relative; min-height: 0;
         margin: 10px 16px 0;
         border: 1px solid rgba(167,139,250,0.2);
-        border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        border-radius: 16px; overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
       }
       #dmMapEl { width: 100%; height: 100%; }
 
-      /* Map tiles — keep natural white/light appearance */
-
-      /* Markers */
       .dm-marker { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
       .dm-marker-dot {
         width: 16px; height: 16px; border-radius: 50%;
@@ -5652,7 +5650,6 @@ function generateGiftConstellation() {
       }
       .dm-marker-dot:hover { transform: scale(1.35); }
 
-      /* Dream Home / Settle marker */
       .dm-marker-settle { position: relative; }
       .dm-settle-ring {
         position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
@@ -5689,9 +5686,8 @@ function generateGiftConstellation() {
         pointer-events: none; line-height: 1.5; letter-spacing: 0.1px;
       }
 
-      /* Info panel */
       .dm-info {
-        flex-shrink: 0; margin: 8px 16px 14px;
+        flex-shrink: 0; margin: 8px 16px 0;
         padding: 12px 16px; border-radius: 12px;
         background: rgba(255,255,255,0.04);
         border: 1px solid rgba(167,139,250,0.2);
@@ -5700,6 +5696,49 @@ function generateGiftConstellation() {
       }
       .dm-info-empty { color: #475569; font-size: 0.77rem; }
       .dm-info-name { font-weight: 700; margin-bottom: 3px; display: block; }
+
+      /* ── Candy Voice Bar ── */
+      #dmCandyBar {
+        flex-shrink: 0; margin: 8px 16px 14px;
+        padding: 12px 16px; border-radius: 12px;
+        background: rgba(167,139,250,0.07);
+        border: 1px solid rgba(167,139,250,0.25);
+        display: flex; align-items: center; gap: 12px;
+      }
+      #dmCandyAvatar {
+        width: 42px; height: 42px; border-radius: 50%;
+        background: rgba(167,139,250,0.15);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.25rem; flex-shrink: 0;
+        border: 1.5px solid rgba(167,139,250,0.3);
+      }
+      #dmCandyText { flex: 1; min-width: 0; }
+      #dmCandyName {
+        font-size: 0.6rem; font-weight: 700; color: #a78bfa;
+        text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;
+      }
+      #dmCandySpeech {
+        font-size: 0.78rem; color: #94a3b8; line-height: 1.55;
+      }
+      #dmCandySpeech.typing::after {
+        content: '▌';
+        animation: candyBlink 0.7s step-end infinite;
+        color: #a78bfa;
+      }
+      @keyframes candyBlink { 50% { opacity: 0; } }
+      #dmCandyBtn {
+        flex-shrink: 0;
+      }
+      #dmCandyBtn button {
+        display: flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 8px;
+        border: 1px solid rgba(167,139,250,0.5);
+        background: rgba(167,139,250,0.12);
+        color: #c4b5fd; font-size: 0.72rem; font-weight: 600;
+        cursor: pointer; transition: all 0.18s; white-space: nowrap;
+      }
+      #dmCandyBtn button:hover { background: rgba(167,139,250,0.22); }
+      #dmCandyBtn button:disabled { opacity: 0.45; cursor: not-allowed; }
 
       /* Leaflet UI overrides */
       .leaflet-control-zoom a {
@@ -5715,7 +5754,6 @@ function generateGiftConstellation() {
       .leaflet-control-attribution a { color: #475569 !important; }
       .leaflet-container { background: #e8e0d8 !important; }
 
-      /* Loading overlay */
       #dmMapLoading {
         position: absolute; inset: 0; z-index: 500;
         background: #f8fafc;
@@ -5733,7 +5771,8 @@ function generateGiftConstellation() {
       @media (max-width: 640px) {
         .dm-legend { gap: 8px; font-size: 0.6rem; padding: 6px 12px; }
         #dmMapContainer { margin: 8px 10px 0; border-radius: 10px; }
-        .dm-info { margin: 6px 10px 10px; font-size: 0.76rem; }
+        .dm-info { margin: 6px 10px 0; font-size: 0.76rem; }
+        #dmCandyBar { margin: 6px 10px 10px; }
         .dm-header { padding: 12px 14px; }
       }
     `;
@@ -5775,9 +5814,21 @@ function generateGiftConstellation() {
       <div class="dm-info" id="dmInfo">
         <div class="dm-info-empty">📍 Click any pin to discover why this place matters to Pavan.</div>
       </div>
+
+      <div id="dmCandyBar">
+        <div id="dmCandyAvatar">🍬</div>
+        <div id="dmCandyText">
+          <div id="dmCandyName">Candy — AI Travel Voice</div>
+          <div id="dmCandySpeech">Pick a destination and hit "Ask Candy" — I'll tell you something sweet about it! ✨</div>
+        </div>
+        <div id="dmCandyBtn">
+          <button id="dmSpeakBtn" disabled>✨ Ask Candy</button>
+        </div>
+      </div>
     `;
     document.body.appendChild(panel);
     document.getElementById('dmCloseBtn').addEventListener('click', closeDreamMap);
+    document.getElementById('dmSpeakBtn').addEventListener('click', onAskCandy);
   }
 
   /* ── Init Leaflet ── */
@@ -5788,45 +5839,31 @@ function generateGiftConstellation() {
     }
 
     leafletMap = L.map('dmMapEl', {
-      center: [22, 82],
-      zoom: 4,
-      minZoom: 2,
-      maxZoom: 19,
+      center: [22, 82], zoom: 4,
+      minZoom: 2, maxZoom: 19,
       zoomControl: true,
       scrollWheelZoom: false,
       doubleClickZoom: true,
       touchZoom: true,
       dragging: true,
       zoomAnimation: true,
-      zoomAnimationThreshold: 4,
-      wheelDebounceTime: 20,
-      wheelPxPerZoomLevel: 80,
       preferCanvas: true,
     });
 
-    // Scroll wheel zoom: only active when mouse is over the map element
     const mapEl = document.getElementById('dmMapEl');
     mapEl.addEventListener('mouseenter', () => leafletMap.scrollWheelZoom.enable());
     mapEl.addEventListener('mouseleave', () => leafletMap.scrollWheelZoom.disable());
-
-    // Prevent map scroll from bubbling up to the page
     mapEl.addEventListener('wheel', (e) => e.stopPropagation(), { passive: false });
 
-
-
-    // CartoDB Voyager — modern, clean, Google Maps-like style
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
       subdomains: 'abcd',
       maxZoom: 20,
-      retina: '@2x',
     }).addTo(leafletMap);
 
-    // Hide loader once first tile loads
     leafletMap.once('load', hideLoader);
-    setTimeout(hideLoader, 3000); // fallback
+    setTimeout(hideLoader, 3000);
 
-    // Add markers
     DESTINATIONS.forEach((d) => {
       const meta = TYPE_META[d.type];
       const isSettle = d.type === 'settle';
@@ -5848,30 +5885,95 @@ function generateGiftConstellation() {
       });
 
       L.marker([d.lat, d.lng], { icon }).addTo(leafletMap).on('click', () => {
-        leafletMap.setView([d.lat, d.lng], Math.max(leafletMap.getZoom(), 6), {
-          animate: true,
-          duration: 0.3,
-        });
-        const settleTag = isSettle
-          ? `<span style="
-              display:inline-block; margin-left:8px;
-              background:#fff3e8; color:#c2410c;
-              font-size:0.65rem; font-weight:700; padding:2px 8px;
-              border-radius:100px; border:1px solid #fb923c;
-              vertical-align: middle;
-            ">🏡 Pavan's Dream Home</span>`
-          : '';
-        document.getElementById('dmInfo').innerHTML = `
-          <span class="dm-info-name" style="color:${meta.color}">${meta.emoji} ${d.name} — ${meta.label}${settleTag}</span>
-          ${d.note}
-        `;
+        selectDestination(d, isSettle, meta);
       });
     });
+  }
+
+  function selectDestination(d, isSettle, meta) {
+    selectedDest = d;
+    leafletMap.setView([d.lat, d.lng], Math.max(leafletMap.getZoom(), 6), {
+      animate: true, duration: 0.3,
+    });
+
+    const settleTag = isSettle
+      ? `<span style="
+          display:inline-block; margin-left:8px;
+          background:#fff3e8; color:#c2410c;
+          font-size:0.65rem; font-weight:700; padding:2px 8px;
+          border-radius:100px; border:1px solid #fb923c; vertical-align:middle;
+        ">🏡 Pavan's Dream Home</span>`
+      : '';
+
+    document.getElementById('dmInfo').innerHTML = `
+      <span class="dm-info-name" style="color:${meta.color}">${meta.emoji} ${d.name} — ${meta.label}${settleTag}</span>
+      ${d.note}
+    `;
+
+    const btn = document.getElementById('dmSpeakBtn');
+    btn.disabled = false;
+
+    const speech = document.getElementById('dmCandySpeech');
+    speech.className = '';
+    speech.style.color = '#94a3b8';
+    speech.textContent = `Click "Ask Candy" and I'll tell you something special about ${d.name}! ✨`;
   }
 
   function hideLoader() {
     const el = document.getElementById('dmMapLoading');
     if (el) el.style.display = 'none';
+  }
+
+  /* ── Candy Voice ── */
+  async function onAskCandy() {
+    if (!selectedDest || candySpeaking) return;
+    candySpeaking = true;
+
+    const btn = document.getElementById('dmSpeakBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Thinking…';
+
+    const speech = document.getElementById('dmCandySpeech');
+    speech.className = '';
+    speech.style.color = '#e2e8f0';
+    speech.textContent = '';
+
+    const d = selectedDest;
+    const meta = TYPE_META[d.type];
+    const prompt = `You are Candy, a bubbly, warm, and enthusiastic AI travel companion with a sweet and uplifting personality. You use vivid imagery, a little playfulness, and genuine emotion. In 2–3 sentences max, tell Pavan something special and heartfelt about ${d.name} (category: ${meta.label}). Context about this destination for Pavan: ${d.note}. Be encouraging, dreamy, and personal — as if you're his cheerful travel bestie. No hashtags, no lists, no emojis at the end.`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 200,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+      const data = await res.json();
+      const text = data.content?.find(c => c.type === 'text')?.text
+        || 'Oops, I lost my words for a moment! Try again. 🍬';
+      await typewriterEffect(speech, text);
+    } catch (err) {
+      speech.textContent = 'Hmm, couldn\'t connect right now. Try again in a moment! 🍬';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✨ Ask Candy';
+    candySpeaking = false;
+  }
+
+  async function typewriterEffect(el, text) {
+    el.className = 'typing';
+    el.style.color = '#e2e8f0';
+    el.textContent = '';
+    for (let i = 0; i < text.length; i++) {
+      el.textContent += text[i];
+      await new Promise(r => setTimeout(r, 18));
+    }
+    el.className = '';
   }
 
   /* ── Open / close ── */
