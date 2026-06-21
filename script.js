@@ -5511,6 +5511,7 @@ function generateGiftConstellation() {
 
 
 
+
 /* ═══════════════════════════════════════════
    DREAM DESTINATION MAP — REAL WORLD (Leaflet.js) v2
    Uses OpenStreetMap tiles (most reliable).
@@ -5751,6 +5752,8 @@ function generateGiftConstellation() {
     leafletMap = L.map('dmMapEl', {
       center: [22, 82],
       zoom: 4,
+      minZoom: 2,
+      maxZoom: 19,
       zoomControl: true,
       scrollWheelZoom: false,
       doubleClickZoom: true,
@@ -5777,7 +5780,7 @@ function generateGiftConstellation() {
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
       subdomains: 'abcd',
-      maxZoom: 19,
+      maxZoom: 20,
       retina: '@2x',
     }).addTo(leafletMap);
 
