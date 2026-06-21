@@ -5508,3 +5508,270 @@ function generateGiftConstellation() {
   }, 1000);
 
 }
+
+
+
+/* ═══════════════════════════════════════════
+   DREAM DESTINATION MAP
+   A cosmic-styled interactive map of Pavan's
+   favorite places and travel dreams.
+   Paste anywhere in script.js (after DOM is ready).
+═══════════════════════════════════════════ */
+(function DreamMap() {
+  'use strict';
+
+  /* ── DESTINATION DATA ──
+     x / y are percentage positions on the panel (artistic layout,
+     not literal geographic coordinates — grouped by region for a
+     clean "dream map" feel rather than strict cartography). */
+  const DESTINATIONS = [
+    { name: 'Ooty',          x: 38, y: 62, type: 'nature',     note: 'A hill station escape — exactly the kind of quiet, cool, green place Pavan dreams of eventually settling down in.' },
+    { name: 'Mysore',        x: 35, y: 58, type: 'culture',    note: 'Rich in Karnataka heritage and royal history — fits Pavan\'s love for Indian traditions and culture.' },
+    { name: 'Goa',           x: 30, y: 55, type: 'nature',     note: 'Coastal calm rather than party scene — Pavan prefers nature and quiet over nightlife, even in places known for it.' },
+    { name: 'Cochi',         x: 33, y: 66, type: 'nature',     note: 'Backwaters and coastal charm in Kerala — peaceful, green, and far from crowds.' },
+    { name: 'Rameswaram',    x: 42, y: 70, type: 'spiritual',  note: 'One of the holiest temple towns in India — on Pavan\'s must-visit list at least once in his life.' },
+    { name: 'Mathura',       x: 47, y: 40, type: 'spiritual',  note: 'Birthplace of Lord Krishna — deeply meaningful to Pavan given his devotion to Krishna.' },
+    { name: 'Vrindavan',     x: 49, y: 39, type: 'spiritual',  note: 'Where Krishna spent his childhood — a place Pavan feels pulled toward spiritually.' },
+    { name: 'Dwaraka',       x: 24, y: 46, type: 'spiritual',  note: 'Krishna\'s legendary kingdom by the sea — another essential stop on Pavan\'s spiritual journey.' },
+    { name: 'Ayodhya',       x: 51, y: 36, type: 'spiritual',  note: 'Sacred to the Ramayana — ties into Pavan\'s deep love for Indian mythology.' },
+    { name: 'Araku Valley',  x: 56, y: 60, type: 'nature',     note: 'Misty hills and coffee plantations in Andhra Pradesh — a nature escape close to home.' },
+    { name: 'India',         x: 44, y: 52, type: 'culture',    note: 'Home — and endlessly rich in the traditions, festivals, and history Pavan loves exploring.' },
+    { name: 'Japan',         x: 84, y: 42, type: 'travel',     note: 'A dream travel destination — a striking mix of tradition and futuristic technology.' },
+    { name: 'Europe',        x: 50, y: 28, type: 'travel',     note: 'On Pavan\'s world tour wishlist — history, architecture, and culture in one place.' },
+    { name: 'USA',           x: 16, y: 34, type: 'travel',     note: 'Part of Pavan\'s long-term travel and career dreams — open to settling abroad too.' },
+    { name: 'Canada',        x: 14, y: 24, type: 'travel',     note: 'Cool climates and nature — fits Pavan\'s love for cooler weather over heat.' },
+  ];
+
+  const TYPE_META = {
+    spiritual: { color: '#a78bfa', label: 'Spiritual' },
+    nature:    { color: '#34d399', label: 'Nature & Hills' },
+    culture:   { color: '#fbbf24', label: 'Culture' },
+    travel:    { color: '#06b6d4', label: 'World Tour Dream' },
+  };
+
+  let panel, canvas, ctx, bound = false;
+
+  /* ── Trigger button (place this wherever you want it, e.g. sidebar) ── */
+  function buildTrigger() {
+    const btn = document.createElement('button');
+    btn.id = 'dreamMapTrigger';
+    btn.className = 'portbtn';
+    btn.innerHTML = `
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+      Dream Map
+    `;
+    btn.addEventListener('click', openDreamMap);
+
+    // Attach next to the existing welcome-message button row if present,
+    // otherwise just append to body as a floating fallback.
+    const target = document.querySelector('#starters') || document.body;
+    target.appendChild(btn);
+  }
+
+  /* ── Build panel DOM ── */
+  function buildPanel() {
+    panel = document.createElement('div');
+    panel.id = 'dreamMapPanel';
+    panel.innerHTML = `
+      <canvas class="dm-stars" id="dmStars"></canvas>
+      <div class="dm-header">
+        <div class="dm-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          Pavan's Dream Destination Map
+        </div>
+        <button id="dmCloseBtn" class="dm-close">✕</button>
+      </div>
+      <div class="dm-legend">
+        ${Object.entries(TYPE_META).map(([k, m]) => `
+          <div class="dm-legend-item">
+            <span class="dm-legend-dot" style="background:${m.color};box-shadow:0 0 8px ${m.color}"></span>
+            ${m.label}
+          </div>`).join('')}
+      </div>
+      <div class="dm-map" id="dmMap">
+        ${DESTINATIONS.map((d, i) => `
+          <div class="dm-pin" data-i="${i}" style="left:${d.x}%; top:${d.y}%; --pin-color:${TYPE_META[d.type].color}">
+            <span class="dm-pin-dot"></span>
+            <span class="dm-pin-label">${d.name}</span>
+          </div>`).join('')}
+      </div>
+      <div class="dm-info" id="dmInfo">
+        <div class="dm-info-empty">Tap a pin to see why this place matters to Pavan.</div>
+      </div>
+    `;
+    document.body.appendChild(panel);
+
+    canvas = document.getElementById('dmStars');
+    ctx = canvas.getContext('2d');
+  }
+
+  /* ── Styles ── */
+  function injectStyles() {
+    if (document.getElementById('dreamMapStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'dreamMapStyles';
+    style.textContent = `
+      #dreamMapPanel {
+        position: fixed; inset: 0; z-index: 99999;
+        background: linear-gradient(160deg, #020818, #050d2e 60%, #020610);
+        display: none; flex-direction: column;
+        font-family: 'Inter', sans-serif;
+      }
+      #dreamMapPanel.active { display: flex; }
+      .dm-stars { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+      .dm-header {
+        position: relative; z-index: 2;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 22px; border-bottom: 1px solid rgba(167,139,250,0.18);
+        background: rgba(0,0,0,0.25);
+      }
+      .dm-title {
+        display: flex; align-items: center; gap: 8px;
+        color: #e9d5ff; font-weight: 700; font-size: 0.95rem; letter-spacing: 0.3px;
+      }
+      .dm-close {
+        width: 32px; height: 32px; border-radius: 8px;
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        color: #94a3b8; cursor: pointer; font-size: 0.9rem;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.2s;
+      }
+      .dm-close:hover { background: rgba(244,63,94,0.15); color: #f43f5e; border-color: rgba(244,63,94,0.4); }
+      .dm-legend {
+        position: relative; z-index: 2;
+        display: flex; gap: 16px; flex-wrap: wrap;
+        padding: 10px 22px; font-size: 0.68rem; color: #94a3b8;
+        background: rgba(0,0,0,0.15);
+      }
+      .dm-legend-item { display: flex; align-items: center; gap: 6px; }
+      .dm-legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+      .dm-map {
+        position: relative; z-index: 2; flex: 1; margin: 10px 22px;
+        border: 1px solid rgba(167,139,250,0.15); border-radius: 16px;
+        background: radial-gradient(ellipse at 50% 40%, rgba(139,92,246,0.07), transparent 70%);
+        overflow: hidden;
+      }
+      .dm-pin {
+        position: absolute; transform: translate(-50%, -100%);
+        display: flex; flex-direction: column; align-items: center;
+        cursor: pointer; transition: transform 0.2s;
+      }
+      .dm-pin:hover { transform: translate(-50%, -100%) scale(1.15); }
+      .dm-pin.active .dm-pin-dot { animation: dmPinPulse 1.2s infinite; }
+      .dm-pin-dot {
+        width: 12px; height: 12px; border-radius: 50%;
+        background: var(--pin-color);
+        box-shadow: 0 0 10px var(--pin-color), 0 0 2px #fff inset;
+        border: 1.5px solid rgba(255,255,255,0.6);
+      }
+      @keyframes dmPinPulse {
+        0%,100% { box-shadow: 0 0 10px var(--pin-color), 0 0 0 0 var(--pin-color); }
+        50% { box-shadow: 0 0 16px var(--pin-color), 0 0 0 8px transparent; }
+      }
+      .dm-pin-label {
+        margin-top: 4px; font-size: 0.62rem; color: #e2e8f0;
+        background: rgba(0,0,0,0.5); padding: 2px 7px; border-radius: 100px;
+        white-space: nowrap; border: 1px solid rgba(255,255,255,0.08);
+      }
+      .dm-info {
+        position: relative; z-index: 2; margin: 0 22px 18px;
+        min-height: 70px; padding: 14px 18px; border-radius: 12px;
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(167,139,250,0.18);
+        color: #cbd5e1; font-size: 0.82rem; line-height: 1.6;
+        transition: all 0.25s;
+      }
+      .dm-info-empty { color: #64748b; font-size: 0.78rem; }
+      .dm-info-name { color: #e9d5ff; font-weight: 700; margin-bottom: 4px; display: block; }
+
+      @media (max-width: 640px) {
+        .dm-legend { gap: 10px; font-size: 0.62rem; }
+        .dm-pin-label { font-size: 0.56rem; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  /* ── Starfield background ── */
+  function startStars() {
+    let W, H, stars = [];
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      stars = [];
+      const n = Math.floor((W * H) / 4500);
+      for (let i = 0; i < n; i++) {
+        stars.push({
+          x: Math.random() * W, y: Math.random() * H,
+          r: Math.random() * 1.2 + 0.2,
+          a: Math.random(), da: (Math.random() - 0.5) * 0.01,
+        });
+      }
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      stars.forEach(s => {
+        s.a += s.da;
+        if (s.a <= 0.1 || s.a >= 0.9) s.da *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${s.a})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize', resize);
+    resize(); draw();
+  }
+
+  /* ── Pin click → show info ── */
+  function bindPins() {
+    document.querySelectorAll('.dm-pin').forEach(pin => {
+      pin.addEventListener('click', () => {
+        document.querySelectorAll('.dm-pin').forEach(p => p.classList.remove('active'));
+        pin.classList.add('active');
+        const d = DESTINATIONS[+pin.dataset.i];
+        const meta = TYPE_META[d.type];
+        document.getElementById('dmInfo').innerHTML = `
+          <span class="dm-info-name" style="color:${meta.color}">${d.name} — ${meta.label}</span>
+          ${d.note}
+        `;
+      });
+    });
+  }
+
+  /* ── Open / close ── */
+  function openDreamMap() {
+    if (!panel) {
+      injectStyles();
+      buildPanel();
+      startStars();
+      bindPins();
+      document.getElementById('dmCloseBtn').addEventListener('click', closeDreamMap);
+    }
+    panel.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDreamMap() {
+    panel.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  window.openDreamMap = openDreamMap;
+  window.closeDreamMap = closeDreamMap;
+
+  function init() {
+    buildTrigger();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
