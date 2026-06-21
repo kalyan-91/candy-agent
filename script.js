@@ -5590,6 +5590,8 @@ function generateGiftConstellation() {
         background: #020818;
         display: none; flex-direction: column;
         font-family: 'Inter', sans-serif;
+        touch-action: pan-x pan-y;
+        overscroll-behavior: contain;
       }
       #dreamMapPanel.active { display: flex; }
 
@@ -5750,9 +5752,22 @@ function generateGiftConstellation() {
       center: [22, 82],
       zoom: 4,
       zoomControl: true,
-      scrollWheelZoom: false,
+      scrollWheelZoom: false,   // disabled — use +/- buttons or pinch
+      doubleClickZoom: true,
+      touchZoom: true,
+      dragging: true,
       preferCanvas: false,
     });
+
+    // Allow scroll wheel zoom only when user clicks/focuses the map
+    const mapEl = document.getElementById('dmMapEl');
+    mapEl.addEventListener('click', () => leafletMap.scrollWheelZoom.enable());
+    mapEl.addEventListener('mouseleave', () => leafletMap.scrollWheelZoom.disable());
+
+    // Prevent panel scroll from propagating to page when map is open
+    document.getElementById('dreamMapPanel').addEventListener('wheel', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
 
     // CartoDB Voyager — modern, clean, Google Maps-like style
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
