@@ -5752,11 +5752,15 @@ function generateGiftConstellation() {
       center: [22, 82],
       zoom: 4,
       zoomControl: true,
-      scrollWheelZoom: false,   // disabled — use +/- buttons or pinch
+      scrollWheelZoom: false,
       doubleClickZoom: true,
       touchZoom: true,
       dragging: true,
-      preferCanvas: false,
+      zoomAnimation: true,
+      zoomAnimationThreshold: 4,
+      wheelDebounceTime: 20,
+      wheelPxPerZoomLevel: 80,
+      preferCanvas: true,
     });
 
     // Allow scroll wheel zoom only when user clicks/focuses the map
@@ -5796,9 +5800,9 @@ function generateGiftConstellation() {
       });
 
       L.marker([d.lat, d.lng], { icon }).addTo(leafletMap).on('click', () => {
-        leafletMap.flyTo([d.lat, d.lng], Math.max(leafletMap.getZoom(), 6), {
-          duration: 1.0,
-          easeLinearity: 0.3,
+        leafletMap.setView([d.lat, d.lng], Math.max(leafletMap.getZoom(), 6), {
+          animate: true,
+          duration: 0.3,
         });
         document.getElementById('dmInfo').innerHTML = `
           <span class="dm-info-name" style="color:${meta.color}">${meta.emoji} ${d.name} — ${meta.label}</span>
