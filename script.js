@@ -6156,20 +6156,14 @@ function generateGiftConstellation() {
 
 
 
-
 /* ============================================================
    Project DNA Lab — all-in-one JS module
-   Injects its own CSS + HTML, no external files needed.
-   Usage:
-     <div id="dna-lab-root"></div>
-     <script src="project-dna-lab.js"></script>
-     OR  ProjectDNALab.mount('#dna-lab-root');
+   Auto-mounts into Candy via a trigger button in #starters.
    ============================================================ */
 
 (function () {
   const ProjectDNALab = {};
 
-  // ---------- Data: edit / extend freely ----------
   const projects = [
     {
       name: "Student Management System",
@@ -6177,9 +6171,9 @@ function generateGiftConstellation() {
       colors: ["#fb7185", "#f43f5e"],
       genes: [
         { label: "Creativity",  score: 7, note: "Role-based dashboards for Admin, Faculty & Students with automated PDF marksheets." },
-        { label: "Complexity", score: 9, note: "Java Swing + MySQL + JDBC, OMR sheet scanning via OpenCV, automated grade computation." },
-        { label: "Impact",     score: 8, note: "Manages entire academic cycles — exam scanning to result publication, end-to-end." },
-        { label: "Innovation", score: 7, note: "OMR scanning pipeline combined with iText PDF reporting and ZXing barcode tooling." }
+        { label: "Complexity",  score: 9, note: "Java Swing + MySQL + JDBC, OMR sheet scanning via OpenCV, automated grade computation." },
+        { label: "Impact",      score: 8, note: "Manages entire academic cycles — exam scanning to result publication, end-to-end." },
+        { label: "Innovation",  score: 7, note: "OMR scanning pipeline combined with iText PDF reporting and ZXing barcode tooling." }
       ]
     },
     {
@@ -6188,9 +6182,9 @@ function generateGiftConstellation() {
       colors: ["#22d3ee", "#5ef0ff"],
       genes: [
         { label: "Creativity",  score: 7, note: "Clean Streamlit + Plotly dashboard turning raw stock data into visual insight." },
-        { label: "Complexity", score: 7, note: "Python, Pandas, Plotly with live alerts, audit logging, and secure multi-user login." },
-        { label: "Impact",     score: 9, note: "Live on Streamlit Cloud — plug-and-play analytics layer for real e-commerce businesses." },
-        { label: "Innovation", score: 7, note: "Sales velocity & demand trend modeling with CSV import/export and audit history." }
+        { label: "Complexity",  score: 7, note: "Python, Pandas, Plotly with live alerts, audit logging, and secure multi-user login." },
+        { label: "Impact",      score: 9, note: "Live on Streamlit Cloud — plug-and-play analytics layer for real e-commerce businesses." },
+        { label: "Innovation",  score: 7, note: "Sales velocity & demand trend modeling with CSV import/export and audit history." }
       ]
     },
     {
@@ -6199,9 +6193,9 @@ function generateGiftConstellation() {
       colors: ["#a78bfa", "#9d7bff"],
       genes: [
         { label: "Creativity",  score: 8, note: "Live drawing canvas where visitors test a real CNN in real time." },
-        { label: "Complexity", score: 8, note: "TensorFlow/Keras CNN with conv + pooling layers, trained on MNIST's 60,000 samples." },
-        { label: "Impact",     score: 7, note: "Deployed as an interactive public demo with instant predictions and confidence scores." },
-        { label: "Innovation", score: 8, note: "OpenCV preprocessing feeding a trained CNN directly from a browser canvas." }
+        { label: "Complexity",  score: 8, note: "TensorFlow/Keras CNN with conv + pooling layers, trained on MNIST's 60,000 samples." },
+        { label: "Impact",      score: 7, note: "Deployed as an interactive public demo with instant predictions and confidence scores." },
+        { label: "Innovation",  score: 8, note: "OpenCV preprocessing feeding a trained CNN directly from a browser canvas." }
       ]
     },
     {
@@ -6210,9 +6204,9 @@ function generateGiftConstellation() {
       colors: ["#f43f5e", "#ffd36e"],
       genes: [
         { label: "Creativity",  score: 7, note: "Executive-level BI report with genre, geography, and trend storytelling." },
-        { label: "Complexity", score: 6, note: "Power BI, DAX measures, and Power Query modeling across 5000+ titles." },
-        { label: "Impact",     score: 7, note: "Turns a flat CSV into a navigable content intelligence tool for decision-making." },
-        { label: "Innovation", score: 6, note: "Geographic production heatmap and Movies vs TV Shows trend analytics via DAX." }
+        { label: "Complexity",  score: 6, note: "Power BI, DAX measures, and Power Query modeling across 5000+ titles." },
+        { label: "Impact",      score: 7, note: "Turns a flat CSV into a navigable content intelligence tool for decision-making." },
+        { label: "Innovation",  score: 6, note: "Geographic production heatmap and Movies vs TV Shows trend analytics via DAX." }
       ]
     },
     {
@@ -6221,9 +6215,9 @@ function generateGiftConstellation() {
       colors: ["#34d399", "#22d3ee"],
       genes: [
         { label: "Creativity",  score: 6, note: "HR decision-support dashboard built on top of a predictive ML pipeline." },
-        { label: "Complexity", score: 9, note: "Logistic Regression, Random Forest, XGBoost with SMOTE oversampling across 35+ features." },
-        { label: "Impact",     score: 8, note: "Surfaces real attrition drivers — overtime, satisfaction, tenure — for HR action." },
-        { label: "Innovation", score: 7, note: "Feature importance analysis paired with a live Power BI prediction dashboard." }
+        { label: "Complexity",  score: 9, note: "Logistic Regression, Random Forest, XGBoost with SMOTE oversampling across 35+ features." },
+        { label: "Impact",      score: 8, note: "Surfaces real attrition drivers — overtime, satisfaction, tenure — for HR action." },
+        { label: "Innovation",  score: 7, note: "Feature importance analysis paired with a live Power BI prediction dashboard." }
       ]
     },
     {
@@ -6232,143 +6226,174 @@ function generateGiftConstellation() {
       colors: ["#8b5cf6", "#22d3ee"],
       genes: [
         { label: "Creativity",  score: 10, note: "Space-themed AI assistant that converses naturally as Pavan's digital representative." },
-        { label: "Complexity", score: 8,  note: "HTML/CSS/JS frontend wired to AI APIs with real-time response handling, deployed on Netlify." },
-        { label: "Impact",     score: 9,  note: "Acts as a living, talking portfolio — visitors explore projects through conversation, not clicks." },
-        { label: "Innovation", score: 10, note: "Portfolio navigation, project explanations, and guidance delivered through live AI dialogue." }
+        { label: "Complexity",  score: 8,  note: "HTML/CSS/JS frontend wired to AI APIs with real-time response handling, deployed on Netlify." },
+        { label: "Impact",      score: 9,  note: "Acts as a living, talking portfolio — visitors explore projects through conversation, not clicks." },
+        { label: "Innovation",  score: 10, note: "Portfolio navigation, project explanations, and guidance delivered through live AI dialogue." }
       ]
     }
   ];
 
-  // ---------- CSS (injected once) ----------
+  /* ── CSS ── */
   const CSS = `
-  .dnalab{
+  /* ── Fullscreen overlay ── */
+  #dnalabOverlay {
+    position: fixed; inset: 0; z-index: 99999;
+    background: rgba(0,0,0,0.82); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  #dnalabOverlay.active { display: flex; }
+
+  /* ── Inner scrollable container ── */
+  #dnalabOverlay .dnalab-outer {
+    width: min(820px, 100%); max-height: 90vh;
+    overflow-y: auto; border-radius: 20px;
+    scrollbar-width: thin; scrollbar-color: rgba(94,240,255,.3) transparent;
+  }
+  #dnalabOverlay .dnalab-outer::-webkit-scrollbar { width: 4px; }
+  #dnalabOverlay .dnalab-outer::-webkit-scrollbar-thumb { background: rgba(94,240,255,.3); border-radius: 4px; }
+
+  /* ── Close button ── */
+  #dnalabClose {
+    position: fixed; top: 18px; right: 22px; z-index: 100000;
+    width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+    color: #94a3b8; cursor: pointer; font-size: 1rem;
+    display: none; align-items: center; justify-content: center; transition: all .2s;
+  }
+  #dnalabClose.active { display: flex; }
+  #dnalabClose:hover { background: rgba(244,63,94,.15); color: #f43f5e; border-color: rgba(244,63,94,.4); }
+
+  /* ── Widget styles ── */
+  .dnalab {
     --bg:#05060f; --panel:#0b0e1f; --panel-edge:rgba(124,140,255,.18);
     --cyan:#5ef0ff; --violet:#9d7bff; --pink:#ff6fb5; --gold:#ffd36e;
     --text:#eaf0ff; --dim:#7c87b8;
-    position:relative; font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-    color:var(--text); padding:40px 20px; border-radius:24px;
-    background:radial-gradient(ellipse at 50% -10%, #161b3a 0%, var(--bg) 60%);
-    overflow:hidden;
+    position: relative; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: var(--text); padding: 40px 24px 32px;
+    border-radius: 20px;
+    background: radial-gradient(ellipse at 50% -10%, #161b3a 0%, var(--bg) 60%);
+    overflow: hidden;
   }
-  .dnalab *{box-sizing:border-box;}
-  .dnalab canvas.dnalab-stars{position:absolute;inset:0;z-index:0;pointer-events:none;}
-  .dnalab .dnalab-wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;}
+  .dnalab * { box-sizing: border-box; }
+  .dnalab canvas.dnalab-stars { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .dnalab .dnalab-wrap { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
 
-  .dnalab-header{text-align:center;margin-bottom:28px;}
-  .dnalab-header h1{
-    margin:0;font-size:1.7rem;letter-spacing:.5px;
-    background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+  .dnalab-header { text-align: center; margin-bottom: 28px; }
+  .dnalab-header h1 {
+    margin: 0; font-size: 1.65rem; letter-spacing: .5px;
+    background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .dnalab-header p{color:var(--dim);margin:6px 0 0;font-size:.85rem;}
+  .dnalab-header p { color: var(--dim); margin: 6px 0 0; font-size: .84rem; }
 
-  .dnalab-selector{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:26px;}
-  .dnalab-selector button{
-    background:var(--panel);border:1px solid var(--panel-edge);color:var(--dim);
-    padding:8px 16px;border-radius:999px;cursor:pointer;font-size:.8rem;
-    transition:all .25s ease;
+  .dnalab-selector { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .dnalab-selector button {
+    background: var(--panel); border: 1px solid var(--panel-edge); color: var(--dim);
+    padding: 7px 15px; border-radius: 999px; cursor: pointer; font-size: .78rem;
+    transition: all .25s ease; font-family: inherit;
   }
-  .dnalab-selector button:hover{color:var(--text);border-color:var(--cyan);}
-  .dnalab-selector button.active{
-    color:#05060f;font-weight:600;
-    background:linear-gradient(90deg,var(--cyan),var(--violet));
-    border-color:transparent; box-shadow:0 0 18px rgba(94,240,255,.4);
+  .dnalab-selector button:hover { color: var(--text); border-color: var(--cyan); }
+  .dnalab-selector button.active {
+    color: #05060f; font-weight: 600;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    border-color: transparent; box-shadow: 0 0 18px rgba(94,240,255,.4);
   }
 
-  .dnalab-card{
-    background:linear-gradient(180deg, rgba(20,24,48,.9), rgba(10,12,26,.9));
-    border:1px solid var(--panel-edge); border-radius:20px; padding:30px 30px 26px;
-    box-shadow:0 0 40px rgba(80,90,200,.12), inset 0 0 60px rgba(80,90,200,.04);
-    position:relative; overflow:hidden;
+  .dnalab-card {
+    background: linear-gradient(180deg, rgba(20,24,48,.9), rgba(10,12,26,.9));
+    border: 1px solid var(--panel-edge); border-radius: 18px; padding: 28px 26px 22px;
+    box-shadow: 0 0 40px rgba(80,90,200,.12), inset 0 0 60px rgba(80,90,200,.04);
+    position: relative; overflow: hidden;
   }
-  .dnalab-card::before{
-    content:"";position:absolute;top:-60%;left:-20%;width:140%;height:200%;
-    background:radial-gradient(circle, rgba(124,140,255,.08), transparent 60%);
-    animation:dnalabDrift 14s linear infinite; pointer-events:none;
+  .dnalab-card::before {
+    content: ""; position: absolute; top: -60%; left: -20%; width: 140%; height: 200%;
+    background: radial-gradient(circle, rgba(124,140,255,.08), transparent 60%);
+    animation: dnalabDrift 14s linear infinite; pointer-events: none;
   }
-  @keyframes dnalabDrift{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes dnalabDrift { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .dnalab-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;position:relative;z-index:2;}
-  .dnalab-card-top h2{margin:0;font-size:1.25rem;}
-  .dnalab-card-top .dnalab-tag{font-size:.7rem;color:var(--dim);letter-spacing:1px;text-transform:uppercase;}
-  .dnalab-badge{
-    width:46px;height:46px;border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,.25), transparent 60%),
-               linear-gradient(135deg,var(--cyan),var(--violet));
-    display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-    box-shadow:0 0 22px rgba(94,240,255,.35);
-    animation:dnalabPulse 2.4s ease-in-out infinite;
+  .dnalab-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; position: relative; z-index: 2; }
+  .dnalab-card-top h2 { margin: 0; font-size: 1.2rem; }
+  .dnalab-card-top .dnalab-tag { font-size: .68rem; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .dnalab-badge {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.25), transparent 60%),
+                linear-gradient(135deg, var(--cyan), var(--violet));
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    box-shadow: 0 0 22px rgba(94,240,255,.35); flex-shrink: 0;
+    animation: dnalabPulse 2.4s ease-in-out infinite;
   }
-  @keyframes dnalabPulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+  @keyframes dnalabPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
-  .dnalab-strand{position:relative;z-index:2;}
-  .dnalab-gene{
-    display:grid;grid-template-columns:120px 1fr 50px;align-items:center;
-    gap:14px;margin-bottom:16px;cursor:pointer;position:relative;
+  .dnalab-strand { position: relative; z-index: 2; }
+  .dnalab-gene {
+    display: grid; grid-template-columns: 110px 1fr 48px;
+    align-items: center; gap: 12px; margin-bottom: 14px;
+    cursor: pointer; position: relative;
   }
-  .dnalab-gene-label{font-size:.85rem;color:var(--dim);font-weight:500;transition:color .2s;}
-  .dnalab-gene:hover .dnalab-gene-label{color:var(--text);}
+  .dnalab-gene-label { font-size: .82rem; color: var(--dim); font-weight: 500; transition: color .2s; }
+  .dnalab-gene:hover .dnalab-gene-label { color: var(--text); }
 
-  .dnalab-track{
-    height:14px;border-radius:8px;background:rgba(255,255,255,.05);
-    position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.06);
+  .dnalab-track {
+    height: 13px; border-radius: 8px; background: rgba(255,255,255,.05);
+    position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.06);
   }
-  .dnalab-ticks{position:absolute;inset:0;display:flex;}
-  .dnalab-ticks span{flex:1;border-right:1px solid rgba(255,255,255,.04);}
-  .dnalab-ticks span:last-child{border-right:none;}
+  .dnalab-ticks { position: absolute; inset: 0; display: flex; }
+  .dnalab-ticks span { flex: 1; border-right: 1px solid rgba(255,255,255,.04); }
+  .dnalab-ticks span:last-child { border-right: none; }
 
-  .dnalab-fill{
-    position:absolute;top:0;left:0;height:100%;width:0%;border-radius:8px;
-    background:linear-gradient(90deg, var(--barA), var(--barB));
-    box-shadow:0 0 14px var(--barA);
-    transition:width 1.1s cubic-bezier(.2,.8,.2,1);
+  .dnalab-fill {
+    position: absolute; top: 0; left: 0; height: 100%; width: 0%; border-radius: 8px;
+    background: linear-gradient(90deg, var(--barA), var(--barB));
+    box-shadow: 0 0 14px var(--barA);
+    transition: width 1.1s cubic-bezier(.2,.8,.2,1);
   }
-  .dnalab-fill::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
-    width:30%; animation:dnalabShine 2.6s ease-in-out infinite;
+  .dnalab-fill::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    width: 30%; animation: dnalabShine 2.6s ease-in-out infinite;
   }
-  @keyframes dnalabShine{ 0%{transform:translateX(-120%);} 100%{transform:translateX(420%);} }
+  @keyframes dnalabShine { 0% { transform: translateX(-120%); } 100% { transform: translateX(420%); } }
 
-  .dnalab-gene-score{font-size:.85rem;font-weight:700;text-align:right;color:var(--text);font-variant-numeric:tabular-nums;}
+  .dnalab-gene-score { font-size: .82rem; font-weight: 700; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
 
-  .dnalab-tooltip{
-    position:absolute;bottom:calc(100% + 8px);left:0;
-    background:#11142a;border:1px solid var(--panel-edge);
-    color:var(--text);font-size:.72rem;padding:8px 12px;border-radius:10px;
-    width:max-content;max-width:240px;opacity:0;pointer-events:none;
-    transform:translateY(6px); transition:opacity .2s, transform .2s; z-index:5;
-    box-shadow:0 6px 20px rgba(0,0,0,.4);
+  .dnalab-tooltip {
+    position: absolute; bottom: calc(100% + 8px); left: 0;
+    background: #11142a; border: 1px solid var(--panel-edge);
+    color: var(--text); font-size: .7rem; padding: 8px 12px; border-radius: 10px;
+    width: max-content; max-width: 230px; opacity: 0; pointer-events: none;
+    transform: translateY(6px); transition: opacity .2s, transform .2s; z-index: 5;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4); line-height: 1.5;
   }
-  .dnalab-gene:hover .dnalab-tooltip{opacity:1;transform:translateY(0);}
+  .dnalab-gene:hover .dnalab-tooltip { opacity: 1; transform: translateY(0); }
 
-  .dnalab-summary{
-    margin-top:24px;display:flex;justify-content:space-between;align-items:center;
-    border-top:1px solid var(--panel-edge);padding-top:18px;position:relative;z-index:2;
+  .dnalab-summary {
+    margin-top: 22px; display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--panel-edge); padding-top: 16px; position: relative; z-index: 2;
   }
-  .dnalab-avg-label{font-size:.75rem;color:var(--dim);}
-  .dnalab-avg-val{
-    font-size:1.6rem;font-weight:700;
-    background:linear-gradient(90deg,var(--cyan),var(--pink));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+  .dnalab-avg-label { font-size: .72rem; color: var(--dim); }
+  .dnalab-avg-val {
+    font-size: 1.55rem; font-weight: 700;
+    background: linear-gradient(90deg, var(--cyan), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .dnalab-dna-icon{display:flex;gap:3px;align-items:center;}
-  .dnalab-dna-icon span{width:6px;height:6px;border-radius:50%;background:var(--violet);animation:dnalabBob 1.8s ease-in-out infinite;}
-  .dnalab-dna-icon span:nth-child(2){animation-delay:.2s;background:var(--cyan);}
-  .dnalab-dna-icon span:nth-child(3){animation-delay:.4s;background:var(--pink);}
-  .dnalab-dna-icon span:nth-child(4){animation-delay:.6s;background:var(--gold);}
-  @keyframes dnalabBob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+  .dnalab-dna-icon { display: flex; gap: 3px; align-items: center; }
+  .dnalab-dna-icon span { width: 6px; height: 6px; border-radius: 50%; background: var(--violet); animation: dnalabBob 1.8s ease-in-out infinite; }
+  .dnalab-dna-icon span:nth-child(2) { animation-delay: .2s; background: var(--cyan); }
+  .dnalab-dna-icon span:nth-child(3) { animation-delay: .4s; background: var(--pink); }
+  .dnalab-dna-icon span:nth-child(4) { animation-delay: .6s; background: var(--gold); }
+  @keyframes dnalabBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
   `;
 
   function injectCSS() {
     if (document.getElementById('dnalab-style')) return;
-    const style = document.createElement('style');
-    style.id = 'dnalab-style';
-    style.textContent = CSS;
-    document.head.appendChild(style);
+    const s = document.createElement('style');
+    s.id = 'dnalab-style';
+    s.textContent = CSS;
+    document.head.appendChild(s);
   }
 
-  // ---------- HTML shell ----------
   function shellHTML() {
     return `
       <div class="dnalab">
@@ -6397,28 +6422,24 @@ function generateGiftConstellation() {
             </div>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
   }
 
-  // ---------- Mount logic ----------
-  ProjectDNALab.mount = function (selector, customProjects) {
+  ProjectDNALab.mount = function (selector) {
     injectCSS();
     const root = typeof selector === 'string' ? document.querySelector(selector) : selector;
-    if (!root) { console.error('ProjectDNALab: mount target not found'); return; }
+    if (!root) return;
     root.innerHTML = shellHTML();
 
-    const data = customProjects || projects;
     let active = 0;
-
-    const selEl = root.querySelector('.dnalab-selector');
+    const selEl   = root.querySelector('.dnalab-selector');
     const strandEl = root.querySelector('.dnalab-strand');
-    const titleEl = root.querySelector('.dnalab-title');
-    const tagEl = root.querySelector('.dnalab-tag');
-    const avgEl = root.querySelector('.dnalab-avg-val');
-    const canvas = root.querySelector('.dnalab-stars');
+    const titleEl  = root.querySelector('.dnalab-title');
+    const tagEl    = root.querySelector('.dnalab-tag');
+    const avgEl    = root.querySelector('.dnalab-avg-val');
+    const canvas   = root.querySelector('.dnalab-stars');
 
-    data.forEach((p, i) => {
+    projects.forEach((p, i) => {
       const btn = document.createElement('button');
       btn.textContent = p.name;
       if (i === 0) btn.classList.add('active');
@@ -6432,10 +6453,10 @@ function generateGiftConstellation() {
     });
 
     function render() {
-      const p = data[active];
+      const p = projects[active];
       titleEl.textContent = p.name;
-      tagEl.textContent = p.tag;
-      strandEl.innerHTML = '';
+      tagEl.textContent   = p.tag;
+      strandEl.innerHTML  = '';
 
       p.genes.forEach(g => {
         const row = document.createElement('div');
@@ -6449,36 +6470,32 @@ function generateGiftConstellation() {
             <div class="dnalab-fill" data-target="${g.score * 10}"></div>
           </div>
           <div class="dnalab-gene-score">${g.score}/10</div>
-          <div class="dnalab-tooltip">${g.note}</div>
-        `;
+          <div class="dnalab-tooltip">${g.note}</div>`;
         strandEl.appendChild(row);
       });
 
-      const avg = Math.round(p.genes.reduce((a, g) => a + g.score, 0) / p.genes.length * 10);
+      const avg = Math.round(projects[active].genes.reduce((a, g) => a + g.score, 0) / projects[active].genes.length * 10);
       avgEl.textContent = avg + '%';
 
       requestAnimationFrame(() => {
-        const fills = strandEl.querySelectorAll('.dnalab-fill');
-        fills.forEach((f, i) => {
+        strandEl.querySelectorAll('.dnalab-fill').forEach((f, i) => {
           setTimeout(() => { f.style.width = f.dataset.target + '%'; }, i * 140);
         });
       });
     }
 
     render();
-    startStarfield(canvas);
+    startStarfield(canvas, root.querySelector('.dnalab'));
   };
 
-  // ---------- Starfield ----------
-  function startStarfield(canvas) {
+  function startStarfield(canvas, parent) {
     const ctx = canvas.getContext('2d');
     function resize() {
-      canvas.width = canvas.parentElement.parentElement.offsetWidth;
-      canvas.height = canvas.parentElement.parentElement.offsetHeight;
+      canvas.width  = parent.offsetWidth;
+      canvas.height = parent.offsetHeight;
     }
     resize();
     window.addEventListener('resize', resize);
-
     const stars = Array.from({ length: 120 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -6486,14 +6503,12 @@ function generateGiftConstellation() {
       s: Math.random() * 0.6 + 0.2,
       o: Math.random()
     }));
-
     function loop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       stars.forEach(st => {
         st.o += st.s * 0.01;
-        const alpha = Math.abs(Math.sin(st.o));
         ctx.beginPath();
-        ctx.fillStyle = `rgba(220,230,255,${alpha * 0.8})`;
+        ctx.fillStyle = `rgba(220,230,255,${Math.abs(Math.sin(st.o)) * 0.8})`;
         ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
         ctx.fill();
       });
@@ -6502,6 +6517,78 @@ function generateGiftConstellation() {
     loop();
   }
 
-  // Expose globally
+  /* ══════════════════════════════════════════════════════
+     AUTO-INJECT into Candy: overlay + close btn + trigger
+  ══════════════════════════════════════════════════════ */
+  function buildOverlay() {
+    if (document.getElementById('dnalabOverlay')) return;
+
+    /* close button */
+    const closeBtn = document.createElement('button');
+    closeBtn.id = 'dnalabClose';
+    closeBtn.textContent = '✕';
+    closeBtn.title = 'Close DNA Lab';
+    document.body.appendChild(closeBtn);
+
+    /* overlay */
+    const overlay = document.createElement('div');
+    overlay.id = 'dnalabOverlay';
+    overlay.innerHTML = '<div class="dnalab-outer" id="dnalabMount"></div>';
+    document.body.appendChild(overlay);
+
+    /* close handlers */
+    closeBtn.addEventListener('click', closeDNALab);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeDNALab(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDNALab(); });
+  }
+
+  function openDNALab() {
+    buildOverlay();
+    const overlay  = document.getElementById('dnalabOverlay');
+    const closeBtn = document.getElementById('dnalabClose');
+    const mount    = document.getElementById('dnalabMount');
+
+    /* mount fresh each time so bars animate in */
+    ProjectDNALab.mount(mount);
+
+    overlay.classList.add('active');
+    closeBtn.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDNALab() {
+    const overlay  = document.getElementById('dnalabOverlay');
+    const closeBtn = document.getElementById('dnalabClose');
+    if (overlay)  overlay.classList.remove('active');
+    if (closeBtn) closeBtn.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  window.openDNALab  = openDNALab;
+  window.closeDNALab = closeDNALab;
   window.ProjectDNALab = ProjectDNALab;
+
+  /* ── Add trigger button into Candy's #starters row ── */
+  function addTriggerBtn() {
+    if (document.getElementById('dnalabTriggerBtn')) return;
+    const target = document.querySelector('#starters') || document.body;
+    const btn = document.createElement('button');
+    btn.id = 'dnalabTriggerBtn';
+    btn.className = 'portbtn';
+    btn.innerHTML = `
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/>
+        <path d="M12 8v4l3 3"/>
+      </svg>
+      Project DNA Lab`;
+    btn.addEventListener('click', openDNALab);
+    target.appendChild(btn);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addTriggerBtn);
+  } else {
+    addTriggerBtn();
+  }
+
 })();
