@@ -6596,10 +6596,12 @@ function generateGiftConstellation() {
 
 
 
+
 /* ============================================================
    CANDY AI — Sun & Moon System  (candy-sun-moon.js)
-   Drop this <script> tag anywhere in your Candy HTML.
-   It self-injects all CSS + HTML into the page.
+   FIXED VERSION: z-index raised well above app UI (was 798-803,
+   now 2147480000+) so it renders on top of the chat widget.
+   Drop this <script> tag at the end of <body>.
    ============================================================ */
 
 (function () {
@@ -6611,26 +6613,8 @@ function generateGiftConstellation() {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 800;
-      overflow: hidden;
-    }
-
-    /* ── Orbit Ring ── */
-    .csm-orbit {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 420px;
-      height: 420px;
-      border-radius: 50%;
-      border: 1px dashed rgba(99,179,237,0.12);
-      animation: csm-orbit-spin 60s linear infinite;
-      pointer-events: none;
-    }
-    @keyframes csm-orbit-spin {
-      from { transform: translate(-50%,-50%) rotate(0deg); }
-      to   { transform: translate(-50%,-50%) rotate(360deg); }
+      z-index: 2147480000;
+      overflow: visible;
     }
 
     /* ── Shared Body ── */
@@ -6647,6 +6631,7 @@ function generateGiftConstellation() {
       justify-content: center;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      z-index: 2147480010;
     }
     .csm-body:hover { transform: scale(1.18); }
     .csm-body:active { transform: scale(0.96); }
@@ -6689,24 +6674,18 @@ function generateGiftConstellation() {
 
     /* ── Solar Flare Rays ── */
     .csm-ray {
-      position: absolute;
+      position: fixed;
       width: 2px;
       border-radius: 2px;
       background: linear-gradient(to top, transparent, rgba(255,200,80,0.9));
       transform-origin: bottom center;
       animation: csm-ray-flicker 3s ease-in-out infinite;
+      z-index: 2147480005;
+      pointer-events: none;
     }
     @keyframes csm-ray-flicker {
-      0%,100% { opacity: 0.6; transform: scaleY(1) rotate(var(--r)); }
-      50%      { opacity: 1;   transform: scaleY(1.3) rotate(var(--r)); }
-    }
-
-    /* ── Moon Crater Dots ── */
-    .csm-crater {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.12);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+      0%,100% { opacity: 0.6; transform: rotate(var(--r)) scaleY(1); }
+      50%      { opacity: 1;   transform: rotate(var(--r)) scaleY(1.3); }
     }
 
     /* ── Particle Canvas ── */
@@ -6714,7 +6693,7 @@ function generateGiftConstellation() {
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 801;
+      z-index: 2147480001;
     }
 
     /* ── Panel Base ── */
@@ -6722,6 +6701,7 @@ function generateGiftConstellation() {
       position: fixed;
       right: 100px;
       width: 320px;
+      max-width: calc(100vw - 20px);
       border-radius: 20px;
       backdrop-filter: blur(24px) saturate(1.6);
       -webkit-backdrop-filter: blur(24px) saturate(1.6);
@@ -6729,7 +6709,7 @@ function generateGiftConstellation() {
       padding: 0;
       overflow: hidden;
       pointer-events: all;
-      z-index: 850;
+      z-index: 2147480020;
       transform: translateX(30px) scale(0.92);
       opacity: 0;
       transition: opacity 0.35s cubic-bezier(0.34,1.3,0.64,1), transform 0.35s cubic-bezier(0.34,1.3,0.64,1);
@@ -6753,7 +6733,6 @@ function generateGiftConstellation() {
       box-shadow: 0 8px 40px rgba(80,50,255,0.35), 0 0 0 1px rgba(120,80,255,0.15), inset 0 0 60px rgba(60,30,200,0.05);
     }
 
-    /* ── Panel Header ── */
     .csm-panel-header {
       padding: 18px 20px 14px;
       display: flex;
@@ -6805,10 +6784,8 @@ function generateGiftConstellation() {
     }
     .csm-panel-close:hover { background: rgba(255,80,80,0.2); color: #ff8080; }
 
-    /* ── Panel Body ── */
     .csm-panel-body { padding: 16px 20px 20px; }
 
-    /* ── Energy Bar ── */
     .csm-energy-row {
       display: flex; align-items: center; gap: 10px;
       margin-bottom: 14px;
@@ -6835,7 +6812,6 @@ function generateGiftConstellation() {
       color: #ffa040; white-space: nowrap;
     }
 
-    /* ── Stats Grid ── */
     .csm-stats {
       display: grid; grid-template-columns: 1fr 1fr;
       gap: 8px; margin-bottom: 14px;
@@ -6859,7 +6835,6 @@ function generateGiftConstellation() {
     #csm-sun-panel .csm-stat-num { color: #ffb040; }
     #csm-moon-panel .csm-stat-num { color: #a090ff; }
 
-    /* ── Insight Cards ── */
     .csm-insight {
       border-radius: 12px;
       padding: 11px 14px;
@@ -6890,7 +6865,6 @@ function generateGiftConstellation() {
     #csm-sun-panel .csm-insight-tag { background: rgba(255,140,0,0.15); color: #ffaa50; }
     #csm-moon-panel .csm-insight-tag { background: rgba(120,80,255,0.15); color: #b0a0ff; }
 
-    /* ── Flare Button ── */
     .csm-action-btn {
       width: 100%; padding: 10px;
       border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
@@ -6919,7 +6893,6 @@ function generateGiftConstellation() {
       box-shadow: 0 0 20px rgba(80,50,220,0.3);
     }
 
-    /* ── Dream Stream (Moon specific) ── */
     .csm-dream-stream {
       border-radius: 12px;
       padding: 12px;
@@ -6949,12 +6922,11 @@ function generateGiftConstellation() {
     }
     @keyframes csm-blink { 50% { opacity: 0; } }
 
-    /* ── Hologram Ripple ── */
     .csm-ripple {
       position: fixed;
       border-radius: 50%;
       pointer-events: none;
-      z-index: 799;
+      z-index: 2147480004;
       transform: scale(0);
       opacity: 0.8;
       animation: csm-ripple-out 0.9s cubic-bezier(0.2,0.8,0.4,1) forwards;
@@ -6963,7 +6935,6 @@ function generateGiftConstellation() {
       to { transform: scale(6); opacity: 0; }
     }
 
-    /* ── Tooltip Label ── */
     .csm-tooltip {
       position: fixed;
       right: 96px;
@@ -6976,28 +6947,13 @@ function generateGiftConstellation() {
       pointer-events: none;
       opacity: 0; transition: opacity 0.2s;
       backdrop-filter: blur(12px);
+      z-index: 2147480015;
     }
     #csm-sun-tooltip { bottom: 134px; color: #ffaa50; }
     #csm-moon-tooltip { bottom: 214px; color: #b0a0ff; }
     #csm-sun:hover ~ #csm-sun-tooltip,
     #csm-sun-tooltip:hover { opacity: 1; }
 
-    /* ── Flare Burst ── */
-    .csm-flare-burst {
-      position: fixed;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 802;
-    }
-
-    /* ── Constellation Lines (Moon) ── */
-    .csm-constellation {
-      position: fixed;
-      pointer-events: none;
-      z-index: 799;
-    }
-
-    /* ── Scroll badge ── */
     .csm-badge {
       position: absolute;
       top: -4px; right: -4px;
@@ -7021,16 +6977,14 @@ function generateGiftConstellation() {
       #csm-sun-tooltip, #csm-moon-tooltip { display: none; }
     }
 
-    /* ── Orbitron Font ── */
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
 
-    /* ── Dark star field ── */
     .csm-star {
       position: fixed;
       border-radius: 50%;
       background: #fff;
       pointer-events: none;
-      z-index: 798;
+      z-index: 2147480002;
       animation: csm-star-twinkle var(--dur, 3s) ease-in-out infinite;
     }
     @keyframes csm-star-twinkle {
@@ -7111,7 +7065,6 @@ function generateGiftConstellation() {
 
   function spawnFlare(x, y) {
     spawnBurst(x, y, '#ffc050', 40);
-    // extra white sparks
     for (let i = 0; i < 12; i++) {
       const a = Math.random() * Math.PI * 2, s = 5 + Math.random() * 5;
       particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, size: 1, color: '#fff', alpha: 1, decay: 0.03, trail: [] });
@@ -7130,7 +7083,6 @@ function generateGiftConstellation() {
       p.trail.push({ x: p.x, y: p.y });
       if (p.trail.length > 6) p.trail.shift();
 
-      // trail
       p.trail.forEach((pt, i) => {
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, p.size * (i / p.trail.length) * 0.7, 0, Math.PI * 2);
@@ -7139,7 +7091,6 @@ function generateGiftConstellation() {
         ctx.fill();
       });
 
-      // particle
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
       ctx.fillStyle = p.color;
@@ -7149,7 +7100,7 @@ function generateGiftConstellation() {
 
       p.x  += p.vx;
       p.y  += p.vy;
-      p.vy += 0.04; // subtle gravity
+      p.vy += 0.04;
       p.alpha -= p.decay;
     });
     requestAnimationFrame(animateCanvas);
@@ -7182,26 +7133,30 @@ function generateGiftConstellation() {
   `;
   document.body.appendChild(sun);
 
-  // Ray decoration
-  const RAYS = 12;
-  for (let i = 0; i < RAYS; i++) {
-    const ray = document.createElement('div');
-    ray.className = 'csm-ray';
-    const angle = (i / RAYS) * 360;
-    const len = 10 + Math.random() * 12;
-    const rect = { bottom: 136, right: 40 };
-    ray.style.cssText = `
-      --r: ${angle}deg;
-      width: ${1 + Math.random()}px;
-      height: ${len}px;
-      bottom: ${136 + 32 + 4}px;
-      right: ${40 + 32 - 1}px;
-      transform-origin: bottom center;
-      transform: rotate(${angle}deg) translateY(-36px);
-      animation-delay: ${Math.random() * 2}s;
-    `;
-    document.body.appendChild(ray);
+  // Ray decoration — anchored relative to the sun element itself, computed after layout
+  function buildRays() {
+    const RAYS = 12;
+    const r = sun.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    for (let i = 0; i < RAYS; i++) {
+      const ray = document.createElement('div');
+      ray.className = 'csm-ray';
+      const angle = (i / RAYS) * 360;
+      const len = 10 + Math.random() * 12;
+      ray.style.cssText = `
+        --r: ${angle}deg;
+        width: ${1 + Math.random()}px;
+        height: ${len}px;
+        left: ${cx}px;
+        top: ${cy - r.height/2 - 4}px;
+        transform: rotate(${angle}deg) translateY(-36px);
+        animation-delay: ${Math.random() * 2}s;
+      `;
+      document.body.appendChild(ray);
+    }
   }
+  requestAnimationFrame(buildRays);
 
   /* ── 7. BUILD MOON ──────────────────────────────────────── */
   const moon = document.createElement('div');
@@ -7282,7 +7237,6 @@ function generateGiftConstellation() {
 
   /* ── 10. BUILD MOON PANEL ──────────────────────────────── */
   let dreamIdx = 0;
-  let dreamTimer = null;
 
   function buildMoonPanel() {
     const p = document.createElement('div');
@@ -7354,10 +7308,9 @@ function generateGiftConstellation() {
     setTimeout(() => createRipple(sun, 'rgba(255,220,80,0.4)'), 180);
     setTimeout(() => createRipple(sun, 'rgba(255,80,0,0.3)'), 360);
 
-    // screen flash
     const flash = document.createElement('div');
     flash.style.cssText = `
-      position:fixed;inset:0;z-index:803;
+      position:fixed;inset:0;z-index:2147480030;
       background:radial-gradient(circle at ${cx}px ${cy}px, rgba(255,200,80,0.18) 0%, transparent 70%);
       pointer-events:none;
       animation:csm-fade-in 0.1s ease,csm-flare-fade 0.6s ease 0.1s forwards;
@@ -7460,5 +7413,5 @@ function generateGiftConstellation() {
     }
   }, { passive: true });
 
-  console.log('🌞🌙 Candy AI Sun & Moon System — online');
+  console.log('🌞🌙 Candy AI Sun & Moon System — online (z-index fixed)');
 })();
