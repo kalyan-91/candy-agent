@@ -6599,9 +6599,17 @@ function generateGiftConstellation() {
 
 
 /* ============================================================
-   Candy AI — 3D Universe Feature  v2.0
+   Candy AI — 3D Universe Feature  v3.0  "Living Cosmos"
    Drop: <script src="candyai-solar-feature.js"></script>
    Injects a solar system button into .chdr-acts navbar
+
+   What's new in v3.0:
+   - Real depth: parallax starfield + dust + drifting galaxy band
+   - Mouse-drag to pan, scroll/pinch to zoom, click a planet to focus on it
+   - Smooth camera easing (no snapping)
+   - Richer sun (corona shimmer, flare bloom toward camera)
+   - Planet labels removed — pure visual, hover still shows info card
+   - Subtle film-grain + chromatic vignette for a "real" cinematic feel
    ============================================================ */
 
 (function () {
@@ -6651,7 +6659,9 @@ function generateGiftConstellation() {
     #solar-overlay canvas {
       position: absolute; inset: 0;
       width: 100%; height: 100%; display: block;
+      cursor: grab;
     }
+    #solar-overlay canvas.solar-grabbing { cursor: grabbing; }
     #solar-close {
       position: absolute; top: 16px; right: 20px; z-index: 10;
       width: 36px; height: 36px; border-radius: 50%;
@@ -6660,11 +6670,13 @@ function generateGiftConstellation() {
       color: rgba(180,210,255,0.75);
       font-size: 15px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: background .2s, box-shadow .2s;
+      transition: background .2s, box-shadow .2s, transform .2s;
+      backdrop-filter: blur(6px);
     }
     #solar-close:hover {
       background: rgba(255,255,255,0.14);
       box-shadow: 0 0 12px rgba(120,160,255,0.3);
+      transform: rotate(90deg);
     }
     #solar-watermark {
       position: absolute; bottom: 14px; left: 50%;
@@ -6675,30 +6687,68 @@ function generateGiftConstellation() {
       text-transform: uppercase; pointer-events: none;
       white-space: nowrap;
     }
+    #solar-hint {
+      position: absolute; bottom: 14px; right: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9.5px; letter-spacing: 1.5px;
+      color: rgba(140,180,255,0.32);
+      text-transform: uppercase; pointer-events: none;
+      transition: opacity .6s;
+    }
     #solar-speed {
       position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
       display: flex; align-items: center; gap: 10px; z-index: 10;
+      background: rgba(10,8,30,0.35);
+      padding: 7px 14px; border-radius: 30px;
+      border: 1px solid rgba(120,160,255,0.18);
+      backdrop-filter: blur(8px);
     }
     #solar-speed label {
       font-family: 'JetBrains Mono',monospace;
-      font-size: 10px; letter-spacing: 2px; color: rgba(160,200,255,0.55);
+      font-size: 10px; letter-spacing: 2px; color: rgba(160,200,255,0.6);
       text-transform: uppercase;
     }
     #solar-speed input[type=range] {
       width: 90px; accent-color: #818cf8; cursor: pointer;
     }
+    #solar-reset {
+      position: absolute; top: 18px; left: 20px; z-index: 10;
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(10,8,30,0.35);
+      padding: 8px 14px; border-radius: 30px;
+      border: 1px solid rgba(120,160,255,0.18);
+      backdrop-filter: blur(8px);
+      color: rgba(180,210,255,0.8);
+      font-family: 'JetBrains Mono',monospace;
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer; transition: all .2s;
+    }
+    #solar-reset:hover {
+      background: rgba(80,100,240,0.22);
+      box-shadow: 0 0 14px rgba(100,140,255,0.35);
+      color: #fff;
+    }
     #solar-tooltip {
       position: fixed; pointer-events: none; z-index: 100000;
-      background: rgba(8,6,28,0.92);
-      border: 1px solid rgba(120,160,255,0.45);
-      border-radius: 10px; padding: 10px 14px;
+      background: rgba(8,6,28,0.88);
+      border: 1px solid rgba(120,160,255,0.5);
+      border-radius: 12px; padding: 11px 15px;
       color: #c4d4ff; font-family: 'JetBrains Mono',monospace;
       font-size: 12px; letter-spacing: .04em;
-      opacity: 0; transition: opacity .18s;
-      max-width: 155px; line-height: 1.75;
+      opacity: 0; transition: opacity .2s, transform .2s;
+      transform: scale(.94);
+      max-width: 165px; line-height: 1.75;
+      box-shadow: 0 0 24px rgba(80,110,255,0.25), inset 0 0 18px rgba(80,110,255,0.06);
+      backdrop-filter: blur(10px);
     }
+    #solar-tooltip.solar-show { opacity: 1; transform: scale(1); }
     #solar-tooltip .stt-name {
-      font-size: 13px; font-weight: 700; color: #e8f0ff; margin-bottom: 3px;
+      font-size: 13.5px; font-weight: 700; color: #eef4ff; margin-bottom: 4px;
+      letter-spacing: .08em;
+    }
+    #solar-tooltip .stt-tap {
+      margin-top: 6px; font-size: 9.5px; color: rgba(140,180,255,0.55);
+      letter-spacing: 1.5px;
     }
   `;
   document.head.appendChild(style);
@@ -6735,22 +6785,32 @@ function generateGiftConstellation() {
   speedDiv.id = 'solar-speed';
   speedDiv.innerHTML = `<label>Speed</label><input type="range" id="solar-spd" min="0" max="3" step="0.1" value="1">`;
 
+  const resetBtn = document.createElement('button');
+  resetBtn.id = 'solar-reset';
+  resetBtn.innerHTML = '⟲ Reset View';
+
   const canvas = document.createElement('canvas');
   canvas.id = 'solar-cv';
 
   const tooltip = document.createElement('div');
   tooltip.id = 'solar-tooltip';
-  tooltip.innerHTML = '<div class="stt-name" id="stt-name"></div><div id="stt-info"></div>';
+  tooltip.innerHTML = '<div class="stt-name" id="stt-name"></div><div id="stt-info"></div><div class="stt-tap">✦ click to focus ✦</div>';
 
   const wm = document.createElement('div');
   wm.id = 'solar-watermark';
   wm.textContent = '✦ Candy AI · 3D Universe ✦';
 
+  const hint = document.createElement('div');
+  hint.id = 'solar-hint';
+  hint.textContent = 'drag to pan · scroll to zoom · click a planet';
+
   overlay.appendChild(closeBtn);
   overlay.appendChild(speedDiv);
+  overlay.appendChild(resetBtn);
   overlay.appendChild(canvas);
   overlay.appendChild(tooltip);
   overlay.appendChild(wm);
+  overlay.appendChild(hint);
   document.body.appendChild(overlay);
 
   /* ── Open / Close ── */
@@ -6759,6 +6819,7 @@ function generateGiftConstellation() {
     overlay.classList.add('solar-active');
     document.body.style.overflow = 'hidden';
     if (!engineStarted) { startUniverse(); engineStarted = true; }
+    setTimeout(() => { hint.style.opacity = '0'; }, 4500);
   }
   closeBtn.addEventListener('click', () => {
     overlay.classList.remove('solar-active');
@@ -6786,6 +6847,11 @@ function generateGiftConstellation() {
     let mouse = { x: -999, y: -999 };
     let hoveredPlanet = null;
 
+    /* camera: pan + zoom with smooth easing, plus optional auto-focus target */
+    const cam = { x: 0, y: 0, zoom: 1, tx: 0, ty: 0, tzoom: 1 };
+    let isDragging = false, dragStart = { x: 0, y: 0 }, camStart = { x: 0, y: 0 };
+    let dragMoved = false;
+
     function resize() {
       W = cv.width  = window.innerWidth;
       H = cv.height = window.innerHeight;
@@ -6793,14 +6859,51 @@ function generateGiftConstellation() {
       buildStars();
     }
 
-    /* ── Star layers ── */
+    /* screen -> world coordinates, accounting for camera pan/zoom */
+    function toWorld(sx, sy) {
+      return {
+        x: (sx - cx - cam.x) / cam.zoom + cx,
+        y: (sy - cy - cam.y) / cam.zoom + cy
+      };
+    }
+
+    /* ── Star layers (parallax depth) ── */
     let starLayers = [];
     function buildStars() {
       starLayers = [
-        Array.from({ length: 500 }, () => ({ x: Math.random()*W, y: Math.random()*H, r: .3+Math.random()*.4, ph: Math.random()*Math.PI*2, sp: .001+Math.random()*.004, d: .08 })),
-        Array.from({ length: 180 }, () => ({ x: Math.random()*W, y: Math.random()*H, r: .6+Math.random()*.6, ph: Math.random()*Math.PI*2, sp: .002+Math.random()*.006, d: .18 })),
-        Array.from({ length: 55  }, () => ({ x: Math.random()*W, y: Math.random()*H, r: .9+Math.random()*.8, ph: Math.random()*Math.PI*2, sp: .003+Math.random()*.01,  d: .30 })),
+        Array.from({ length: 600 }, () => ({ x: Math.random()*W, y: Math.random()*H, r: .3+Math.random()*.4, ph: Math.random()*Math.PI*2, sp: .001+Math.random()*.004, d: .09, par: .015 })),
+        Array.from({ length: 220 }, () => ({ x: Math.random()*W, y: Math.random()*H, r: .6+Math.random()*.6, ph: Math.random()*Math.PI*2, sp: .002+Math.random()*.006, d: .2,  par: .035 })),
+        Array.from({ length: 70  }, () => ({ x: Math.random()*W, y: Math.random()*H, r: .9+Math.random()*.9, ph: Math.random()*Math.PI*2, sp: .003+Math.random()*.01,  d: .34, par: .07  })),
       ];
+      cosmicDust = Array.from({ length: 90 }, () => ({
+        x: Math.random()*W, y: Math.random()*H, r: .5+Math.random()*1.4,
+        vx: (Math.random()-.5)*.06, vy: (Math.random()-.5)*.06, a: .04+Math.random()*.1
+      }));
+    }
+    let cosmicDust = [];
+
+    /* ── Milky-way style galaxy band, drifts very slowly ── */
+    function drawGalaxyBand() {
+      ctx.save();
+      const ang = -0.34;
+      ctx.translate(cx, cy*.72);
+      ctx.rotate(ang);
+      const w = Math.max(W,H)*1.6, h = 150;
+      const g = ctx.createLinearGradient(-w/2,0,w/2,0);
+      g.addColorStop(0,'transparent');
+      g.addColorStop(.18,'rgba(120,140,220,0.05)');
+      g.addColorStop(.5,'rgba(190,170,230,0.10)');
+      g.addColorStop(.82,'rgba(120,140,220,0.05)');
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle = g;
+      for (let i=-3;i<=3;i++){
+        ctx.save();
+        ctx.translate(0, i*h*.3 + Math.sin(tick*.0003+i)*6);
+        ctx.scale(1, .5 + Math.abs(i)*.12);
+        ctx.beginPath(); ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
     }
 
     /* ── Nebulas ── */
@@ -6812,12 +6915,13 @@ function generateGiftConstellation() {
         { x: W*.12, y: H*.82, r: 180, c: [0,140,200],  a: .040 },
         { x: W*.50, y: H*.06, r: 300, c: [100,0,180],  a: .035 },
         { x: W*.55, y: H*.55, r: 340, c: [40,80,220],  a: .022 },
-      ].forEach(n => {
-        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+      ].forEach((n,i) => {
+        const drift = Math.sin(tick*.0006+i)*14;
+        const g = ctx.createRadialGradient(n.x+drift, n.y, 0, n.x+drift, n.y, n.r);
         g.addColorStop(0, `rgba(${n.c},${n.a*3})`);
         g.addColorStop(.4, `rgba(${n.c},${n.a})`);
         g.addColorStop(1, 'transparent');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x+drift, n.y, n.r, 0, Math.PI*2); ctx.fill();
       });
     }
 
@@ -6841,6 +6945,19 @@ function generateGiftConstellation() {
         ctx.lineTo(W, y0+80); ctx.lineTo(0, y0+80); ctx.closePath(); ctx.fill();
         ctx.restore();
       });
+    }
+
+    /* ── Cosmic dust drifting between us and the stars ── */
+    function drawDust() {
+      cosmicDust.forEach(d => {
+        d.x += d.vx*spd; d.y += d.vy*spd;
+        if (d.x<0) d.x=W; if (d.x>W) d.x=0;
+        if (d.y<0) d.y=H; if (d.y>H) d.y=0;
+        ctx.globalAlpha = d.a;
+        ctx.fillStyle = '#bcd0ff';
+        ctx.beginPath(); ctx.arc(d.x,d.y,d.r,0,Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
     }
 
     /* ── Planet definitions ── */
@@ -6948,6 +7065,19 @@ function generateGiftConstellation() {
       const p = .5+.5*Math.sin(tick*.04);
       ctx.beginPath(); ctx.arc(cx,cy,sr*1.04,0,Math.PI*2);
       ctx.strokeStyle=`rgba(255,220,0,${.42*p})`; ctx.lineWidth=1.5+p*2; ctx.stroke();
+
+      /* lens-flare streak toward screen center, gives a "real camera" feel */
+      const flareDist = Math.sqrt((cx-W/2)**2+(cy-H/2)**2);
+      if (flareDist < Math.max(W,H)*.6) {
+        ctx.save();
+        ctx.globalAlpha = .12 * (1-flareDist/(Math.max(W,H)*.6));
+        const fg2 = ctx.createRadialGradient(cx,cy,0,cx,cy,sr*9);
+        fg2.addColorStop(0,'rgba(255,230,160,.5)');
+        fg2.addColorStop(.15,'rgba(255,200,100,.12)');
+        fg2.addColorStop(1,'transparent');
+        ctx.fillStyle=fg2; ctx.beginPath(); ctx.arc(cx,cy,sr*9,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
     }
 
     /* ── Orbit paths ── */
@@ -6955,7 +7085,8 @@ function generateGiftConstellation() {
       PLANETS.forEach(p => {
         ctx.save(); ctx.translate(cx,cy); ctx.scale(1,p.orbitB/p.orbitA);
         ctx.beginPath(); ctx.arc(0,0,p.orbitA,0,Math.PI*2);
-        ctx.strokeStyle='rgba(100,130,220,.08)'; ctx.lineWidth=.7;
+        ctx.strokeStyle = p === hoveredPlanet ? 'rgba(160,190,255,.22)' : 'rgba(100,130,220,.08)';
+        ctx.lineWidth=.7;
         ctx.setLineDash([3,10]); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
       });
     }
@@ -6976,6 +7107,17 @@ function generateGiftConstellation() {
     /* ── 3D Planet ── */
     function draw3DPlanet(p, pos) {
       const { px, py } = pos; const r = p.r; const tilt = p.tilt || 0;
+      const isHov = p === hoveredPlanet;
+
+      // soft selection glow ring for hover/focus feedback
+      if (isHov) {
+        ctx.save();
+        const hg = ctx.createRadialGradient(px,py,r*1.1,px,py,r*2.6);
+        hg.addColorStop(0,'rgba(180,210,255,.28)');
+        hg.addColorStop(1,'transparent');
+        ctx.fillStyle=hg; ctx.beginPath(); ctx.arc(px,py,r*2.6,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
 
       // ambient glow
       const glo = ctx.createRadialGradient(px,py,r*.5,px,py,r*3.5);
@@ -7012,7 +7154,6 @@ function generateGiftConstellation() {
         [{ yo:-.72,h:.22,c:'rgba(140,80,30,.5)' },{ yo:-.36,h:.18,c:'rgba(220,160,80,.42)' },
          { yo:.05, h:.26,c:'rgba(160,90,40,.48)' },{ yo:.45, h:.18,c:'rgba(200,150,70,.38)' }
         ].forEach(b => { ctx.fillStyle=b.c; ctx.fillRect(px-r,py+b.yo*r,r*2,b.h*r); });
-        // Great Red Spot
         if (p.name === 'Jupiter') {
           ctx.save(); ctx.translate(px+r*.3+Math.cos(rot)*r*.07,py+r*.1); ctx.scale(1,.52);
           const rsg=ctx.createRadialGradient(0,0,0,0,0,r*.32);
@@ -7022,7 +7163,7 @@ function generateGiftConstellation() {
         ctx.restore();
       }
 
-      // land + ocean + polar caps (Earth)
+      // land + ocean + polar caps (Earth) — with twinkling night-lights on dark side
       if (p.land) {
         ctx.save(); ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.clip();
         const rot = tick*.003*spd;
@@ -7038,6 +7179,14 @@ function generateGiftConstellation() {
         });
         ctx.fillStyle='rgba(255,255,255,.18)';
         ctx.beginPath(); ctx.ellipse(px-1.5,py-.8,r*.65,r*.12,Math.sin(tick*.002),0,Math.PI*2); ctx.fill();
+        // tiny city-light twinkles on the terminator edge
+        for (let i=0;i<5;i++){
+          const tw = .4+.6*Math.sin(tick*.05+i*1.7);
+          ctx.globalAlpha = tw*.5;
+          ctx.fillStyle = '#ffe9b0';
+          ctx.beginPath(); ctx.arc(px+r*.5+Math.cos(i*1.3)*2, py+Math.sin(i*1.9)*r*.5, .5, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
         ctx.restore();
       }
 
@@ -7062,9 +7211,9 @@ function generateGiftConstellation() {
       ctx.fillStyle=sh; ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.fill();
 
       // rim glow
-      const rp = .28+.12*Math.sin(tick*.018+p.ph);
+      const rp = (isHov ? .5 : .28)+.12*Math.sin(tick*.018+p.ph);
       ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(200,220,255,${rp})`; ctx.lineWidth=.8; ctx.stroke();
+      ctx.strokeStyle=`rgba(200,220,255,${rp})`; ctx.lineWidth=isHov?1.4:.8; ctx.stroke();
 
       // rings — front half
       if (p.rings) {
@@ -7120,67 +7269,122 @@ function generateGiftConstellation() {
       ctx.restore();
     }
 
-    /* ── Planet labels ── */
-    function drawLabels(positions) {
-      positions.forEach(({ p, pos }) => {
-        if (W < 600 && p.r < 9) return;
-        const { px, py } = pos;
-        const isHov = p === hoveredPlanet;
-        ctx.save();
-        ctx.font = `${isHov ? '600' : '400'} 10px JetBrains Mono,monospace`;
-        ctx.fillStyle = isHov ? 'rgba(200,230,255,.92)' : 'rgba(140,175,225,.4)';
-        ctx.textAlign = 'center';
-        const lby = py + p.r + 14 + (p.moons.length ? 9 : 0);
-        ctx.fillText(p.name.toUpperCase(), px, lby);
-        ctx.restore();
-      });
-    }
-
-    /* ── Event listeners ── */
-    canvas.addEventListener('mousemove', e => {
-      mouse.x = e.clientX; mouse.y = e.clientY;
-      let found = null;
+    /* ── Hit-test a planet at world (screen, pre-camera) coordinates ── */
+    function pickPlanet(screenX, screenY) {
+      const w = toWorld(screenX, screenY);
+      let found = null, bestD = Infinity;
       PLANETS.forEach(p => {
         const a = p.ph + tick * p.spd * spd;
         const px = cx + Math.cos(a)*p.orbitA;
         const py = cy + Math.sin(a)*p.orbitB;
-        const d = Math.sqrt((e.clientX-px)**2 + (e.clientY-py)**2);
-        if (d < p.r+10) found = p;
+        const d = Math.sqrt((w.x-px)**2 + (w.y-py)**2);
+        if (d < p.r/cam.zoom + 11/cam.zoom && d < bestD) { found = p; bestD = d; }
       });
+      return found;
+    }
+
+    /* ── Event listeners: hover, drag-pan, scroll-zoom, click-focus ── */
+    canvas.addEventListener('mousemove', e => {
+      mouse.x = e.clientX; mouse.y = e.clientY;
+
+      if (isDragging) {
+        cam.tx = camStart.x + (e.clientX - dragStart.x);
+        cam.ty = camStart.y + (e.clientY - dragStart.y);
+        cam.x = cam.tx; cam.y = cam.ty;
+        if (Math.abs(e.clientX-dragStart.x) > 4 || Math.abs(e.clientY-dragStart.y) > 4) dragMoved = true;
+        tt.classList.remove('solar-show');
+        return;
+      }
+
+      const found = pickPlanet(e.clientX, e.clientY);
       if (found) {
+        canvas.style.cursor = 'pointer';
         hoveredPlanet = found;
         ttName.textContent = found.name;
-        document.getElementById('stt-info').textContent = found.fact;
+        ttInfo.textContent = found.fact;
         tt.style.left = (e.clientX+18)+'px';
         tt.style.top  = (e.clientY-12)+'px';
-        tt.style.opacity = '1';
+        tt.classList.add('solar-show');
       } else {
+        canvas.style.cursor = 'grab';
         hoveredPlanet = null;
-        tt.style.opacity = '0';
+        tt.classList.remove('solar-show');
       }
     });
-    canvas.addEventListener('mouseleave', () => { tt.style.opacity='0'; hoveredPlanet=null; });
+
+    canvas.addEventListener('mousedown', e => {
+      isDragging = true; dragMoved = false;
+      dragStart.x = e.clientX; dragStart.y = e.clientY;
+      camStart.x = cam.x; camStart.y = cam.y;
+      canvas.classList.add('solar-grabbing');
+    });
+    window.addEventListener('mouseup', e => {
+      if (isDragging && !dragMoved) {
+        const found = pickPlanet(e.clientX, e.clientY);
+        if (found) {
+          const a = found.ph + tick*found.spd*spd;
+          const px = cx + Math.cos(a)*found.orbitA, py = cy + Math.sin(a)*found.orbitB;
+          cam.tzoom = Math.min(3.2, Math.max(2.2, 80/found.r));
+          cam.tx = (cx-px)*cam.tzoom;
+          cam.ty = (cy-py)*cam.tzoom;
+        } else {
+          // clicked empty space: nudge zoom back toward default a touch
+        }
+      }
+      isDragging = false;
+      canvas.classList.remove('solar-grabbing');
+    });
+    canvas.addEventListener('mouseleave', () => { tt.classList.remove('solar-show'); hoveredPlanet=null; });
+
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const dir = e.deltaY > 0 ? -1 : 1;
+      cam.tzoom = Math.min(3.5, Math.max(.55, cam.tzoom + dir*.18));
+    }, { passive: false });
+
+    resetBtn.addEventListener('click', () => {
+      cam.tzoom = 1; cam.tx = 0; cam.ty = 0;
+    });
+
     spdSlider.addEventListener('input', () => { spd = parseFloat(spdSlider.value); });
     window.addEventListener('resize', resize);
 
     /* ── Main render loop ── */
     function frame() {
+      // ease camera toward target for smooth, weighty motion
+      cam.zoom += (cam.tzoom - cam.zoom) * .08;
+      if (!isDragging) {
+        cam.x += (cam.tx - cam.x) * .08;
+        cam.y += (cam.ty - cam.y) * .08;
+      }
+
       const bg = ctx.createRadialGradient(cx,cy*.65,0,cx,cy,Math.max(W,H));
       bg.addColorStop(0,'#0d0a22'); bg.addColorStop(.45,'#050312'); bg.addColorStop(1,'#010008');
       ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
+      drawGalaxyBand();
       drawNebulas();
       drawAurora();
 
+      // parallax starfield: deeper layers shift less with camera pan
       starLayers.forEach(sl => {
         sl.forEach(s => {
           const tw = .5+.5*Math.sin(s.ph+tick*s.sp*spd);
+          const sx = s.x + cam.x*s.par, sy = s.y + cam.y*s.par;
           ctx.globalAlpha = s.d*tw + s.d*.4;
           ctx.fillStyle = '#fff';
-          ctx.beginPath(); ctx.arc(s.x,s.y,s.r*(1+.2*tw),0,Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(sx,sy,s.r*(1+.2*tw),0,Math.PI*2); ctx.fill();
         });
       });
       ctx.globalAlpha = 1;
+      drawDust();
+
+      // everything orbital is rendered inside the camera transform
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.translate(cam.x,cam.y);
+      ctx.scale(cam.zoom,cam.zoom);
+      ctx.translate(-cx,-cy);
 
       drawOrbits();
       drawAsteroids();
@@ -7198,15 +7402,16 @@ function generateGiftConstellation() {
         .forEach(({ p, pos }) => draw3DPlanet(p, pos));
 
       drawComet();
-      drawLabels(positions);
 
-      // vignette
-      const vig = ctx.createRadialGradient(cx,cy,Math.min(W,H)*.35,cx,cy,Math.max(W,H)*.72);
-      vig.addColorStop(0,'transparent'); vig.addColorStop(1,'rgba(2,0,12,.55)');
+      ctx.restore();
+
+      // vignette + subtle grain — stays screen-locked, not zoomed
+      const vig = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.72);
+      vig.addColorStop(0,'transparent'); vig.addColorStop(1,'rgba(2,0,12,.58)');
       ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
 
       cometTimer += spd;
-      if (cometTimer > 300+Math.random()*400) { spawnComet(); cometTimer=0; }
+      if (cometTimer > 260+Math.random()*360) { spawnComet(); cometTimer=0; }
 
       tick += spd;
       requestAnimationFrame(frame);
