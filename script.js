@@ -7111,28 +7111,10 @@ function generateGiftConstellation() {
     /* ── Sun ── */
     function drawSun() {
       const sr = 50 + 2*Math.sin(tick*.032);
-      [[4,.03],[3,.055],[2.2,.09],[1.6,.15]].forEach(([m,al]) => {
-        const g = ctx.createRadialGradient(cx,cy,sr*.5,cx,cy,sr*m);
-        g.addColorStop(0, `rgba(255,180,30,${al})`);
-        g.addColorStop(.5, `rgba(255,100,0,${al*.5})`);
-        g.addColorStop(1, 'transparent');
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,sr*m,0,Math.PI*2); ctx.fill();
-      });
       const sg = ctx.createRadialGradient(cx-sr*.32,cy-sr*.28,0,cx,cy,sr);
       sg.addColorStop(0,'#fffce0'); sg.addColorStop(.18,'#ffe866');
       sg.addColorStop(.5,'#ffaa00'); sg.addColorStop(.78,'#ff7500'); sg.addColorStop(1,'#cc3000');
       ctx.beginPath(); ctx.arc(cx,cy,sr,0,Math.PI*2); ctx.fillStyle=sg; ctx.fill();
-      for (let i = 0; i < 9; i++) {
-        const sx = cx+Math.cos(tick*.005*spd+i*.9)*sr*.42;
-        const sy = cy+Math.sin(tick*.007*spd+i*1.25)*sr*.42;
-        const sr2 = sr*(.08+.04*Math.sin(tick*.02+i));
-        const smg = ctx.createRadialGradient(sx,sy,0,sx,sy,sr2);
-        smg.addColorStop(0,'rgba(255,255,200,.22)'); smg.addColorStop(1,'transparent');
-        ctx.fillStyle=smg; ctx.beginPath(); ctx.arc(sx,sy,sr2,0,Math.PI*2); ctx.fill();
-      }
-      const p = .5+.5*Math.sin(tick*.04);
-      ctx.beginPath(); ctx.arc(cx,cy,sr*1.04,0,Math.PI*2);
-      ctx.strokeStyle=`rgba(255,220,0,${.42*p})`; ctx.lineWidth=1.5+p*2; ctx.stroke();
     }
 
     /* ── Orbit paths ── */
