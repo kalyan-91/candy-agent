@@ -6889,20 +6889,23 @@ function generateGiftConstellation() {
         ['#9ee8ff','#c9a8ff'], ['#ffb8e0','#a8ffe6']
       ];
       const reach = Math.max(W,H);
-      distantGalaxies = Array.from({ length: 14 }, (_, i) => {
-        const ang = (i/14)*Math.PI*2 + Math.random()*.4;
-        const dist = reach*1.1 + Math.random()*reach*1.6;
+      distantGalaxies = Array.from({ length: 18 }, (_, i) => {
+        const ang = (i/18)*Math.PI*2 + Math.random()*.35;
+        const dist = reach*1.1 + Math.random()*reach*1.8;
         const planetCount = 2+Math.floor(Math.random()*3);
+        const isMilkyWay = i % 5 === 0; // a few bigger, more detailed home-style spirals
         return {
           wx: Math.cos(ang)*dist, wy: Math.sin(ang)*dist,
-          rx: 22+Math.random()*46, ry: 7+Math.random()*15,
+          rx: isMilkyWay ? 70+Math.random()*50 : 22+Math.random()*40,
+          ry: isMilkyWay ? 20+Math.random()*14 : 7+Math.random()*13,
           rot: Math.random()*Math.PI,
           c: palette[i % palette.length],
           ph: Math.random()*Math.PI*2,
-          arms: 2+Math.floor(Math.random()*2),
-          starR: 4+Math.random()*3,
-          name: `System ${String.fromCharCode(65+i)}-${100+i*7}`,
-          fact: 'A distant star system · far beyond our own',
+          arms: isMilkyWay ? 4+Math.floor(Math.random()*2) : 2+Math.floor(Math.random()*2),
+          milkyWay: isMilkyWay,
+          starR: (isMilkyWay ? 6 : 4)+Math.random()*3,
+          name: isMilkyWay ? `Milky Way Cluster ${1+Math.floor(i/5)}` : `System ${String.fromCharCode(65+i)}-${100+i*7}`,
+          fact: isMilkyWay ? 'A spiral galaxy much like our own home' : 'A distant star system · far beyond our own',
           planets: Array.from({ length: planetCount }, (_, pi) => ({
             r: 1.6+Math.random()*2.2,
             dist: 14+pi*9+Math.random()*4,
@@ -6938,10 +6941,10 @@ function generateGiftConstellation() {
         ctx.translate(gx, gy);
         ctx.rotate(g.rot + tick*.00006);
 
-        // soft core glow
+        // soft core glow / bulge
         const core = ctx.createRadialGradient(0,0,0,0,0,g.rx);
-        core.addColorStop(0, `rgba(${hexToRgb(g.c[0])},.18)`);
-        core.addColorStop(.4, `rgba(${hexToRgb(g.c[1])},.08)`);
+        core.addColorStop(0, `rgba(${hexToRgb(g.c[0])},${g.milkyWay?.26:.18})`);
+        core.addColorStop(.4, `rgba(${hexToRgb(g.c[1])},${g.milkyWay?.12:.08})`);
         core.addColorStop(1, 'transparent');
         ctx.fillStyle = core;
         ctx.beginPath(); ctx.ellipse(0,0,g.rx,g.ry,0,0,Math.PI*2); ctx.fill();
@@ -6953,13 +6956,32 @@ function generateGiftConstellation() {
           ctx.rotate((Math.PI*2/g.arms)*a);
           ctx.scale(1,.34);
           const arm = ctx.createRadialGradient(0,0,0,0,0,g.rx*1.4);
-          arm.addColorStop(0, `rgba(${hexToRgb(g.c[0])},.10)`);
+          arm.addColorStop(0, `rgba(${hexToRgb(g.c[0])},${g.milkyWay?.16:.10})`);
           arm.addColorStop(1, 'transparent');
           ctx.fillStyle = arm;
           ctx.beginPath(); ctx.ellipse(g.rx*.3,0,g.rx*1.4,g.ry*1.1,0,0,Math.PI*2); ctx.fill();
           ctx.restore();
         }
         ctx.globalAlpha = 1;
+
+        // dust lane + brighter central bulge, just for the bigger Milky-Way-style galaxies
+        if (g.milkyWay) {
+          ctx.save();
+          ctx.globalAlpha = .35;
+          ctx.scale(1,.16);
+          const lane = ctx.createLinearGradient(-g.rx,0,g.rx,0);
+          lane.addColorStop(0,'transparent');
+          lane.addColorStop(.5, `rgba(10,8,18,.6)`);
+          lane.addColorStop(1,'transparent');
+          ctx.fillStyle = lane;
+          ctx.beginPath(); ctx.ellipse(0,0,g.rx*.96,g.ry*1.6,0,0,Math.PI*2); ctx.fill();
+          ctx.restore();
+          const bulge = ctx.createRadialGradient(0,0,0,0,0,g.rx*.3);
+          bulge.addColorStop(0,'rgba(255,250,235,.5)');
+          bulge.addColorStop(1,'transparent');
+          ctx.fillStyle = bulge;
+          ctx.beginPath(); ctx.ellipse(0,0,g.rx*.3,g.ry*.5,0,0,Math.PI*2); ctx.fill();
+        }
         ctx.restore();
 
         // its own tiny sun, always at true world position so it lines up under the glow
@@ -7408,7 +7430,16 @@ function generateGiftConstellation() {
       // multiplicative step so the same gesture works smoothly across a huge
       // zoom range — from a close-up planet view out to the whole universe
       const factor = dir > 0 ? 1.16 : 1/1.16;
-      cam.tzoom = Math.min(9, Math.max(.06, cam.tzoom * factor));
+      const newZoom = Math.min(9, Math.max(.05, cam.zoom * factor));
+
+      // anchor the zoom on whatever world point is under the cursor right now —
+      // otherwise every zoom recenters on the solar system instead of staying
+      // on the distant galaxy you're actually looking at
+      const world = toWorld(e.clientX, e.clientY);
+      cam.zoom = newZoom; cam.tzoom = newZoom;
+      cam.x = (e.clientX - cx) - (world.x - cx) * newZoom;
+      cam.y = (e.clientY - cy) - (world.y - cy) * newZoom;
+      cam.tx = cam.x; cam.ty = cam.y;
     }, { passive: false });
 
     resetBtn.addEventListener('click', () => {
