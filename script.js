@@ -6597,6 +6597,7 @@ function generateGiftConstellation() {
 
 
 
+
 /* ============================================================
    Candy AI — 3D Universe Feature  v3.0  "Living Cosmos"
    Drop: <script src="candyai-solar-feature.js"></script>
@@ -6801,7 +6802,7 @@ function generateGiftConstellation() {
 
   const hint = document.createElement('div');
   hint.id = 'solar-hint';
-  hint.textContent = 'drag to pan · scroll to zoom · click a planet';
+  hint.textContent = 'drag to pan · scroll to zoom out into the universe · click to focus';
 
   overlay.appendChild(closeBtn);
   overlay.appendChild(speedDiv);
@@ -6879,46 +6880,68 @@ function generateGiftConstellation() {
         vx: (Math.random()-.5)*.06, vy: (Math.random()-.5)*.06, a: .04+Math.random()*.1
       }));
 
-      /* distant galaxies — other star-systems far beyond our own, very faint, almost still */
+      /* distant galaxies — other star-systems far beyond our own. Placed in real
+         world-space around our solar system (not screen-space) so zooming OUT
+         reveals them, and zooming IN on one reveals its own tiny sun + planets. */
       const palette = [
         ['#9fc2ff','#c9a8ff'], ['#ffd2a8','#ff9ecb'], ['#a8ffe6','#9fc2ff'],
         ['#ffe6a8','#ff9e9e'], ['#c9a8ff','#9fc2ff'], ['#ff9ecb','#ffe6a8'],
         ['#9ee8ff','#c9a8ff'], ['#ffb8e0','#a8ffe6']
       ];
-      distantGalaxies = Array.from({ length: 14 }, (_, i) => ({
-        x: Math.random()*W, y: Math.random()*H*.9,
-        rx: 22+Math.random()*46, ry: 7+Math.random()*15,
-        rot: Math.random()*Math.PI,
-        c: palette[i % palette.length],
-        par: .006+Math.random()*.01,
-        ph: Math.random()*Math.PI*2,
-        arms: 2+Math.floor(Math.random()*2)
-      }));
+      const reach = Math.max(W,H);
+      distantGalaxies = Array.from({ length: 14 }, (_, i) => {
+        const ang = (i/14)*Math.PI*2 + Math.random()*.4;
+        const dist = reach*1.1 + Math.random()*reach*1.6;
+        const planetCount = 2+Math.floor(Math.random()*3);
+        return {
+          wx: Math.cos(ang)*dist, wy: Math.sin(ang)*dist,
+          rx: 22+Math.random()*46, ry: 7+Math.random()*15,
+          rot: Math.random()*Math.PI,
+          c: palette[i % palette.length],
+          ph: Math.random()*Math.PI*2,
+          arms: 2+Math.floor(Math.random()*2),
+          starR: 4+Math.random()*3,
+          name: `System ${String.fromCharCode(65+i)}-${100+i*7}`,
+          fact: 'A distant star system · far beyond our own',
+          planets: Array.from({ length: planetCount }, (_, pi) => ({
+            r: 1.6+Math.random()*2.2,
+            dist: 14+pi*9+Math.random()*4,
+            spd: .01+Math.random()*.025,
+            ph: Math.random()*Math.PI*2,
+            c: palette[(i+pi+1) % palette.length][0]
+          }))
+        };
+      });
 
-      /* faraway alien suns — pinpoint star-systems scattered beyond the galaxy band */
-      farSystems = Array.from({ length: 46 }, () => ({
-        x: Math.random()*W, y: Math.random()*H,
-        r: .9+Math.random()*1.1,
-        ph: Math.random()*Math.PI*2,
-        c: Math.random()<.5 ? '255,210,160' : '170,200,255'
-      }));
+      /* faraway alien suns — pinpoint star-systems scattered even further out */
+      farSystems = Array.from({ length: 70 }, () => {
+        const ang = Math.random()*Math.PI*2;
+        const dist = reach*1.3 + Math.random()*reach*2.2;
+        return {
+          wx: Math.cos(ang)*dist, wy: Math.sin(ang)*dist,
+          r: .9+Math.random()*1.1,
+          ph: Math.random()*Math.PI*2,
+          c: Math.random()<.5 ? '255,210,160' : '170,200,255'
+        };
+      });
     }
     let cosmicDust = [];
     let distantGalaxies = [];
     let farSystems = [];
 
-    /* ── Distant galaxies: soft spiral smudges, almost motionless (deep background) ── */
+    /* ── Distant galaxies: soft spiral smudges that resolve into a tiny sun +
+         orbiting planets once you zoom in close enough — a universe within reach ── */
     function drawDistantGalaxies() {
       distantGalaxies.forEach(g => {
-        const gx = g.x + cam.x*g.par, gy = g.y + cam.y*g.par;
+        const gx = cx + g.wx, gy = cy + g.wy;
         ctx.save();
         ctx.translate(gx, gy);
         ctx.rotate(g.rot + tick*.00006);
 
         // soft core glow
         const core = ctx.createRadialGradient(0,0,0,0,0,g.rx);
-        core.addColorStop(0, `rgba(${hexToRgb(g.c[0])},.16)`);
-        core.addColorStop(.4, `rgba(${hexToRgb(g.c[1])},.07)`);
+        core.addColorStop(0, `rgba(${hexToRgb(g.c[0])},.18)`);
+        core.addColorStop(.4, `rgba(${hexToRgb(g.c[1])},.08)`);
         core.addColorStop(1, 'transparent');
         ctx.fillStyle = core;
         ctx.beginPath(); ctx.ellipse(0,0,g.rx,g.ry,0,0,Math.PI*2); ctx.fill();
@@ -6937,24 +6960,41 @@ function generateGiftConstellation() {
           ctx.restore();
         }
         ctx.globalAlpha = 1;
-
-        // bright galactic nucleus speck
-        const tw = .6+.4*Math.sin(tick*.01+g.ph);
-        ctx.fillStyle = `rgba(255,255,255,${.5*tw})`;
-        ctx.beginPath(); ctx.arc(0,0,1.1,0,Math.PI*2); ctx.fill();
         ctx.restore();
+
+        // its own tiny sun, always at true world position so it lines up under the glow
+        const tw = .6+.4*Math.sin(tick*.01+g.ph);
+        const isHov = g === hoveredPlanet;
+        const sg = ctx.createRadialGradient(gx,gy,0,gx,gy,g.starR);
+        sg.addColorStop(0,'#fffce0'); sg.addColorStop(.4,'#ffd866'); sg.addColorStop(1,'#ff8a00');
+        ctx.beginPath(); ctx.arc(gx,gy,g.starR,0,Math.PI*2); ctx.fillStyle=sg; ctx.fill();
+        if (isHov) {
+          ctx.beginPath(); ctx.arc(gx,gy,g.starR*1.6,0,Math.PI*2);
+          ctx.strokeStyle = `rgba(255,255,255,${.35*tw})`; ctx.lineWidth = .8; ctx.stroke();
+        }
+
+        // its tiny orbiting worlds
+        g.planets.forEach(pl => {
+          const a = pl.ph + tick*pl.spd*spd;
+          const px = gx + Math.cos(a)*pl.dist;
+          const py = gy + Math.sin(a)*pl.dist*.55;
+          const pg = ctx.createRadialGradient(px-pl.r*.3,py-pl.r*.3,0,px,py,pl.r);
+          pg.addColorStop(0,'#fff'); pg.addColorStop(.3, pl.c); pg.addColorStop(1,'#1a1a2e');
+          ctx.beginPath(); ctx.arc(px,py,pl.r,0,Math.PI*2); ctx.fillStyle=pg; ctx.fill();
+        });
       });
     }
 
-    /* ── Faraway star systems: pinpoint suns of other worlds, scattered behind everything ── */
+    /* ── Faraway star systems: pinpoint suns of other worlds, scattered way beyond the galaxies ── */
     function drawFarSystems() {
       farSystems.forEach(s => {
+        const sx = cx + s.wx, sy = cy + s.wy;
         const tw = .4+.6*Math.sin(s.ph+tick*.012);
         ctx.globalAlpha = .55*tw;
         ctx.fillStyle = `rgb(${s.c})`;
-        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(sx,sy,s.r,0,Math.PI*2); ctx.fill();
         ctx.globalAlpha = .12*tw;
-        ctx.beginPath(); ctx.arc(s.x,s.y,s.r*3,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(sx,sy,s.r*3,0,Math.PI*2); ctx.fill();
       });
       ctx.globalAlpha = 1;
     }
@@ -7283,7 +7323,7 @@ function generateGiftConstellation() {
       ctx.restore();
     }
 
-    /* ── Hit-test a planet at world (screen, pre-camera) coordinates ── */
+    /* ── Hit-test: our planets AND distant galaxies are both pickable/focusable ── */
     function pickPlanet(screenX, screenY) {
       const w = toWorld(screenX, screenY);
       let found = null, bestD = Infinity;
@@ -7293,6 +7333,11 @@ function generateGiftConstellation() {
         const py = cy + Math.sin(a)*p.orbitB;
         const d = Math.sqrt((w.x-px)**2 + (w.y-py)**2);
         if (d < p.r/cam.zoom + 11/cam.zoom && d < bestD) { found = p; bestD = d; }
+      });
+      distantGalaxies.forEach(g => {
+        const gx = cx+g.wx, gy = cy+g.wy;
+        const d = Math.sqrt((w.x-gx)**2 + (w.y-gy)**2);
+        if (d < g.rx/cam.zoom + 14/cam.zoom && d < bestD) { found = g; bestD = d; }
       });
       return found;
     }
@@ -7336,13 +7381,20 @@ function generateGiftConstellation() {
       if (isDragging && !dragMoved) {
         const found = pickPlanet(e.clientX, e.clientY);
         if (found) {
-          const a = found.ph + tick*found.spd*spd;
-          const px = cx + Math.cos(a)*found.orbitA, py = cy + Math.sin(a)*found.orbitB;
-          cam.tzoom = Math.min(3.2, Math.max(2.2, 80/found.r));
+          let px, py, targetSize;
+          if (found.orbitA !== undefined) {
+            // one of our planets
+            const a = found.ph + tick*found.spd*spd;
+            px = cx + Math.cos(a)*found.orbitA; py = cy + Math.sin(a)*found.orbitB;
+            targetSize = found.r;
+          } else {
+            // a distant galaxy — zoom in close enough to see its own sun + planets
+            px = cx + found.wx; py = cy + found.wy;
+            targetSize = found.rx * .3;
+          }
+          cam.tzoom = Math.min(9, Math.max(2.2, 80/targetSize));
           cam.tx = (cx-px)*cam.tzoom;
           cam.ty = (cy-py)*cam.tzoom;
-        } else {
-          // clicked empty space: nudge zoom back toward default a touch
         }
       }
       isDragging = false;
@@ -7353,7 +7405,10 @@ function generateGiftConstellation() {
     canvas.addEventListener('wheel', e => {
       e.preventDefault();
       const dir = e.deltaY > 0 ? -1 : 1;
-      cam.tzoom = Math.min(3.5, Math.max(.55, cam.tzoom + dir*.18));
+      // multiplicative step so the same gesture works smoothly across a huge
+      // zoom range — from a close-up planet view out to the whole universe
+      const factor = dir > 0 ? 1.16 : 1/1.16;
+      cam.tzoom = Math.min(9, Math.max(.06, cam.tzoom * factor));
     }, { passive: false });
 
     resetBtn.addEventListener('click', () => {
@@ -7376,8 +7431,6 @@ function generateGiftConstellation() {
       bg.addColorStop(0,'#0d0a22'); bg.addColorStop(.45,'#050312'); bg.addColorStop(1,'#010008');
       ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-      drawFarSystems();
-      drawDistantGalaxies();
       drawNebulas();
       drawAurora();
 
@@ -7394,13 +7447,18 @@ function generateGiftConstellation() {
       ctx.globalAlpha = 1;
       drawDust();
 
-      // everything orbital is rendered inside the camera transform
+      // everything in the universe — our system AND every distant galaxy/star —
+      // lives inside one camera transform, so zooming out truly shrinks our solar
+      // system while distant galaxies become reachable, and zooming in on a galaxy
+      // reveals its own sun and planets.
       ctx.save();
       ctx.translate(cx,cy);
       ctx.translate(cam.x,cam.y);
       ctx.scale(cam.zoom,cam.zoom);
       ctx.translate(-cx,-cy);
 
+      drawFarSystems();
+      drawDistantGalaxies();
       drawOrbits();
       drawAsteroids();
 
