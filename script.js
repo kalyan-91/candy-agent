@@ -6883,11 +6883,12 @@ function generateGiftConstellation() {
       /* distant galaxies — other star-systems far beyond our own, very faint, almost still */
       const palette = [
         ['#9fc2ff','#c9a8ff'], ['#ffd2a8','#ff9ecb'], ['#a8ffe6','#9fc2ff'],
-        ['#ffe6a8','#ff9e9e'], ['#c9a8ff','#9fc2ff']
+        ['#ffe6a8','#ff9e9e'], ['#c9a8ff','#9fc2ff'], ['#ff9ecb','#ffe6a8'],
+        ['#9ee8ff','#c9a8ff'], ['#ffb8e0','#a8ffe6']
       ];
-      distantGalaxies = Array.from({ length: 6 }, (_, i) => ({
-        x: Math.random()*W, y: Math.random()*H*.85,
-        rx: 26+Math.random()*40, ry: 8+Math.random()*14,
+      distantGalaxies = Array.from({ length: 14 }, (_, i) => ({
+        x: Math.random()*W, y: Math.random()*H*.9,
+        rx: 22+Math.random()*46, ry: 7+Math.random()*15,
         rot: Math.random()*Math.PI,
         c: palette[i % palette.length],
         par: .006+Math.random()*.01,
@@ -6896,7 +6897,7 @@ function generateGiftConstellation() {
       }));
 
       /* faraway alien suns — pinpoint star-systems scattered beyond the galaxy band */
-      farSystems = Array.from({ length: 26 }, () => ({
+      farSystems = Array.from({ length: 46 }, () => ({
         x: Math.random()*W, y: Math.random()*H,
         r: .9+Math.random()*1.1,
         ph: Math.random()*Math.PI*2,
@@ -7117,21 +7118,6 @@ function generateGiftConstellation() {
         g.addColorStop(1, 'transparent');
         ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,sr*m,0,Math.PI*2); ctx.fill();
       });
-      for (let i = 0; i < 12; i++) {
-        const a = (i/12)*Math.PI*2 + tick*.002*spd;
-        const len = sr*(.75+.72*Math.sin(tick*.016*spd+i*.72+1));
-        const bw = sr*.085;
-        ctx.save(); ctx.translate(cx,cy); ctx.rotate(a);
-        const fg = ctx.createLinearGradient(sr*.9,0,sr*.9+len,0);
-        fg.addColorStop(0,'rgba(255,220,60,.7)');
-        fg.addColorStop(.4,'rgba(255,140,0,.35)');
-        fg.addColorStop(1,'transparent');
-        ctx.beginPath();
-        ctx.moveTo(sr*.9,-bw*.4);
-        ctx.quadraticCurveTo(sr*.9+len*.5,-bw*(.28+.1*Math.sin(tick*.05+i)),sr*.9+len,0);
-        ctx.quadraticCurveTo(sr*.9+len*.5, bw*(.28+.1*Math.sin(tick*.05+i)),sr*.9,bw*.4);
-        ctx.closePath(); ctx.fillStyle=fg; ctx.fill(); ctx.restore();
-      }
       const sg = ctx.createRadialGradient(cx-sr*.32,cy-sr*.28,0,cx,cy,sr);
       sg.addColorStop(0,'#fffce0'); sg.addColorStop(.18,'#ffe866');
       sg.addColorStop(.5,'#ffaa00'); sg.addColorStop(.78,'#ff7500'); sg.addColorStop(1,'#cc3000');
