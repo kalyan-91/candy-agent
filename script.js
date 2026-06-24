@@ -6879,8 +6879,90 @@ function generateGiftConstellation() {
         x: Math.random()*W, y: Math.random()*H, r: .5+Math.random()*1.4,
         vx: (Math.random()-.5)*.06, vy: (Math.random()-.5)*.06, a: .04+Math.random()*.1
       }));
+
+      /* distant galaxies — other star-systems far beyond our own, very faint, almost still */
+      const palette = [
+        ['#9fc2ff','#c9a8ff'], ['#ffd2a8','#ff9ecb'], ['#a8ffe6','#9fc2ff'],
+        ['#ffe6a8','#ff9e9e'], ['#c9a8ff','#9fc2ff']
+      ];
+      distantGalaxies = Array.from({ length: 6 }, (_, i) => ({
+        x: Math.random()*W, y: Math.random()*H*.85,
+        rx: 26+Math.random()*40, ry: 8+Math.random()*14,
+        rot: Math.random()*Math.PI,
+        c: palette[i % palette.length],
+        par: .006+Math.random()*.01,
+        ph: Math.random()*Math.PI*2,
+        arms: 2+Math.floor(Math.random()*2)
+      }));
+
+      /* faraway alien suns — pinpoint star-systems scattered beyond the galaxy band */
+      farSystems = Array.from({ length: 26 }, () => ({
+        x: Math.random()*W, y: Math.random()*H,
+        r: .9+Math.random()*1.1,
+        ph: Math.random()*Math.PI*2,
+        c: Math.random()<.5 ? '255,210,160' : '170,200,255'
+      }));
     }
     let cosmicDust = [];
+    let distantGalaxies = [];
+    let farSystems = [];
+
+    /* ── Distant galaxies: soft spiral smudges, almost motionless (deep background) ── */
+    function drawDistantGalaxies() {
+      distantGalaxies.forEach(g => {
+        const gx = g.x + cam.x*g.par, gy = g.y + cam.y*g.par;
+        ctx.save();
+        ctx.translate(gx, gy);
+        ctx.rotate(g.rot + tick*.00006);
+
+        // soft core glow
+        const core = ctx.createRadialGradient(0,0,0,0,0,g.rx);
+        core.addColorStop(0, `rgba(${hexToRgb(g.c[0])},.16)`);
+        core.addColorStop(.4, `rgba(${hexToRgb(g.c[1])},.07)`);
+        core.addColorStop(1, 'transparent');
+        ctx.fillStyle = core;
+        ctx.beginPath(); ctx.ellipse(0,0,g.rx,g.ry,0,0,Math.PI*2); ctx.fill();
+
+        // faint spiral arms
+        ctx.globalAlpha = .5;
+        for (let a=0; a<g.arms; a++){
+          ctx.save();
+          ctx.rotate((Math.PI*2/g.arms)*a);
+          ctx.scale(1,.34);
+          const arm = ctx.createRadialGradient(0,0,0,0,0,g.rx*1.4);
+          arm.addColorStop(0, `rgba(${hexToRgb(g.c[0])},.10)`);
+          arm.addColorStop(1, 'transparent');
+          ctx.fillStyle = arm;
+          ctx.beginPath(); ctx.ellipse(g.rx*.3,0,g.rx*1.4,g.ry*1.1,0,0,Math.PI*2); ctx.fill();
+          ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+
+        // bright galactic nucleus speck
+        const tw = .6+.4*Math.sin(tick*.01+g.ph);
+        ctx.fillStyle = `rgba(255,255,255,${.5*tw})`;
+        ctx.beginPath(); ctx.arc(0,0,1.1,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    /* ── Faraway star systems: pinpoint suns of other worlds, scattered behind everything ── */
+    function drawFarSystems() {
+      farSystems.forEach(s => {
+        const tw = .4+.6*Math.sin(s.ph+tick*.012);
+        ctx.globalAlpha = .55*tw;
+        ctx.fillStyle = `rgb(${s.c})`;
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+        ctx.globalAlpha = .12*tw;
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r*3,0,Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function hexToRgb(hex) {
+      const n = parseInt(hex.replace('#',''),16);
+      return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
+    }
 
     /* ── Milky-way style galaxy band, drifts very slowly ── */
     function drawGalaxyBand() {
@@ -7065,19 +7147,6 @@ function generateGiftConstellation() {
       const p = .5+.5*Math.sin(tick*.04);
       ctx.beginPath(); ctx.arc(cx,cy,sr*1.04,0,Math.PI*2);
       ctx.strokeStyle=`rgba(255,220,0,${.42*p})`; ctx.lineWidth=1.5+p*2; ctx.stroke();
-
-      /* lens-flare streak toward screen center, gives a "real camera" feel */
-      const flareDist = Math.sqrt((cx-W/2)**2+(cy-H/2)**2);
-      if (flareDist < Math.max(W,H)*.6) {
-        ctx.save();
-        ctx.globalAlpha = .12 * (1-flareDist/(Math.max(W,H)*.6));
-        const fg2 = ctx.createRadialGradient(cx,cy,0,cx,cy,sr*9);
-        fg2.addColorStop(0,'rgba(255,230,160,.5)');
-        fg2.addColorStop(.15,'rgba(255,200,100,.12)');
-        fg2.addColorStop(1,'transparent');
-        ctx.fillStyle=fg2; ctx.beginPath(); ctx.arc(cx,cy,sr*9,0,Math.PI*2); ctx.fill();
-        ctx.restore();
-      }
     }
 
     /* ── Orbit paths ── */
@@ -7363,6 +7432,8 @@ function generateGiftConstellation() {
       ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
       drawGalaxyBand();
+      drawFarSystems();
+      drawDistantGalaxies();
       drawNebulas();
       drawAurora();
 
