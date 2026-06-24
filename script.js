@@ -6597,7 +6597,6 @@ function generateGiftConstellation() {
 
 
 
-
 /* ============================================================
    Candy AI — 3D Universe Feature  v3.0  "Living Cosmos"
    Drop: <script src="candyai-solar-feature.js"></script>
@@ -6965,29 +6964,7 @@ function generateGiftConstellation() {
       return `${(n>>16)&255},${(n>>8)&255},${n&255}`;
     }
 
-    /* ── Milky-way style galaxy band, drifts very slowly ── */
-    function drawGalaxyBand() {
-      ctx.save();
-      const ang = -0.34;
-      ctx.translate(cx, cy*.72);
-      ctx.rotate(ang);
-      const w = Math.max(W,H)*1.6, h = 150;
-      const g = ctx.createLinearGradient(-w/2,0,w/2,0);
-      g.addColorStop(0,'transparent');
-      g.addColorStop(.18,'rgba(120,140,220,0.05)');
-      g.addColorStop(.5,'rgba(190,170,230,0.10)');
-      g.addColorStop(.82,'rgba(120,140,220,0.05)');
-      g.addColorStop(1,'transparent');
-      ctx.fillStyle = g;
-      for (let i=-3;i<=3;i++){
-        ctx.save();
-        ctx.translate(0, i*h*.3 + Math.sin(tick*.0003+i)*6);
-        ctx.scale(1, .5 + Math.abs(i)*.12);
-        ctx.beginPath(); ctx.ellipse(0,0,w/2,h/2,0,0,Math.PI*2); ctx.fill();
-        ctx.restore();
-      }
-      ctx.restore();
-    }
+    /* milky-way diagonal band removed per feedback — kept background clean */
 
     /* ── Nebulas ── */
     function drawNebulas() {
@@ -7399,7 +7376,6 @@ function generateGiftConstellation() {
       bg.addColorStop(0,'#0d0a22'); bg.addColorStop(.45,'#050312'); bg.addColorStop(1,'#010008');
       ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
-      drawGalaxyBand();
       drawFarSystems();
       drawDistantGalaxies();
       drawNebulas();
